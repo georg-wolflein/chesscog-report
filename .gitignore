@@ -1,5 +1,6 @@
 __latexindent_temp.tex
 *.ist
+/chapters/*.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

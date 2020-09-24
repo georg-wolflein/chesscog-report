@@ -1,0 +1,53 @@
+\documentclass[a4paper,oneside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes}
+\usepackage{fancyhdr}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[inline]{enumitem}
+\usepackage{graphicx}
+\usepackage[style=ieee,mincitenames=1,maxcitenames=2]{biblatex}
+\usepackage{todonotes}
+\usepackage[toc,acronym]{glossaries}
+\usepackage{cleveref}
+\usepackage{subfiles}
+
+
+\AtEndDocument{%
+    \ifSubfilesClassLoaded{%
+        \printglossary[type=\acronymtype]%
+        \printbibliography%
+    }{}%
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textit{\leftmark}}
+\cfoot{\thepage}
+
+\addbibresource{\subfix{bib/context_survey.bib}}
+\addbibresource{\subfix{bib/doer.bib}}
+\graphicspath{ {./images/} }
+
+\author{Georg Wölflein}
+\title{Context survey}
+
+\makeglossaries
+\input{common/acronyms.tex}
+
+\begin{document}
+
+\frontmatter
+\input{common/title_page.tex}
+\subfile{chapters/declaration}
+\tableofcontents
+
+\mainmatter
+\subfile{chapters/introduction}
+
+\backmatter
+\printglossary[type=\acronymtype]
+\printbibliography[heading=bibintoc]
+
+\end{document}

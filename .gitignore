@@ -1,3 +1,6 @@
+__latexindent_temp.tex
+*.ist
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof

@@ -4,6 +4,7 @@
 \usepackage{fancyhdr}
 \usepackage[british]{babel}
 \usepackage{graphicx}
+\usepackage{pdfpages}
 \usepackage[hidelinks]{hyperref}
 \usepackage[inline]{enumitem}
 \usepackage{graphicx}
@@ -46,8 +47,11 @@
 \mainmatter
 \subfile{chapters/introduction}
 
-\backmatter
 \printglossary[type=\acronymtype]
 \printbibliography[heading=bibintoc]
+
+\appendix
+\subfile{chapters/appendix/user_manual}
+\subfile{chapters/appendix/ethics_form}
 
 \end{document}

@@ -1,0 +1,21 @@
+{
+    "files.exclude": {
+        "**/__latexindent_temp.tex": true,
+        "**/*.acn": true,
+        "**/*.acr": true,
+        "**/*.alg": true,
+        "**/*.aux": true,
+        "**/*.bbl": true,
+        "**/*.bcf": true,
+        "**/*.blg": true,
+        "**/*.glg": true,
+        "**/*.glo": true,
+        "**/*.gls": true,
+        "**/*.ist": true,
+        "**/*.log": true,
+        "**/*.out": true,
+        "**/*.run.xml": true,
+        "**/*.synctex.gz": true,
+        "*/**/*.pdf": false,
+    }
+}

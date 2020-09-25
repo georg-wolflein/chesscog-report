@@ -1,5 +1,8 @@
 \documentclass[a4paper,oneside]{book}
 \usepackage[utf8]{inputenc}
+\usepackage{breakcites} % don't let citations break out of the text frame
+\usepackage{microtype} % get rid of some frame busts automatically
+\usepackage[font=small]{caption}
 \usepackage{csquotes}
 \usepackage{fancyhdr}
 \usepackage[british]{babel}
@@ -22,6 +25,10 @@
     }{}%
 }
 
+% Make \[ \] math have equation numbers
+\DeclareRobustCommand{\[}{\begin{equation}}
+\DeclareRobustCommand{\]}{\end{equation}}
+
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{\textit{\leftmark}}
@@ -37,12 +44,15 @@
 \makeglossaries
 \input{common/acronyms.tex}
 
+\allowdisplaybreaks
+
 \begin{document}
 
 \frontmatter
 \input{common/title_page.tex}
 \subfile{chapters/declaration}
 \tableofcontents
+\listoffigures
 
 \mainmatter
 \subfile{chapters/introduction}

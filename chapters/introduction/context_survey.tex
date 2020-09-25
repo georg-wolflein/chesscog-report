@@ -9,7 +9,7 @@ Early work on chess recognition in the 1990s focused on extracting typeset games
 In recent years, the problem of parsing two-dimensional chess images has effectively been solved using conventional machine learning techniques \cite{khater2012} and even deep learning \cite{sameer2020,roy2020}.
 However, recognising chess positions from physical chessboards as opposed to artificial two-dimensional images poses a much more interesting and challenging problem that finds practial application in chess-playing robots, augmented reality, and aiding amateur chess players\footnote{Electronic chess sets are impractical and very costly \cite{wang2013}, thus solutions for chess recognition using just a photo of an unmodified chess board are more compelling for amateur chess players.}.
 
-\paragraph{Chess robots}
+%\paragraph{Chess robots}
 Initial research into chess recognition emerged from the development of chess robots that included a camera to detect the human opponent's moves from a top-down overhead perspective. 
 The difficulty of distinguishing between chess pieces from a bird's-eye-view due to their similarity is noted in many papers; as a result, chess robots typically implement a three-way classification system that for every square attempts to determine whether it contains a piece, and if so, the piece's colour.
 Various approaches have been explored including
@@ -17,7 +17,7 @@ Various approaches have been explored including
   differential imaging (classifying based on the per-pixel difference between two images) \cite{khan2014,chen2019}.
 Although the \emph{Gambit} robot proposed by \textcite{matuszek2011} does not require a bird's-eye view over the chessboard and uses a depth camera to more reliably detect the occupancy of each square, it still employs the three-way classification strategy using a linear \gls{svm} to determine the piece colour. 
 
-\paragraph{Chess move recording}
+%\paragraph{Chess move recording}
 Several techniques for recording chess moves from video footage have been proposed that follow a similar three-way occupancy and colour classification scheme, both from a top-down perspective \cite{sokic2008,wang2013} as well as from a camera positioned at an acute angle to the board \cite{hack2014}.
 However, in any three-way classification approach, the robot or move recorder requires knowledge of the previous board state in addition to its predictions for each square's occupancy and piece colour to deduce the last move. 
 While this information is readily available to a chess robot or move recording software, this is not the case for a chess recognition system that should deduce the position from a single still image.

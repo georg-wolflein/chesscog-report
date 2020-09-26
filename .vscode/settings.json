@@ -16,6 +16,10 @@
         "**/*.out": true,
         "**/*.run.xml": true,
         "**/*.synctex.gz": true,
+        "**/*.toc": true,
+        "**/*.fls": true,
+        "**/*.lof": true,
+        "**/*.fdb_latexmk": true,
         "*/**/*.pdf": false,
     }
 }

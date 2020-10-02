@@ -1,4 +1,13 @@
 
+@online{64squares2020,
+  title = {Magnus {{Carlsen Chess Games}}},
+  author = {{64 Squares}},
+  date = {2020-02},
+  journaltitle = {PGN Mentor},
+  url = {https://www.pgnmentor.com/players/Carlsen/},
+  urldate = {2020-09-29}
+}
+
 @article{acher2016,
   title = {Large-Scale {{Analysis}} of {{Chess Games}} with {{Chess Engines}}: {{A Preliminary Report}}},
   shorttitle = {Large-Scale {{Analysis}} of {{Chess Games}} with {{Chess Engines}}},
@@ -59,6 +68,24 @@
   file = {/Users/georg/Zotero/storage/4T6K8GSE/4T6K8GSE.pdf;/Users/georg/Zotero/storage/IESL7ENN/S1077314213001999.html},
   keywords = {Camera calibration,Chess-board corner detection,Feature extraction,Pattern recognition,Photogrammetric marker detection,Structured light surface measurement},
   langid = {english}
+}
+
+@article{bilalic2010,
+  title = {Mechanisms and Neural Basis of Object and Pattern Recognition: {{A}} Study with Chess Experts},
+  shorttitle = {Mechanisms and Neural Basis of Object and Pattern Recognition},
+  author = {Bilalić, Merim and Langner, Robert and Erb, Michael and Grodd, Wolfgang},
+  date = {2010},
+  journaltitle = {Journal of Experimental Psychology: General},
+  volume = {139},
+  pages = {728--742},
+  publisher = {{American Psychological Association}},
+  location = {{US}},
+  issn = {1939-2222(Electronic),0096-3445(Print)},
+  doi = {10.1037/a0020756},
+  abstract = {Comparing experts with novices offers unique insights into the functioning of cognition, based on the maximization of individual differences. Here we used this expertise approach to disentangle the mechanisms and neural basis behind two processes that contribute to everyday expertise: object and pattern recognition. We compared chess experts and novices performing chess-related and -unrelated (visual) search tasks. As expected, the superiority of experts was limited to the chess-specific task, as there were no differences in a control task that used the same chess stimuli but did not require chess-specific recognition. The analysis of eye movements showed that experts immediately and exclusively focused on the relevant aspects in the chess task, whereas novices also examined irrelevant aspects. With random chess positions, when pattern knowledge could not be used to guide perception, experts nevertheless maintained an advantage. Experts' superior domain-specific parafoveal vision, a consequence of their knowledge about individual domain-specific symbols, enabled improved object recognition. Functional magnetic resonance imaging corroborated this differentiation between object and pattern recognition and showed that chess-specific object recognition was accompanied by bilateral activation of the occipitotemporal junction, whereas chess-specific pattern recognition was related to bilateral activations in the middle part of the collateral sulci. Using the expertise approach together with carefully chosen controls and multiple dependent measures, we identified object and pattern recognition as two essential cognitive processes in expert visual cognition, which may also help to explain the mechanisms of everyday perception. (PsycINFO Database Record (c) 2016 APA, all rights reserved)},
+  file = {/Users/georg/Zotero/storage/Q8TE2ARY/Bilalić et al. - 2010 - Mechanisms and neural basis of object and pattern .pdf},
+  keywords = {Chess,Cognitions,Eye Movements,Functional Magnetic Resonance Imaging,Individual Differences,Insight,Object Recognition,Pattern Recognition (Cognitive Process)},
+  number = {4}
 }
 
 @inproceedings{chen2016,
@@ -165,6 +192,17 @@
   langid = {english}
 }
 
+@book{edwards1994,
+  title = {{{PGN Standard}}},
+  author = {Edwards, Steven J.},
+  date = {1994-03-12},
+  url = {http://archive.org/details/pgn-standard-1994-03-12},
+  urldate = {2020-09-10},
+  abstract = {Portable Game Notation Specification and Implementation Guide},
+  keywords = {chess},
+  langid = {english}
+}
+
 @inproceedings{goncalves2005,
   title = {Chess Robot System : A Multi-Disciplinary Experience in Automation},
   shorttitle = {Chess Robot System},
@@ -203,6 +241,16 @@
   date = {2016-21},
   abstract = {Chess Board recognition is an implementation which recognizes the chess board by locating the squares and detect the chess pieces from the input image using image processing techniques. The chess board is segmented from the input image, edges are detected using Canny’s edge detector and cross lines are detected using Hough transform. This will give us the required 64 squares. Each square, with some vicinity around it, is extracted and compared to see if it contains a chess piece. If yes, then the test piece is scaled and oriented to compare with the pre-defined training set. The area score is calculated by taking difference of training pieces and test piece and the one with the lowest score is chosen as the best matching piece.},
   file = {/Users/georg/Zotero/storage/NA9G2PZ9/NA9G2PZ9.pdf}
+}
+
+@book{kasparov2018,
+  title = {Deep Thinking: Where Machine Intelligence Ends and Human Creativity Begins},
+  shorttitle = {Deep Thinking},
+  author = {Kasparov, Garry and Greengard, Mig},
+  date = {2018},
+  annotation = {OCLC: 1083948333},
+  isbn = {978-1-4736-5351-1},
+  langid = {english}
 }
 
 @article{khan2014,
@@ -301,6 +349,27 @@
   organization = {{official-stockfish}}
 }
 
+@software{roy2020,
+  title = {Chessputzer},
+  author = {Roy, Abhishek},
+  date = {2020-07-12T17:29:53Z},
+  origdate = {2017-11-16T13:25:09Z},
+  url = {https://github.com/metterklume/chessputzer},
+  urldate = {2020-09-11},
+  abstract = {Image recognition for chess positions. Contribute to metterklume/chessputzer development by creating an account on GitHub.}
+}
+
+@software{sameer2020,
+  title = {Tensorflow\_chessbot},
+  author = {Sameer, Ansari},
+  date = {2020-09-06T06:59:21Z},
+  origdate = {2016-02-08T09:52:24Z},
+  url = {https://github.com/Elucidation/tensorflow_chessbot},
+  urldate = {2020-09-11},
+  abstract = {Predict chessboard FEN layouts from images using TensorFlow},
+  keywords = {chess,chessboard,chessboard-detection,chessboard-recognition,tensorflow,tensorflow-examples,tensorflow-tutorials}
+}
+
 @inproceedings{sokic2008,
   title = {Simple {{Computer Vision System}} for {{Chess Playing Robot Manipulator}} as a {{Project}}-Based {{Learning Example}}},
   booktitle = {2008 {{IEEE International Symposium}} on {{Signal Processing}} and {{Information Technology}}},
@@ -395,6 +464,17 @@
   abstract = {Chessboards are commonly used to calibrate cameras, and many robust methods have been developed to recognize the unoccupied boards. However, when the chessboard is populated with chess pieces, such as during an actual game, the problem of recognizing the board is much harder. Challenges include occlusion caused by the chess pieces, the presence of outlier lines and low viewing angles of the chessboard. In this paper, we present a novel approach to address the above challenges and recognize the chessboard. The Canny edge detector and Hough transform are used to capture all possible lines in the scene. The k-means clustering and a k-nearest-neighbors inspired algorithm are applied to cluster and reject the outlier lines based on their Euclidean distances to the nearest neighbors in a scaled Hough transform space. Finally, based on prior knowledge of the chessboard structure, a geometric constraint is used to find the correspondences between image lines and the lines on the chessboard through the homography transformation. The proposed algorithm works for a wide range of the operating angles and achieves high accuracy in experiments.},
   eventtitle = {Tenth {{International Conference}} on {{Machine Vision}} ({{ICMV}} 2017)},
   file = {/Users/georg/Zotero/storage/2A5PFNWV/2A5PFNWV.pdf}
+}
+
+@online{zhou2018,
+  title = {Pattern Recognition in Chess},
+  author = {Zhou, Qiyu},
+  date = {2018-05-30},
+  journaltitle = {ChessBase},
+  url = {https://en.chessbase.com/post/pattern-recognition-in-chess},
+  urldate = {2020-09-29},
+  abstract = {Is there a correlation between the strength in chess of players and their ability to recall a position in chess using short-term memory? This was the research question of a budding young scientist, QIYU ZHOU, who gave professional and casual chess players positions to study and then attempt to reconstruct them within 30 seconds. Her results are meticulously documented in a paper we are pleased to publish. At the end, there is an appeal to our readers to help with associated material.},
+  langid = {english}
 }
 
 

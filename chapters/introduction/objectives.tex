@@ -1,0 +1,21 @@
+\section{Objectives}
+\subsection{Primary}
+\begin{enumerate}
+    \item Perform a literature review of available methods for parsing chess positions from photos.
+    \item Develop an algorithm for detecting the corners of the chessboard as well as the squares.
+    \item Develop an algorithm for recognising the chess pieces.
+    \item Develop an algorithm that uses the outputs from (2) and (3) in order to compute a probability distribution over each piece in each square.
+    \item Evaluate the performance of the developed algorithms.
+\end{enumerate}
+    
+
+\subsection{Secondary}
+\begin{enumerate}
+    \item Create a large labelled dataset of synthesised chessboard images using 3D models.
+    \item Implement an algorithm that takes as input the raw probability distribution of each piece in each square and outputs a likely \gls{fen} description.
+    \item Implement a simple web API that performs the inference pipeline for an input image, returning the \gls{fen} description. 
+\end{enumerate}
+\subsection{Tertiary}
+\begin{enumerate}
+    \item Develop a web app that allows the user to upload an image of the chess board to obtain the \gls{fen} description.
+\end{enumerate}

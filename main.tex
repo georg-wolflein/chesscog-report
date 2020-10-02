@@ -6,11 +6,16 @@
 \usepackage{csquotes}
 \usepackage{fancyhdr}
 \usepackage[british]{babel}
+\usepackage{amsmath}
+\usepackage{bm}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{pgfplots}
 \usepackage{pdfpages}
 \usepackage[hidelinks]{hyperref}
 \usepackage[inline]{enumitem}
-\usepackage{graphicx}
 \usepackage[style=ieee,mincitenames=1,maxcitenames=2]{biblatex}
 \usepackage{todonotes}
 \usepackage[toc,acronym]{glossaries}
@@ -25,34 +30,48 @@
     }{}%
 }
 
-% Make \[ \] math have equation numbers
+
+\usetikzlibrary{patterns,calc,angles,quotes}
+\pgfplotsset{width=7cm,compat=1.17}
+
 \DeclareRobustCommand{\[}{\begin{equation}}
 \DeclareRobustCommand{\]}{\end{equation}}
+\DeclareRobustCommand{\(}{\begin{equation*}}
+\DeclareRobustCommand{\)}{\end{equation*}}
+
+\def\normal{\mathcal{N}}
+\renewcommand\vec{\mathbf}
 
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{\textit{\leftmark}}
 \cfoot{\thepage}
 
-\addbibresource{\subfix{bib/context_survey.bib}}
-\addbibresource{\subfix{bib/doer.bib}}
+\addbibresource{\subfix{bib/dissertation.bib}}
 \graphicspath{ {./images/} }
 
 \author{Georg Wölflein}
-\title{Context survey}
+\title{MSci Project}
 
 \makeglossaries
 \input{common/acronyms.tex}
+\input{common/math_commands.tex}
+
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{3}
 
 \allowdisplaybreaks
 
 \begin{document}
 
+%TC:ignore
 \frontmatter
 \input{common/title_page.tex}
 \subfile{chapters/declaration}
 \tableofcontents
 \listoffigures
+\subfile{chapters/notation}
+%TC:endignore
 
 \mainmatter
 \subfile{chapters/introduction}
@@ -62,8 +81,10 @@
 \printglossary[type=\acronymtype]
 \printbibliography[heading=bibintoc]
 
+%TC:ignore
 \appendix
 \subfile{chapters/appendix/user_manual}
 \subfile{chapters/appendix/ethics_form}
+%TC:endignore
 
 \end{document}

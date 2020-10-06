@@ -47,7 +47,10 @@
 \lhead{\textit{\leftmark}}
 \cfoot{\thepage}
 
-\addbibresource{\subfix{bib/dissertation.bib}}
+\addbibresource{\subfix{bibliography.bib}}
+% \AtEveryBibitem{\clearfield{month}}
+\AtEveryBibitem{\clearfield{day}}
+
 \graphicspath{ {./images/} }
 
 \author{Georg Wölflein}
@@ -77,6 +80,11 @@
 \subfile{chapters/introduction}
 \subfile{chapters/design}
 \subfile{chapters/implementation}
+
+\chapter{Evaluation}
+\section{Critical appraisal}
+\chapter{Conclusion}
+\section{Future work}
 
 \printglossary[type=\acronymtype]
 \printbibliography[heading=bibintoc]

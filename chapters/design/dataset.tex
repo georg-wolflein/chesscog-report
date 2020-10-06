@@ -121,12 +121,62 @@ For each chess position, a random choice is made between two different lighting 
                 \caption{spotlights}
                 \label{fig:lighting_spotlights_example}
             \end{subfigure}
-            \caption{Example renderings showing both types of lighting.}
+            \caption{Two samples from the synthesised dataset showing both types of lighting.}
             \label{fig:lighting_examples}
         \end{figure}
     \item In the other lighting mode, two spotlights are set up in the scene. 
+        Their $x$ and $y$ coordinates are constrained such that they lie on a circle centred at the origin of the coordinate system with radius 10 on the $xy$-plane, as depicted in \cref{fig:chessboard_lighting_circle}, but each spotlight's location along the circumference is sampled uniformly.
+        \begin{figure}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[
+                    axis lines=middle,
+                    xlabel=$x$,
+                    ylabel=$y$,
+                    x=.4cm, y=.4cm,
+                    xmin=-10, xmax=10,
+                    ymin=-10, ymax=10,
+                    enlargelimits,
+                    clip=false
+                ]
+                    \foreach \y in {-4,-2,...,2}{
+                        \foreach \x in {-4,-2,...,2}{
+                            \edef\temp{\noexpand\fill[pattern=crosshatch, pattern color=black] (\x,\y) rectangle (1+\x,1+\y) rectangle (2+\x,2+\y);}
+                            \temp
+                        };
+                    };
+                    \draw (-4, -4) rectangle (4, 4);
+
+                    
+                    \coordinate (o) at (0, 0);
+                    \coordinate (s1) at (45:10);
+                    \coordinate (s2) at (135:10);
+                    \draw[dashed] (o) circle (10);
+                    \draw[dashed,->] (s1) -- (o);
+                    \draw[dashed,->] (s2) -- (o);
+
+                    \draw (s1) -- (5.3, 6.3) -- (6.3, 5.3) -- cycle node[right] {spotlight 1};
+                    \draw (s2) -- (-5.3, 6.3) -- (-6.3, 5.3) -- cycle node[left] {spotlight 2};
+                \end{axis}
+            \end{tikzpicture}
+            \caption{Overhead view of the chessboard with two spotlights. The spotlights are constrained to the dashed circle such that their distance to the origin amounts to 10 units when disregarding the $z$-component.}
+            \label{fig:chessboard_lighting_circle}
+        \end{figure}
+        Furthermore, each spotlight's $z$-component is sampled uniformly in the range $[5, 10)$.
+        Finally, the for each spotlight, a focus point on the chessboard surface (i.e. the $xy$ plane) is sampled from
+        \(
+            \normal\left(
+                \begin{bmatrix}
+                    0 \\ 0
+                \end{bmatrix},
+                \frac{5}{2} \mI_2
+            \right)
+        \)
+        and the corresponding spotlight is rotated such that it points in that direction.
+        Consequently, there is greater variabililty in the lighting because the spotlights could be pointing at different areas of the board, thus producing different types of shadows.
+        \Cref{fig:lighting_spotlights_example} shows an example rendering where the lighting produced by the spotlights is poorer than the camera flash mode.
 \end{enumerate}
 
-
+\subsubsection{Automated labelling}
 
 \subsection{Test set}

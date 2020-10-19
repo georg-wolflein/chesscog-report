@@ -13,6 +13,7 @@
 \usepackage{subcaption}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{pgfplotstable}
 \usepackage{pdfpages}
 \usepackage[hidelinks]{hyperref}
 \usepackage[inline]{enumitem}
@@ -33,6 +34,9 @@
 
 \usetikzlibrary{patterns,calc,angles,quotes}
 \pgfplotsset{width=7cm,compat=1.17}
+
+\captionsetup[subfigure]{labelformat=simple}
+\renewcommand\thesubfigure{(\alph{subfigure})}
 
 \DeclareRobustCommand{\[}{\begin{equation}}
 \DeclareRobustCommand{\]}{\end{equation}}

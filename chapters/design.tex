@@ -6,9 +6,102 @@
 \section{Overview}
 \input{chapters/design/dataset}
 
-\section{Classification-based approach}
+\section{A classification-based approach}
 \subsection{Board detection}
-\subsection{Piece classification using \glspl{cnn}}
+\subsection{Occupancy classification}
+Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_annotated}
+        \caption{region from the original image with marked square}
+        \label{fig:occupancy_classification_fp_original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=.7\textwidth]{3828_cut}
+        \caption{cropped sample}
+        \label{fig:occupancy_classification_fp_cropped}
+    \end{subfigure}
+    \caption[An example illustraing why an immediate piece classification approach is inclined to reporting false positives.]{An example illustraing why an immediate piece classification approach is inclined to reporting false positives. Consider the square marked in green in the original image \subref{fig:occupancy_classification_fp_original}. The bounding box for piece classification (marked in red) must be quite tall because the square might contain a tall piece such as a queen or king (the box must be at least as tall as the the queen in the adjacent square on the left). The resulting sample, depicted in \subref{fig:occupancy_classification_fp_cropped}, contains almost the entire rook of the square behind. Thus, a piece classifier might classify this square as containing a rook instead of being empty.}
+    \label{fig:occupancy_classification_fp}
+\end{figure}
+One common scenario where the trained classifier failed is illustrated in \cref{fig:occupancy_classification_fp}.
+Notice that squares further away from the camera must be cropped with increasingly taller bounding boxes.
+If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was inclined to report a false positive.
+
+To solve this problem, a binary classifier was trained to 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828}
+        \caption{original}
+        \label{fig:occupancy_classification_samples_original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_unwarped}
+        \caption{warped}
+        \label{fig:occupancy_classification_samples_warped}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_empty}
+        \caption{all 32 empty samples}
+        \label{fig:occupancy_classification_samples_empty}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_occupied}
+        \caption{all 24 occupied samples}
+        \label{fig:occupancy_classification_samples_occupied}
+    \end{subfigure}
+    \caption[The process of obtaining samples for occupancy classification from a chessboard image.]{The process of obtaining samples for occupancy classification from a chessboard image. First, the original image \subref{fig:occupancy_classification_samples_original} is warped to a two-dimensional overhead view, \subref{fig:occupancy_classification_samples_warped}. Then, all squares are cropped (with a 50\% increase in width and height to include contextual information). Finally, the cropped squares are annoted using the \gls{fen} groundtruth as either empty \subref{fig:occupancy_classification_samples_empty} or occupied \subref{fig:occupancy_classification_samples_occupied}.}
+    \label{fig:occupancy_classification_samples}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \pgfplotstableread[col sep=comma]{data/occupancy_classifier.csv}\ocresults
+    \pgfplotstablesort[sort key={accuracy}, sort cmp=float <]\ocresults\ocresults
+    \pgfplotstablemodifyeachcolumnelement{accuracy}\of\ocresults\as\cell{%
+        \pgfkeys{/pgf/fpu=true}%
+        \pgfmathparse{100*\cell}%
+        \pgfkeys{/pgf/fpu=false}%
+        \edef\cell{\pgfmathresult}%
+    }
+    \begin{tikzpicture}
+        \begin{axis}[
+            xbar,
+            height=10cm,
+            xlabel={accuracy (\%)},
+            ylabel={model},
+            ytick=data,
+            nodes near coords=\pgfmathprintnumber{\pgfplotspointmeta}\%,
+            nodes near coords align={horizontal},
+            nodes near coords style={/pgf/number format/.cd,fixed zerofill,precision=2},
+            yticklabel={%
+                \pgfplotstablegetelem{\ticknum}{run}\of{\ocresults}%
+                \def\marshal{\pgfplotsutilstrreplace{_}{\_}}%
+                \expandafter\marshal\expandafter{\pgfplotsretval}%
+                %
+                \texttt{\pgfplotsretval}%
+            },
+            enlarge x limits={upper,.4}
+        ]
+            \addplot table [x={accuracy}, y expr=\coordindex]{\ocresults};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Performance of all models on the validation set.}
+\end{figure}
+
+\subsection{Piece classification}
 
 \section{An approach based on object detection}
 \section{Identifying plausible game states}

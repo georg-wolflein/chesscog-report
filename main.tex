@@ -8,6 +8,10 @@
 \usepackage[british]{babel}
 \usepackage{amsmath}
 \usepackage{bm}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{array}
+\usepackage{pifont}
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -46,6 +50,9 @@
 \def\normal{\mathcal{N}}
 \renewcommand\vec{\mathbf}
 
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{\textit{\leftmark}}
@@ -77,6 +84,7 @@
 \subfile{chapters/declaration}
 \tableofcontents
 \listoffigures
+\listoftables
 \subfile{chapters/notation}
 %TC:endignore
 

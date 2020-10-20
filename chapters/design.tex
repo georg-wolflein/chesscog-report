@@ -66,40 +66,68 @@ To solve this problem, a binary classifier was trained to
     \label{fig:occupancy_classification_samples}
 \end{figure}
 
-\begin{figure}
+\begin{table}
     \centering
-    \pgfplotstableread[col sep=comma]{data/occupancy_classifier.csv}\ocresults
-    \pgfplotstablesort[sort key={accuracy}, sort cmp=float <]\ocresults\ocresults
-    \pgfplotstablemodifyeachcolumnelement{accuracy}\of\ocresults\as\cell{%
-        \pgfkeys{/pgf/fpu=true}%
-        \pgfmathparse{100*\cell}%
-        \pgfkeys{/pgf/fpu=false}%
-        \edef\cell{\pgfmathresult}%
-    }
-    \begin{tikzpicture}
-        \begin{axis}[
-            xbar,
-            height=10cm,
-            xlabel={accuracy (\%)},
-            ylabel={model},
-            ytick=data,
-            nodes near coords=\pgfmathprintnumber{\pgfplotspointmeta}\%,
-            nodes near coords align={horizontal},
-            nodes near coords style={/pgf/number format/.cd,fixed zerofill,precision=2},
-            yticklabel={%
-                \pgfplotstablegetelem{\ticknum}{run}\of{\ocresults}%
-                \def\marshal{\pgfplotsutilstrreplace{_}{\_}}%
-                \expandafter\marshal\expandafter{\pgfplotsretval}%
-                %
-                \texttt{\pgfplotsretval}%
+    \pgfplotstabletypeset[
+        col sep=tab,
+        columns={context,run,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
+        every head row/.style={%
+            before row=\toprule,
+            after row=\midrule%
+        },
+        every last row/.style={
+            after row=\bottomrule
+        },
+        columns/run/.style={
+            string type,
+            column name={model}
+        },
+        columns/context/.style={
+            string type,
+            column name={}
+        },
+        columns/val_accuracy/.style={
+            dec sep align,
+            postproc cell content/.append code={
+                \ifnum1=\pgfplotstablepartno
+                    \pgfkeysalso{@cell content/.add={}{\%}}%
+                \fi
             },
-            enlarge x limits={upper,.4}
-        ]
-            \addplot table [x={accuracy}, y expr=\coordindex]{\ocresults};
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Performance of all models on the validation set.}
-\end{figure}
+            fixed,
+            fixed zerofill,
+            column name={accuracy}
+        },
+        columns/train_accuracy/.style={
+            dec sep align,
+            postproc cell content/.append code={
+                \ifnum1=\pgfplotstablepartno
+                    \pgfkeysalso{@cell content/.add={}{\%}}%
+                \fi
+            },
+            fixed,
+            fixed zerofill,
+            column name={\makecell{training \\ accuracy}}
+        },
+        columns/val_precision/occupied/.style={
+            dec sep align,
+            precision=3,
+            fixed,
+            fixed zerofill,
+            column name={precision}
+        },
+        columns/val_recall/occupied/.style={
+            dec sep align,
+            precision=3,
+            fixed,
+            fixed zerofill,
+            column name={recall}
+        },
+        columns/val_misclassified/.style={
+            column name={\makecell{errors}}
+        },
+    ]{data/occupancy_classifier.dat}
+    \caption[Performance of all occupancy classification models on the validation set.]{Performance of all occupancy classification models on the validation set. For the \gls{cnn} models, the 4-tuple denotes the length of the square input size in pixels, the number of convolution layers, the number of pooling layers, and the number of fully connected layers. The check mark in the left column indicates whether the input samples contained contextual information (cropped to include part of the adjacent squares). In the penultimate column, the total number of misclassifications in the validation set reported (the validation set consists of 9,346 samples). The training accuracy is given in the rightmost column for comparison. Notice that there is no significant difference between the validation and training accuracies, indicating that none of the models suffer from overfitting.}
+\end{table}
 
 \subsection{Piece classification}
 

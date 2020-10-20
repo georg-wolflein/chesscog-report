@@ -8,6 +8,7 @@
 
 \section{A classification-based approach}
 \subsection{Board detection}
+\todo{TODO: corner point detection}
 \subsection{Occupancy classification}
 Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
 \begin{figure}
@@ -32,7 +33,47 @@ One common scenario where the trained classifier failed is illustrated in \cref{
 Notice that squares further away from the camera must be cropped with increasingly taller bounding boxes.
 If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was inclined to report a false positive.
 
-To solve this problem, a binary classifier was trained to 
+To solve this problem, a binary classifier is trained on cropped squares to decide whether they are empty or not.
+Before cutting out the squares from the original image, the input image is warped to a two-dimensional overhead view by means of a projective transformation.
+This ensures that all squares are of equal size and that the corners form right angles (which is not the case in the original image due to perspective distortion).
+To this end, we compute the \emph{homography matrix} $\mH \in \R^{3 \times 3}$ \cite{szeliski2011} mapping any point
+$\vp$
+from the original image to
+the corresponding point
+$\vp'$
+in the warped image.
+To simplify notation, we shall consider 2D homogenous coordinate vectors, i.e. three-component vectors with the last component being $1$, so the vector
+$\begin{bmatrix}
+    x & y & 1
+\end{bmatrix}^\top$
+would represent the point $(x,y)$ in the Cartesian coordinate system.
+Using this notation, $\mH$ maps $\vp$ to $\vp'$ using the relation
+\begin{equation}
+    \label{eq:homography_matrix_relation}
+    \mH
+    \vp
+    = s \vp'
+\end{equation}
+up to a scalar scale factor $s$.
+
+Let the $4 \times 3$ matrix $\mP$ contain the pixel coordinates of the four chessboard corners starting in the top left in clockwise order and $\mP'$ be a matrix of the same size containing the corner coordinates of a square with side length $l$ pixels given by
+\begin{equation*}
+    \mP' = \begin{bmatrix}
+        0 & l & l & 0 \\
+        0 & 0 & l & l \\
+        1 & 1 & 1 & 1
+    \end{bmatrix}.
+\end{equation*}
+Notice that $\mP'$ describes a square whose top left corner is at the origin, and the coordinates are given in the same order as in $\mP$.
+Since the homography matrix should map points from the original image to the output image, we obtain from \cref{eq:homography_matrix_relation} the relation 
+\begin{equation}
+    \label{eq:homography_matrix_relation_corners}
+    \mH \mP = \mP' (\mI_4 \vs)
+\end{equation}
+where the vector $\vs \in \R^4$ represents the scale factor for each point.
+\Cref{eq:homography_matrix_relation_corners} describes an overdetermined set of linear equations, so it is likely that there is no exact solution for $\mH$. 
+However, we approximate $\mH$ by finding the solution with the least squared error.
+Finally, we can use $\mH$ to apply the projective transformation to the original image such as depicted in \cref{fig:occupancy_classification_samples_original}, obtaining the warped image \cref{fig:occupancy_classification_samples_warped}.
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
@@ -48,7 +89,8 @@ To solve this problem, a binary classifier was trained to
         \caption{warped}
         \label{fig:occupancy_classification_samples_warped}
     \end{subfigure}
-    \hfill
+    
+    \bigskip
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{3828_empty}
@@ -65,6 +107,10 @@ To solve this problem, a binary classifier was trained to
     \caption[The process of obtaining samples for occupancy classification from a chessboard image.]{The process of obtaining samples for occupancy classification from a chessboard image. First, the original image \subref{fig:occupancy_classification_samples_original} is warped to a two-dimensional overhead view, \subref{fig:occupancy_classification_samples_warped}. Then, all squares are cropped (with a 50\% increase in width and height to include contextual information). Finally, the cropped squares are annoted using the \gls{fen} groundtruth as either empty \subref{fig:occupancy_classification_samples_empty} or occupied \subref{fig:occupancy_classification_samples_occupied}.}
     \label{fig:occupancy_classification_samples}
 \end{figure}
+
+Cropping the squares from the warped image is trivial because the squares are of equal size.
+In training the occupancy classifiers, it was conjectured that it would be useful to include contextual information with each square; therefore, they were not cropped tightly around the square boundaries but instead with a 50\% increase in length on all four sides, as shown in \cref{fig:occupancy_classification_samples_empty,fig:occupancy_classification_samples_occupied}.
+This might aid the classifier's decision in difficult situations where a chess piece from another square pokes into the cropped one.
 
 \begin{table}
     \centering

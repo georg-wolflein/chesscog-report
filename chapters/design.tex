@@ -112,67 +112,149 @@ Cropping the squares from the warped image is trivial because the squares are of
 In training the occupancy classifiers, it was conjectured that it would be useful to include contextual information with each square; therefore, they were not cropped tightly around the square boundaries but instead with a 50\% increase in length on all four sides, as shown in \cref{fig:occupancy_classification_samples_empty,fig:occupancy_classification_samples_occupied}.
 This might aid the classifier's decision in difficult situations where a chess piece from another square pokes into the cropped one.
 
+\subsubsection{\Glspl{cnn}}
+Six \gls{cnn} architectures are devised for the occupancy classification task, of which two accept $100\times 100$ pixel input images and the remaining four require the images to be of size $50\times 50$ pixels.
+They differ in the number of convolution layers, pooling layers, and fully connected layers.
+When referring to these models, we will use a 4-tuple consisting of the input side length and the three aforementioned criteria.
+\Cref{fig:occupancy_convnet} depicts the architecture of the \gls{cnn} $(100, 3, 3, 3)$ model which achieves the greatest validation accuracy of these six models.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{occupancy_convnet}
+    \caption[Architecture of the CNN $(100,3,3,3)$ network for occupancy classification.]{
+        Architecture of the \gls{cnn} $(100,3,3,3)$ network for occupancy classification.
+        The input is a three-channel \gls{rgb} image with $100\times 100$ pixels.
+        There are three convolutional layers (yellow) with a kernal size of $5 \times 5$ and stride $1$, meaning that each convolutional layer reduces the width and height by $4$.
+        The first convolutional layer has 16 filters, and with each layer, the number of channels is doubled, as is common practice in \glspl{cnn} \cite{simonyan2015}.
+        Each convolutional layer uses the \gls{relu} activation function and is followed by a max pooling layer with a $2\times 2$ kernel that is moved with a stride of $2$ such that the width and height are halved.
+        Finally, the output of the last pooling layer is reshaped to a 640,000-dimensional vector that passes through two fully connected \gls{relu}-activated layers before reaching the final fully connected layer with softmax activation.
+    }
+    \label{fig:occupancy_convnet}
+\end{figure}
+The fully connected layer in each model contains two output units that represent the two classes (occupied and empty).
+The models are trained using the cross-entropy loss function on the outputs.
+Training proceeds using the popular \emph{Adam} optimizer \cite{kingma2017} with a learning rate of $0.001$ for three whole passes over the training set using a batch size of 128.
+After every 100 steps, the model's loss and accuracy is computed over the entire validation set, the results of which are reported in \cref{fig:occupancy_cnn_loss_accuracy}.
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.69\%.}
+    \label{fig:occupancy_cnn_loss_accuracy}
+\end{figure}
+The model converges smoothly to a very low loss value, achieving a training accuracy of 99.76\% and validation accuracy of 99.69\%.
+Due to the fact that the difference between training and validation accuracy is very small, we conclude that the model does not overfit to the training set.
+
+\subsubsection{Transfer learning on deeper models}
+Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and the same samples except that the squares are cropped tightly.
+In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis that the information around the square itself is useful.
+
+
 \begin{table}
     \centering
-    \pgfplotstabletypeset[
-        col sep=tab,
-        columns={context,run,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
-        every head row/.style={%
-            before row=\toprule,
-            after row=\midrule%
-        },
-        every last row/.style={
-            after row=\bottomrule
-        },
-        columns/run/.style={
-            string type,
-            column name={model}
-        },
-        columns/context/.style={
-            string type,
-            column name={}
-        },
-        columns/val_accuracy/.style={
-            dec sep align,
-            postproc cell content/.append code={
-                \ifnum1=\pgfplotstablepartno
-                    \pgfkeysalso{@cell content/.add={}{\%}}%
-                \fi
+    \makebox[\textwidth][c]{
+        \pgfplotstabletypeset[
+            col sep=tab,
+            columns={context,run,parameters,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
+            every head row/.style={%
+                before row=\toprule,
+                after row=\midrule%
             },
-            fixed,
-            fixed zerofill,
-            column name={accuracy}
-        },
-        columns/train_accuracy/.style={
-            dec sep align,
-            postproc cell content/.append code={
-                \ifnum1=\pgfplotstablepartno
-                    \pgfkeysalso{@cell content/.add={}{\%}}%
-                \fi
+            every last row/.style={
+                after row=\bottomrule
             },
-            fixed,
-            fixed zerofill,
-            column name={\makecell{training \\ accuracy}}
-        },
-        columns/val_precision/occupied/.style={
-            dec sep align,
-            precision=3,
-            fixed,
-            fixed zerofill,
-            column name={precision}
-        },
-        columns/val_recall/occupied/.style={
-            dec sep align,
-            precision=3,
-            fixed,
-            fixed zerofill,
-            column name={recall}
-        },
-        columns/val_misclassified/.style={
-            column name={\makecell{errors}}
-        },
-    ]{data/occupancy_classifier.dat}
-    \caption[Performance of all occupancy classification models on the validation set.]{Performance of all occupancy classification models on the validation set. For the \gls{cnn} models, the 4-tuple denotes the length of the square input size in pixels, the number of convolution layers, the number of pooling layers, and the number of fully connected layers. The check mark in the left column indicates whether the input samples contained contextual information (cropped to include part of the adjacent squares). In the penultimate column, the total number of misclassifications in the validation set reported (the validation set consists of 9,346 samples). The training accuracy is given in the rightmost column for comparison. Notice that there is no significant difference between the validation and training accuracies, indicating that none of the models suffer from overfitting.}
+            columns/run/.style={
+                string type,
+                column name={model}
+            },
+            columns/context/.style={
+                string type,
+                column name={}
+            },
+            columns/val_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={accuracy}
+            },
+            columns/train_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={\makecell{training \\ accuracy}}
+            },
+            columns/val_precision/occupied/.style={
+                dec sep align,
+                precision=3,
+                fixed,
+                fixed zerofill,
+                column name={precision}
+            },
+            columns/val_recall/occupied/.style={
+                dec sep align,
+                precision=3,
+                fixed,
+                fixed zerofill,
+                column name={recall}
+            },
+            columns/val_misclassified/.style={
+                column name={\makecell{errors}}
+            },
+        ]{data/occupancy_classifier.dat}
+    }
+    \caption[Performance of all occupancy classification models on the validation set.]{
+        Performance of all occupancy classification models on the validation set.
+        For the \gls{cnn} models, the 4-tuple denotes the length of the square input size in pixels, the number of convolution layers, the number of pooling layers, and the number of fully connected layers.
+        The check mark in the left column indicates whether the input samples contained contextual information (cropped to include part of the adjacent squares).
+        In the penultimate column, the total number of misclassifications in the validation set reported (the validation set consists of 9,346 samples).
+        The training accuracy is given in the rightmost column for comparison.
+        Notice that there is no significant difference between the validation and training accuracies, indicating that none of the models suffer from overfitting.
+    }
 \end{table}
 
 \subsection{Piece classification}

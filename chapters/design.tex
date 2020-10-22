@@ -174,13 +174,15 @@ After every 100 steps, the model's loss and accuracy is computed over the entire
             \end{tikzpicture}
         \end{subfigure}
     }
-    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.69\%.}
+    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.67\%.}
     \label{fig:occupancy_cnn_loss_accuracy}
 \end{figure}
-The model converges smoothly to a very low loss value, achieving a training accuracy of 99.76\% and validation accuracy of 99.69\%.
+The model converges smoothly to a very low loss value, achieving a training accuracy of 99.72\% and validation accuracy of 99.67\%.
 Due to the fact that the difference between training and validation accuracy is very small, we conclude that the model does not overfit to the training set.
 
 \subsubsection{Transfer learning on deeper models}
+\todo{todo: explain how this was done and explain tradeoff (significantly more parameters in model)}
+
 Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and the same samples except that the squares are cropped tightly.
 In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis that the information around the square itself is useful.
 
@@ -251,11 +253,55 @@ In each case, the model trained on the samples that contained contexual informat
         Performance of all occupancy classification models on the validation set.
         For the \gls{cnn} models, the 4-tuple denotes the length of the square input size in pixels, the number of convolution layers, the number of pooling layers, and the number of fully connected layers.
         The check mark in the left column indicates whether the input samples contained contextual information (cropped to include part of the adjacent squares).
-        In the penultimate column, the total number of misclassifications in the validation set reported (the validation set consists of 9,346 samples).
+        In the penultimate column, the total number of misclassifications in the validation set are reported (the validation set consists of 9,346 samples).
         The training accuracy is given in the rightmost column for comparison.
         Notice that there is no significant difference between the validation and training accuracies, indicating that none of the models suffer from overfitting.
     }
 \end{table}
+
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the VGG model.]{Loss and accuracy during training on both the training and validation sets for the VGG model. The best validation accuracy is 99.96\%.}
+    \label{fig:occupancy_vgg_loss_accuracy}
+\end{figure}
 
 \subsection{Piece classification}
 

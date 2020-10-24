@@ -130,7 +130,7 @@ When referring to these models, we will use a 4-tuple consisting of the input si
     }
     \label{fig:occupancy_convnet}
 \end{figure}
-The fully connected layer in each model contains two output units that represent the two classes (occupied and empty).
+The final fully connected layer in each model contains two output units that represent the two classes (occupied and empty).
 The models are trained using the cross-entropy loss function on the outputs.
 Training proceeds using the popular \emph{Adam} optimizer \cite{kingma2017} with a learning rate of $0.001$ for three whole passes over the training set using a batch size of 128.
 After every 100 steps, the model's loss and accuracy is computed over the entire validation set, the results of which are reported in \cref{fig:occupancy_cnn_loss_accuracy}.
@@ -174,10 +174,10 @@ After every 100 steps, the model's loss and accuracy is computed over the entire
             \end{tikzpicture}
         \end{subfigure}
     }
-    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.67\%.}
+    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.71\%.}
     \label{fig:occupancy_cnn_loss_accuracy}
 \end{figure}
-The model converges smoothly to a very low loss value, achieving a training accuracy of 99.72\% and validation accuracy of 99.67\%.
+The model converges smoothly to a very low loss value, achieving a training accuracy of 99.70\% and validation accuracy of 99.71\%.
 Due to the fact that the difference between training and validation accuracy is very small, we conclude that the model does not overfit to the training set.
 
 \subsubsection{Transfer learning on deeper models}
@@ -192,7 +192,7 @@ In each case, the model trained on the samples that contained contexual informat
     \makebox[\textwidth][c]{
         \pgfplotstabletypeset[
             col sep=tab,
-            columns={context,run,parameters,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
+            columns={context,model,parameters,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
             every head row/.style={%
                 before row=\toprule,
                 after row=\midrule%
@@ -200,9 +200,8 @@ In each case, the model trained on the samples that contained contexual informat
             every last row/.style={
                 after row=\bottomrule
             },
-            columns/run/.style={
-                string type,
-                column name={model}
+            columns/model/.style={
+                string type
             },
             columns/context/.style={
                 string type,
@@ -272,8 +271,8 @@ In each case, the model trained on the samples that contained contexual informat
                     width=.9\textwidth,
                     legend style={at={(0.98,0.98)},anchor=north east}
                 ]
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_train-tag-Loss.csv};
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_val-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_val-tag-Loss.csv};
                     \legend{training,validation}
                 \end{axis}
             \end{tikzpicture}
@@ -292,15 +291,21 @@ In each case, the model trained on the samples that contained contexual informat
                     yticklabel pos=right,
                     legend style={at={(0.98,0.02)},anchor=south east}
                 ]
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_train-tag-Accuracy.csv};
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_VGG_val-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_val-tag-Accuracy.csv};
                     \legend{training,validation}
                 \end{axis}
             \end{tikzpicture}
         \end{subfigure}
     }
-    \caption[Loss and accuracy during training on both the training and validation sets for the VGG model.]{Loss and accuracy during training on both the training and validation sets for the VGG model. The best validation accuracy is 99.96\%.}
-    \label{fig:occupancy_vgg_loss_accuracy}
+    \caption[Loss and accuracy during training on both the training and validation sets for the ResNet model.]{Loss and accuracy during training on both the training and validation sets for the ResNet model. The best validation accuracy is 99.96\%.}
+    \label{fig:occupancy_resnet_loss_accuracy}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{ResNet_val_mistakes.png}
+    \caption[The four samples that the ResNet model misclassified in the validation set.]{The four samples that the ResNet model misclassified in the validation set. The left sample depicts an empty square, and the three other samples are of occupied squares.}
+    \label{fig:occupancy_resnet_mistakes}
 \end{figure}
 
 \subsection{Piece classification}

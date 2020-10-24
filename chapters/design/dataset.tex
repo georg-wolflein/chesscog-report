@@ -68,8 +68,8 @@ Finally, the piece's rotation about its $z$-axis is sampled from a uniform distr
 The camera is aligned such that it points directly at the origin (i.e. the centre of the board).
 It is positioned with only a small offset from the $yz$-plane to ensure that the view over the chessboard is similar to the current player's perspective. 
 A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player will not usually be positioned exactly in the middle in front of the board.
-An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{2},\frac{2\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
-\footnote{On the other hand, if it is black to play, the perspective must be from the other side of the board, so $\theta$ is chosen in the range $\left[\frac{4\pi}{3},\frac{3\pi}{2}\right]$ which is equivalent to reflecting the camera position about the $xz$-plane.}.
+An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
+\footnote{On the other hand, if it is black to play, the perspective must be from the other side of the board, so $\theta$ is chosen in the range $\left[\frac{2\pi}{3},\frac{3\pi}{4}\right]$ which is equivalent to reflecting the camera position about the $xz$-plane.}.
 \begin{figure}
     \centering
     \begin{tikzpicture}

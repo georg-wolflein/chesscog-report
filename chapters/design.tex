@@ -188,6 +188,8 @@ For each chess position, a random choice is made between two different lighting 
 \subsection{Board detection}
 \todo{TODO: corner point detection}
 \subsection{Occupancy classification}
+\label{sec:occupancy_classification}
+
 Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
 \begin{figure}
     \centering
@@ -495,7 +497,28 @@ In each case, the model trained on the samples that contained contexual informat
 \end{figure}
 
 \subsection{Piece classification}
+Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece in each of the occupied squares.
+We require a 12-way classifier that takes as input a cropped image of an occupied square and will output the chess piece on that square. 
+There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are 12 classes of pieces.
 
+We must pay some special attention to how the pieces are cropped. 
+Simply following the approach described in \cref{sec:occupancy_classification} for cropping squares does not give enough information to classify pieces.
+Especially tall pieces at the back of the board would be cropped in a manner such that only the bottom part of the piece remains in the \gls{roi}. 
+Consider for example the white king in \cref{fig:occupancy_classification_samples}.
+Cropping only the square it is located in would not include its crown which is an important feature needed to distinguish between kings and queens.
+Instead, we must choose a rectangular bounding box that is tall enough to account for the perspective distortion.
+
+The camera perspective causes another phenomenon that we must account for: pieces on the left of the board tend to `slant' to the left, and vice-versa on the right.
+This is due to the vanishing point of the normals of the chessboard surface being roughly centred horizontally with regards to the location of the chessboard itself, as illustrated in \cref{fig:occupancy_classification_normals}.
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\textwidth]{3828_normals.png}
+    \caption{The normals converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
+    \label{fig:occupancy_classification_normals}
+\end{figure}
+Hence, we must extend the \gls{roi} horizontally in the appropriate direction.
+
+To obtain the \glspl{roi}, we first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
 
 \begin{table}
     \centering

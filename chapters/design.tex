@@ -162,7 +162,7 @@ For each chess position, a random choice is made between two different lighting 
                     \draw (s2) -- (-5.3, 6.3) -- (-6.3, 5.3) -- cycle node[left] {spotlight 2};
                 \end{axis}
             \end{tikzpicture}
-            \caption{Overhead view of the chessboard with two spotlights. The spotlights are constrained to the dashed circle such that their distance to the origin amounts to 10 units when disregarding the $z$-component.}
+            \caption[Overhead view of the chessboard with two spotlights.]{Overhead view of the chessboard with two spotlights. The spotlights are constrained to the dashed circle such that their distance to the origin amounts to 10 units when disregarding the $z$-component.}
             \label{fig:chessboard_lighting_circle}
         \end{figure}
         Furthermore, each spotlight's $z$-component is sampled uniformly in the range $[5, 10)$.
@@ -513,7 +513,7 @@ This is due to the vanishing point of the normals of the chessboard surface bein
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{3828_normals.png}
-    \caption{The normals converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
+    \caption[The normals on the chessboard converge to a single vanishing point which is below the image.]{The normals on the chessboard (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
     \label{fig:occupancy_classification_normals}
 \end{figure}
 Hence, we must extend the \gls{roi} horizontally in the appropriate direction.

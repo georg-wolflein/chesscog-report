@@ -1,0 +1,326 @@
+
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{Background}
+
+\section{Supervised learning}
+At its core, the purpose of an \gls{ann} is to infer a function that maps some input to some output, based on sample input-output pairs.
+In machine learning, we call this a \emph{supervised learning} task, and there are a great number of machine learning models (not only \glspl{ann}) that have been developed for this task.
+
+There are two main tasks in supervised learning that are relevant to this project: \emph{regression} and \emph{classification}.
+
+\subsection{Regression}
+A regression model captures the relationship between multiple input variables and one output variable. 
+As such, it can be defined a mathematical function of the form $f:\mathbb{R}^n\rightarrow \mathbb{R}$ given by
+\begin{equation}
+    \label{eq:reg_model}
+    f(\vx) = \hat{y} = y + \epsilon
+\end{equation}
+that models the relationship between a $n$-dimensional feature vector $\vx \in \mathbb{R}^n$ of independent (\emph{input}) variables and the dependent (\emph{output}) variable $y \in \mathbb{R}$. 
+Given a particular $\vx$, the model will produce a \emph{prediction} for $y$ which we shall denote $\hat{y}$.
+Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e. the difference between the predicted and observed output.
+
+A labelled dataset for a regression task consists of $m$ tuples of the form $\langle \vx_i, y_i\rangle$ for $i=1,\dots,m$.
+For each feature vector $\vx_i$ (a row vector), the corresponding $y_i$ represents the observed output, or \emph{label} \cite{burkov2019}.
+We use the vector
+\begin{equation}
+    \label{eq:sup_learn_target}
+    \vy = \begin{bmatrix}
+        y_1 & y_2 & \cdots & y_m
+    \end{bmatrix}^\top
+\end{equation}
+to denote all the labelled outputs in the dataset, and the $m \times n$ matrix
+\begin{equation}
+    \label{eq:sup_learn_input_matrix}
+    \mX = \begin{bmatrix}
+        \vx_1 & \vx_2 & \cdots & \vx_m
+    \end{bmatrix}^\top
+\end{equation}
+for representing the corresponding feature vectors.
+
+\subsection{Classification}
+Classification is a task that finds greater applicability within this project.
+As the name implies, a classification model tries to determine which category each input sample belongs to from a predefined set of classes $\sC$.
+To ease notation, we will let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
+In practical terms, the elements in $\sC$ could represent any type of mathematical or non-mathematical object, and in that case we only require a one-to-one mapping from those objects to $\sC$.
+Furthermore, in the context of this report, each input sample can only belong to one class, and we will interpret the output of the model to represent the probabilities of the input sample belonging to each of the classes $\sC$.
+Therefore, a classification model is represented by a vector-valued function
+$\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
+instead of a scalar function as in \cref{eq:reg_model}, namely
+\begin{equation}
+    \label{eq:cla_model}
+    \vf(\vx) = \vyhat + \vec{\epsilon}= \vy.
+\end{equation}
+Here, $\vf(\vx)$ actually represents a \gls{pmf} where the $i$\textsuperscript{th} component $\hat{y}_i$ of the output vector $\vyhat$ represents the probability that the input sample $\vx$ belongs to the class $i\in \sC$.
+It follows that
+\begin{equation}
+    \label{eq:pmf}
+    \sum_{i=1}^{\abs{\sC}} \hat{y}_i = 1.
+\end{equation}
+
+The observed output vector $\vy$ uses a \gls{ohe} to represent the sample's class. 
+For a given class $c \in \sC$, the components of $\vy$ would be given by
+\begin{equation*}
+    y_i = \begin{cases}
+        1 & i=c \\
+        0 & \text{otherwise}
+    \end{cases},
+\end{equation*}
+which retains the property described in \cref{eq:pmf}.
+Since $\vf$ represents a \gls{pmf}, this means that the probability of class $c$ is 100\%.
+
+\todo{Explain how dataset looks like for classification}
+
+% \section{\Glsentrylongpl{ann}}
+% \label{sec:ann}
+% \Glspl{ann} take inspiration from the human brain and can be regarded as a set of interconnected neurons. 
+% More formally, an \gls{ann} is a directed graph of $n$ neurons (referred to as \emph{nodes} or \emph{units}) with weighted edges (\emph{links}).
+% Each link connecting two units $i$ and $j$ is directed and associated with a real-valued weight $w_{i,j}$. 
+
+% A particular unit $i$'s \emph{excitation}, denoted $z_i$, is calculated as the weighted sum
+% \begin{equation}
+%     z_i = \sum_{j=1}^n{w_{j,i} a_j} + b_i
+% \end{equation}
+% where $a_j \in \mathbb{R}$ is another unit $j$'s \emph{activation} and $b_i \in \mathbb{R}$ is the $i$th unit's \emph{bias}.
+% Notice that in this model, if there exists no link between unit $i$ and a particular $j$ then simply $w_{i,j}=0$ and therefore $j$ will not contribute to $i$'s excitation. 
+
+% The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function}, $g: \mathbb{R} \rightarrow \mathbb{R}$. We have
+% \begin{equation}
+%     \label{eq:ann_activation}
+%     a_i = g\left(z_i\right) = g\left(\sum_{j=1}^n{w_{j,i} a_j} + b_i\right).
+% \end{equation}
+
+% \paragraph{Activation functions}
+% In its original form, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
+% This means that in our model from \cref{eq:ann_activation}, we would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{thres}: \mathbb{R} \rightarrow \{0, 1\}$ which would be defined\footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in our model the bias term $b_i$ acts as the threshold.} as
+% \begin{equation}
+%     \label{eq:thres_activation}
+%     g_\text{thres}(x) = \begin{cases} 
+%         0 & x < 0 \\
+%         1 & x \geq 0
+%     \end{cases}.
+% \end{equation}
+
+% Commonly used activation functions in modern neural networks include the sigmoid
+% \begin{equation}
+%     \label{eq:sigmoid}
+%     g_\text{sig}(x) = \frac{1}{1 + e^{-x}}
+% \end{equation}
+% and the rectified linear unit (ReLU)
+% \begin{equation}
+%     g_\text{ReLU} = \begin{cases}
+%         0 & x < 0 \\
+%         x & x \geq 0
+%     \end{cases}
+% \end{equation}
+% which are depicted in \cref{fig:activation_functions}.
+% \begin{figure}
+%     \centering
+%     \begin{subfigure}{.45\textwidth}
+%         \centering
+%         \begin{tikzpicture}
+%             \begin{axis}[
+%                 x=0.75cm,
+%                 y=3cm,
+%                 axis lines=center,
+%                 xlabel={$x$}, xlabel style={anchor=west},
+%                 ylabel={$g_\text{sig}(x)$}, ylabel style={anchor=south},
+%                 ymin=0, ymax=1,
+%                 xmin=-3, xmax=3,
+%                 enlarge x limits,
+%                 enlarge y limits = upper,
+%                 samples=100,
+%                 xtick={-3,...,3},
+%                 ytick={0, 0.5, 1},
+%                 extra x ticks=0
+%             ]
+%                 \addplot[black] {1 / (1 + exp(-x))};
+%             \end{axis}
+%         \end{tikzpicture}
+%         \caption{Sigmoid}
+%     \end{subfigure}
+%     \hspace*{\fill}
+%     \begin{subfigure}{.45\textwidth}
+%         \centering
+%         \begin{tikzpicture}
+%             \begin{axis}[
+%                 x=2.25cm,
+%                 y=3cm,
+%                 axis lines=center,
+%                 xlabel={$x$}, xlabel style={anchor=west},
+%                 ylabel={$g_{\text{ReLU}}(x)$}, ylabel style={anchor=south},
+%                 ymin=0, ymax=1,
+%                 xmin=-1, xmax=1,
+%                 enlarge x limits,
+%                 enlarge y limits = upper,
+%                 samples=100,
+%                 xtick={-1, -0.5, 0, 0.5, 1},
+%                 ytick={0, 0.5, 1},
+%                 extra x ticks=0
+%             ]
+%                 \addplot[black][domain=0:1] {x};
+%                 \addplot[black][domain=-1:0] {0};
+%             \end{axis}
+%         \end{tikzpicture}
+%         \caption{Rectified linear unit}
+%     \end{subfigure}
+%     \caption{Plots of the the two most common activation functions.}
+%     \label{fig:activation_functions}
+% \end{figure}
+% Unlike $g_\text{step}$, these activation functions are differentiable which is an advantage for being able to use gradient descent \cite[729]{russell2010}.
+
+% Rectified units do not suffer from the \emph{vanishing gradient effect} \cite{glorot2011}.
+% This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal.
+% However, the vanishing gradient problem is usually not prevalent in shallow\footnote{Shallow networks refer to \glspl{ann} with few layers.} networks so the sigmoid function still remains popular \cite{neal1992}.
+
+% Particularly in deep neural networks, different neurons (grouped in \emph{layers}, see \cref{sec:multi_layer_perceptron}) often have different activation functions \cite{burkov2019}, but for the purposes of this report it is more convenient (in terms of notation) to have the activation function be the same for all neurons, so it does not need to be supplied as a parameter to the function describing the particular neural network.
+% Much of the work in this report can easily be generalised to designs with multiple activation functions.
+% This is because the algorithms explained in this report do not concern themselves with the specifics of the activation functions, as long as they are non-linear.
+
+% \paragraph{\glspl{ann} as regression models}
+% We can employ an \gls{ann} to model a regression problem of the form given in \cref{eq:reg_model}. 
+% To do so, we need at least $D+1$ neurons in the network. 
+% We consider the first $D$ units to be the \emph{input} neurons, and the last neuron, $n$, is the output unit.
+% Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n$ and $k \leq D$ to ensure that there are no links feeding into the input neurons.
+
+% To obtain the prediction $\hat{y}$ given the $D$-dimensional feature vector $\vx$, we set the activation of the $i$th unit to the value the $i$th element in $\vx$ for $i=1,\dots,D$.
+% Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last neuron, $\hat{y}=a_n$.
+% This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
+
+
+% \chapter{Neural network training}
+% \label{chap:neural_training}
+% We will now introduce the two neural training techniques outlined in \cref{sec:motivation} (gradient descent and simulated annealing) more formally in the context of how we defined neural networks in the previous chapter.
+% For gradient descent, we will derive the famous backpropagation algorithm, but we will also look at a derivative-free notion of gradient descent which we will call \emph{greedy probing}.
+% Simulated annealing is of course derivative-free in nature.
+% We also define some issues related to these methods more precisely as a means of setting the scene for the neural surfing technique later on.
+
+% \emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e. how far they are `off'. 
+% This is how the network facilitates \emph{learning} the input-output function from \cref{def:supervised_learning}.
+% We will use a simple loss function that uses mean squared error for this purpose.
+% \begin{definition}[Mean squared error]
+%     \label{def:mean_squared_error}
+%     Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^N$ be a labelled dataset (see \cref{def:labelled_dataset}).
+%     The mean squared error of a set of predictions $\vec{\hat{y}}$ is given as an average over the sum of squared differences,
+%     \begin{equation}
+%         \label{eq:mean_squared_error}
+%         E\left( \vec{y}, \vec{\hat{y}} \right) = \frac{1}{N} \sum_{i=1}^N{\left(\hat{y}_i - y_i\right)^2}.
+%     \end{equation}
+% \end{definition}
+
+% \begin{definition}[Loss function]
+%     \label{def:loss_function}
+%     Given an MLP $M$ with $P$ trainable parameters (weights and biases), the loss function $L:\mathbb{R}^P\rightarrow \mathbb{R}$ is a function that maps weight (and bias) configurations to their associated error values.
+%     Let $\vec{y} \in \mathbb{R}^N$ be the target outputs for training.
+%     Then the loss function is defined as
+%     \begin{equation}
+%         \label{eq:loss_function}
+%         L(\vec{p}) = \sum_{i=1}^N{\left(M\left(\vx_i; \vec{p}\right) - y_i\right)^2}.
+%     \end{equation}
+%     Notice the similarity to \cref{eq:mean_squared_error}; we have only omitted the factor $\frac{1}{N}$ since the actual loss values are not as important as their relationship to each other, and multiplying by $N$ will retain that relationship.
+%     We use the term \emph{error-weight surface} to refer to the graph of this function.
+% \end{definition}
+
+% \section{Backpropagation with gradient descent}
+% \label{sec:backpropagation}
+% Backpropagation (BP) with gradient descent is an iterative algorithm for training neural networks that, provided a suitable learning rate $\alpha$, is guaranteed to converge to a \emph{local minimum}.
+% The main idea is as follows:
+% \begin{enumerate}
+%     \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vec{p}$ as
+%         $\vec{\Delta p} = \frac{\delta L}{\delta \vec{p}}\left(\vec{p}\right)$.
+%     \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vec{p} \leftarrow \vec{p} - \alpha \vec{\Delta p}$ where $\alpha \in \mathbb{R}$ is the learning rate.
+%     \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
+% \end{enumerate}
+% \cref{fig:gradient_descent_local_minimum} shows the steps that this algorithm would make on a simple error-weight surface with only one parameter.
+% \begin{figure}
+%     \centering
+%     \begin{tikzpicture}[
+%         declare function={
+%             f(\x) = \x^4 + 0.5*\x^3 - 2*\x^2;
+%             g(\x) = f(.5*\x-2)+2;
+%         }
+%     ]
+%         \begin{axis}[
+%             x=1.5cm,
+%             y=1.5cm,
+%             axis lines=center,
+%             xlabel={$p$}, xlabel style={anchor=west},
+%             ylabel={$L(p)$}, ylabel style={anchor=south},
+%             ymin=-0, ymax=4.2,
+%             xmin=0, xmax=7.2,
+%             samples=100,
+%             domain=0.1:7.5,
+%             ticks=none
+%         ]
+%             \addplot[black] {g(x)};
+%             \addplot[-{Latex[length=2mm]},black,samples at={6.85,6.5},mark=*] {g(x)};
+%             \addplot[-{Latex[length=2mm]},black,samples at={6.5,6.2},mark=*] {g(x)};
+%             \addplot[-{Latex[length=2mm]},black,samples at={6.2,5.9},mark=*] {g(x)};
+%             \addplot[-{Latex[length=2mm]},black,samples at={5.9,5.7},mark=*] {g(x)};
+%             \node[left] at (6.85,{g(6.85)}) {initial position};
+%             \node[below,align=center] at (5.7,{g(5.7)}) {final position\\(local minimum)};
+%             \addplot[mark=*] coordinates {(1.6,{g(1.6)})};
+%             \node[below,align=center] at (1.6,{g(1.6)}) {global minimum};
+%         \end{axis}
+%     \end{tikzpicture}
+%     \caption{An illustration gradient descent training on an error-weight surface with only one parameter (not drawn to scale).}
+%     \label{fig:gradient_descent_local_minimum}
+% \end{figure}
+
+% Calculating the derivative of the loss function with respect to each of the trainable parameters is a core part of the gradient descent algorithm.
+% Let us look at calculating this gradient for the example of a single-layer MLP. 
+% We will come back to these results in \cref{sec:stripe_problem}.
+% \begin{example}[Gradient in a single-layer MLP]
+%     \label{ex:gradient_single_layer_mlp}
+%     Let us revisit the SLN with $m$ inputs and one output from \cref{fig:sln_m_in_1_out}.
+%     The loss function will be in terms of the trainable parameters, i.e. the weights $\vec{w}$ and bias $b$, so
+%     \begin{align}
+%         L = L(\vec{w}, b)
+%         &= \sum_{i=1}^N{\left(S\left(\vx_i; \vec{w}, b\right) - y_i\right)^2} \nonumber \\
+%         &= \sum_{i=1}^N{\left(g\left(\vec{w}\tran \vx_i + b\right) - y_i\right)^2}.
+%     \end{align}
+
+%     We obtain the partial derivative of the loss with respect to the bias as
+%     \begin{align}
+%         \frac{\delta L}{\delta b}
+%         &=2 \sum_{i=1}^N{
+%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%             \frac{\delta}{\delta b} \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%         } \nonumber \\
+%         &= 2 \sum_{i=1}^N{
+%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%             g' \left(\vec{w}\tran\vx_i+b\right)
+%         },
+%     \end{align}
+%     and similarly we can differentiate with respect to the weights
+%     \begin{align}
+%         \frac{\delta L}{\delta \vec{w}}
+%         &= 2 \sum_{i=1}^N{
+%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%             \frac{\delta}{\delta \vec{w}} \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%         } \nonumber \\
+%         &= 2 \sum_{i=1}^N{
+%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
+%             g' \left(\vec{w}\tran\vx_i+b\right)
+%             \vx_i
+%         }.
+%     \end{align}
+
+%     Now we would denote the gradient of the loss with respect to the trainable parameters $\vec{p}$ as the row vector
+%     \begin{equation*}
+%         \frac{\delta L}{\delta \vec{p}} = \begin{bmatrix}
+%             \frac{\delta L}{\delta w_1} &
+%             \frac{\delta L}{\delta w_2} &
+%             \cdots &
+%             \frac{\delta L}{\delta w_m} &
+%             \frac{\delta L}{\delta b}
+%         \end{bmatrix}.
+%     \end{equation*}
+% \end{example}
+
+
+\section{Transfer learning}
+
+\end{document}

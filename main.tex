@@ -10,6 +10,7 @@
 \usepackage{amsfonts}
 \usepackage{bm}
 \usepackage{booktabs}
+\usepackage{mathtools}
 \usepackage{makecell}
 \usepackage{array}
 \usepackage{pifont}
@@ -48,8 +49,9 @@
 \DeclareRobustCommand{\(}{\begin{equation*}}
 \DeclareRobustCommand{\)}{\end{equation*}}
 
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \def\normal{\mathcal{N}}
-\renewcommand\vec{\mathbf}
+\renewcommand\vec{\bm}
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -91,6 +93,7 @@
 
 \mainmatter
 \subfile{chapters/introduction}
+\subfile{chapters/background}
 \subfile{chapters/design}
 \subfile{chapters/implementation}
 

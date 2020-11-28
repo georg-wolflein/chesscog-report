@@ -1,0 +1,184 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{The dataset}
+Studies in human cognition by \textcite{bilalic2010} and \textcite{zhou2018} compared skilled chess players with novices in terms of their ability to remember a chess position for a short amount time confirmed that highly skilled players outperform novices at this task.
+Perhaps more interestingly, both studies found that skilled players remembered \emph{random} positions (where pieces are positioned on random squares, not necessarily obeying the rules of chess) significantly less accurately than they did positions from actual chess games. 
+Thus it stands to reason that in general, highly skilled chess players exhibit a more developed pattern recognition ability for chess positions than novices, but this ability is specific to positions that conform to the rules of chess and are likely to occur in actual games.
+
+This project aims to develop a similar pattern recognition ability using machine learning, and therefore our dataset will consist of positions from real chess games. 
+In doing so, we automatically ensure that the chess positions are legal according to chess rules such that a probabilistic reasoning system could later yield sensible results in a post-processing step (see Objective 2.2).
+
+\section{Chess positions}
+The positions are generated from a publicly available dataset of 2,851 games played by current World Chess Champion Magnus Carlsen \cite{64squares2020}.
+Each move in each game is included in our dataset with a probability of 2\%, and duplicate positions are discarded.
+A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
+
+\section{Three-dimensional renders}
+In order to obtain realistic images of these chess positions, we employ a three-dimensional model of a chess set on a wooden table. 
+Chess pieces are placed on the board squares according the given \gls{fen} description. 
+Different camera angles and lighting setups are chosen in a random process in order to maximise diversity in the dataset.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            axis lines=middle,
+            xlabel=$x$,
+            ylabel=$y$,
+            x=.75cm, y=.75cm,
+            xmin=-4, xmax=4,
+            ymin=-4, ymax=4,
+            enlargelimits,
+            clip=false
+        ]
+            \foreach \y in {-4,-2,...,2}{
+                \foreach \x in {-4,-2,...,2}{
+                    \edef\temp{\noexpand\fill[pattern=crosshatch, pattern color=black] (\x,\y) rectangle (1+\x,1+\y) rectangle (2+\x,2+\y);}
+                    \temp
+                };
+            };
+            \draw (-4, -4) rectangle (4, 4);
+            \draw[->] (6, -1) -- (6, 1) node[above,align=center] {direction of play \\ (white)};
+        \end{axis}
+    \end{tikzpicture}
+    \caption[The chessboard coordinate system.]{Overhead view of the coordinate system on the chessboard. The $z$-axis (not shown) points upward, normal to the chessboard surface, and the board is oriented like a chess game would be set up, i.e. the bottom right square is white. White's direction of play (the direction in which pawns are advanced) coincides with the $y$-axis.}
+    \label{fig:cartesian_chessboard}
+\end{figure}
+Let us consider a three-dimensional Cartesian coordinate system whose origin lies at the centre point of the chessboard's surface, as depicted in \cref{fig:cartesian_chessboard}. 
+The chessboard lies on the plane formed by the $x$ and $y$ axes, and the chess squares are of unit length. 
+
+\paragraph{Pieces}
+The pieces are positioned on the squares as dictated by the particular \gls{fen} description.
+However, instead of positioning them at the centre in their respective squares, they are randomly rotated and positioned with a random offset to emulate the conditions in real chess games.
+More specifically, the $x$ and $y$ position of a piece in file $i$ and rank $j$ is sampled from a bivariate normal distribution given by
+\(
+    \rvp_{i,j} \sim \normal \left(
+        \begin{bmatrix}
+            i \\ j
+        \end{bmatrix} - \frac{7}{2},
+        \frac{\mI_2}{10}
+    \right).
+\)
+Here, we assume that $i$ and $j$ are zero-indexed, i.e. the square \emph{a1} corresponds to $i=j=0$.
+The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, we must add one half.
+Due to the fact that the $x$ and $y$ axes are perpendicular, the two components of $\rvp$ will be independent and thus can be modelled with a covariance matrix that is a multiple of the identity matrix $\mI_2$.
+Experiments showed that a variance of $\frac{1}{10}$ achieved realistic results.
+Finally, the piece's rotation about its $z$-axis is sampled from a uniform distribution over the half-open interval $[0, 2\pi)$.
+
+\paragraph{Camera}
+The camera is aligned such that it points directly at the origin (i.e. the centre of the board).
+It is positioned with only a small offset from the $yz$-plane to ensure that the view over the chessboard is similar to the current player's perspective. 
+A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player will not usually be positioned exactly in the middle in front of the board.
+An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
+\footnote{On the other hand, if it is black to play, the perspective must be from the other side of the board, so $\theta$ is chosen in the range $\left[\frac{2\pi}{3},\frac{3\pi}{4}\right]$ which is equivalent to reflecting the camera position about the $xz$-plane.}.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            % axis lines=middle,
+            xlabel=$y$,
+            ylabel=$z$,
+            x=.5cm, y=.5cm,
+            xmin=-7, xmax=7,
+            ymin=0, ymax=8,
+            enlargelimits
+        ]
+            \coordinate (cam) at (7, 7);
+            \coordinate (center) at (0, 0);
+            \coordinate (end) at (4, 0);
+            \draw[|-|] (-4, 0) -- (4, 0) node[near start,fill=white] {board};
+            \draw[->,dashed] (cam) -- (0, 0);
+            \draw (cam) -- (6, 6.7) -- (6.7, 6) -- (cam) node[above] {camera};
+            \pic[draw, ->, "$\theta$", angle radius=1cm] {angle = end--center--cam};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Side view of the camera setup for the scenario where it is white to move. }
+    \label{fig:camera_angle}
+\end{figure}
+This range is chosen because human players would typically choose a camera angle between 45 and 60 degrees to ensure maximum visibility of the pieces.
+The two remaining components ($y$ and $z$) of the camera's location is then obtained using a simple trigonometric calculation such that the distance from the camera to the origin is $11$ units, a length that allows the camera to capture the entire board.
+
+\paragraph{Lighting}
+For each chess position, a random choice is made between two different lighting scenarios, each having equal probability of being employed.
+\begin{enumerate}
+    \item The first lighting mode tries to emulate a \emph{camera flash}.
+        To do so, a spotlight is set up with the same location and orientation as the camera. 
+        As a result, the scene is light up quite well with no large shadows, as it can be seen in \cref{fig:lighting_flash_example}.
+        \begin{figure}
+            \centering
+            \begin{subfigure}[b]{0.47\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{lighting_flash}
+                \caption{camera flash}
+                \label{fig:lighting_flash_example}
+            \end{subfigure}
+            \hfill
+            \begin{subfigure}[b]{0.47\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{lighting_spotlights}
+                \caption{spotlights}
+                \label{fig:lighting_spotlights_example}
+            \end{subfigure}
+            \caption{Two samples from the synthesised dataset showing both types of lighting.}
+            \label{fig:lighting_examples}
+        \end{figure}
+    \item In the other lighting mode, two spotlights are set up in the scene. 
+        Their $x$ and $y$ coordinates are constrained such that they lie on a circle centred at the origin of the coordinate system with radius 10 on the $xy$-plane, as depicted in \cref{fig:chessboard_lighting_circle}, but each spotlight's location along the circumference is sampled uniformly.
+        \begin{figure}
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[
+                    axis lines=middle,
+                    xlabel=$x$,
+                    ylabel=$y$,
+                    x=.4cm, y=.4cm,
+                    xmin=-10, xmax=10,
+                    ymin=-10, ymax=10,
+                    enlargelimits,
+                    clip=false
+                ]
+                    \foreach \y in {-4,-2,...,2}{
+                        \foreach \x in {-4,-2,...,2}{
+                            \edef\temp{\noexpand\fill[pattern=crosshatch, pattern color=black] (\x,\y) rectangle (1+\x,1+\y) rectangle (2+\x,2+\y);}
+                            \temp
+                        };
+                    };
+                    \draw (-4, -4) rectangle (4, 4);
+
+                    
+                    \coordinate (o) at (0, 0);
+                    \coordinate (s1) at (45:10);
+                    \coordinate (s2) at (135:10);
+                    \draw[dashed] (o) circle (10);
+                    \draw[dashed,->] (s1) -- (o);
+                    \draw[dashed,->] (s2) -- (o);
+
+                    \draw (s1) -- (5.3, 6.3) -- (6.3, 5.3) -- cycle node[right] {spotlight 1};
+                    \draw (s2) -- (-5.3, 6.3) -- (-6.3, 5.3) -- cycle node[left] {spotlight 2};
+                \end{axis}
+            \end{tikzpicture}
+            \caption[Overhead view of the chessboard with two spotlights.]{Overhead view of the chessboard with two spotlights. The spotlights are constrained to the dashed circle such that their distance to the origin amounts to 10 units when disregarding the $z$-component.}
+            \label{fig:chessboard_lighting_circle}
+        \end{figure}
+        Furthermore, each spotlight's $z$-component is sampled uniformly in the range $[5, 10)$.
+        Finally, the for each spotlight, a focus point on the chessboard surface (i.e. the $xy$ plane) is sampled from
+        \(
+            \normal\left(
+                \begin{bmatrix}
+                    0 \\ 0
+                \end{bmatrix},
+                \frac{5}{2} \mI_2
+            \right)
+        \)
+        and the corresponding spotlight is rotated such that it points in that direction.
+        Consequently, there is greater variabililty in the lighting because the spotlights could be pointing at different areas of the board, thus producing different types of shadows.
+        \Cref{fig:lighting_spotlights_example} shows an example rendering where the lighting produced by the spotlights is poorer than the camera flash mode.
+\end{enumerate}
+
+\section{Automated labelling}
+\todo{use the chesscog.data\_synthesis.visualisation script}
+\todo{todo: explain how dataset was split into train/val/test}
+
+\end{document}

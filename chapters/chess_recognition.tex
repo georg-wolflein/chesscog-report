@@ -1,0 +1,481 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{Recognising chess positions}
+\section{Overview}
+
+\section{Board localisation}
+\label{sec:board_localisation}
+
+
+\todo{TODO: corner point detection}
+\section{Occupancy classification}
+\label{sec:occupancy_classification}
+
+Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_annotated}
+        \caption{region from the original image with marked square}
+        \label{fig:occupancy_classification_fp_original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=.7\textwidth]{3828_cut}
+        \caption{cropped sample}
+        \label{fig:occupancy_classification_fp_cropped}
+    \end{subfigure}
+    \caption[An example illustraing why an immediate piece classification approach is inclined to reporting false positives.]{An example illustraing why an immediate piece classification approach is inclined to reporting false positives. Consider the square marked in green in the original image \subref{fig:occupancy_classification_fp_original}. The bounding box for piece classification (marked in red) must be quite tall because the square might contain a tall piece such as a queen or king (the box must be at least as tall as the the queen in the adjacent square on the left). The resulting sample, depicted in \subref{fig:occupancy_classification_fp_cropped}, contains almost the entire rook of the square behind. Thus, a piece classifier might classify this square as containing a rook instead of being empty.}
+    \label{fig:occupancy_classification_fp}
+\end{figure}
+One common scenario where the trained classifier failed is illustrated in \cref{fig:occupancy_classification_fp}.
+Notice that squares further away from the camera must be cropped with increasingly taller bounding boxes.
+If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was inclined to report a false positive.
+
+To solve this problem, a binary classifier is trained on cropped squares to decide whether they are empty or not.
+Before cutting out the squares from the original image, the input image is warped to a two-dimensional overhead view by means of a projective transformation.
+This ensures that all squares are of equal size and that the corners form right angles (which is not the case in the original image due to perspective distortion).
+To this end, we compute the \emph{homography matrix} $\mH \in \R^{3 \times 3}$ \cite{szeliski2011} mapping any point
+$\vp$
+from the original image to
+the corresponding point
+$\vp'$
+in the warped image.
+To simplify notation, we shall consider 2D homogenous coordinate vectors, i.e. three-component vectors with the last component being $1$, so the vector
+$\begin{bmatrix}
+    x & y & 1
+\end{bmatrix}^\top$
+would represent the point $(x,y)$ in the Cartesian coordinate system.
+Using this notation, $\mH$ maps $\vp$ to $\vp'$ using the relation
+\begin{equation}
+    \label{eq:homography_matrix_relation}
+    \mH
+    \vp
+    = s \vp'
+\end{equation}
+up to a scalar scale factor $s$.
+
+Let the $4 \times 3$ matrix $\mP$ contain the pixel coordinates of the four chessboard corners starting in the top left in clockwise order and $\mP'$ be a matrix of the same size containing the corner coordinates of a square with side length $l$ pixels given by
+\begin{equation*}
+    \mP' = \begin{bmatrix}
+        0 & l & l & 0 \\
+        0 & 0 & l & l \\
+        1 & 1 & 1 & 1
+    \end{bmatrix}.
+\end{equation*}
+Notice that $\mP'$ describes a square whose top left corner is at the origin, and the coordinates are given in the same order as in $\mP$.
+Since the homography matrix should map points from the original image to the output image, we obtain from \cref{eq:homography_matrix_relation} the relation 
+\begin{equation}
+    \label{eq:homography_matrix_relation_corners}
+    \mH \mP = \mP' (\mI_4 \vs)
+\end{equation}
+where the vector $\vs \in \R^4$ represents the scale factor for each point.
+\Cref{eq:homography_matrix_relation_corners} describes an overdetermined set of linear equations, so it is likely that there is no exact solution for $\mH$. 
+However, we approximate $\mH$ by finding the solution with the least squared error.
+Finally, we can use $\mH$ to apply the projective transformation to the original image such as depicted in \cref{fig:occupancy_classification_samples_original}, obtaining the warped image in \cref{fig:occupancy_classification_samples_warped}.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828}
+        \caption{original}
+        \label{fig:occupancy_classification_samples_original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_unwarped}
+        \caption{warped}
+        \label{fig:occupancy_classification_samples_warped}
+    \end{subfigure}
+    
+    \bigskip
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_empty}
+        \caption{all 32 empty samples}
+        \label{fig:occupancy_classification_samples_empty}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_occupied}
+        \caption{all 24 occupied samples}
+        \label{fig:occupancy_classification_samples_occupied}
+    \end{subfigure}
+    \caption[The process of obtaining samples for occupancy classification from a chessboard image.]{The process of obtaining samples for occupancy classification from a chessboard image. First, the original image \subref{fig:occupancy_classification_samples_original} is warped to a two-dimensional overhead view, \subref{fig:occupancy_classification_samples_warped}. Then, all squares are cropped (with a 50\% increase in width and height to include contextual information). Finally, the cropped squares are annoted using the \gls{fen} groundtruth as either empty \subref{fig:occupancy_classification_samples_empty} or occupied \subref{fig:occupancy_classification_samples_occupied}.}
+    \label{fig:occupancy_classification_samples}
+\end{figure}
+
+Cropping the squares from the warped image is trivial because the squares are of equal size.
+In training the occupancy classifiers, it is conjectured that it would be useful to include contextual information with each square; therefore, the squares are not cropped tightly around their boundaries but instead with a 50\% increase in length on all four sides, as shown in \cref{fig:occupancy_classification_samples_empty,fig:occupancy_classification_samples_occupied}.
+This might aid the classifier's decision in difficult situations where a chess piece from another square reaches into the cropped one due to the camera perspective.
+
+\subsection{Training \glspl{cnn}}
+Six \gls{cnn} architectures are devised for the occupancy classification task, of which two accept $100\times 100$ pixel input images and the remaining four require the images to be of size $50\times 50$ pixels.
+They differ in the number of convolution layers, pooling layers, and fully connected layers.
+When referring to these models, we shall use a 4-tuple consisting of the input side length and the three aforementioned criteria.
+\Cref{fig:occupancy_convnet} depicts the architecture of the \gls{cnn} $(100, 3, 3, 3)$ model which achieves the greatest validation accuracy of these six models.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{occupancy_convnet}
+    \caption[Architecture of the CNN $(100,3,3,3)$ network for occupancy classification.]{
+        Architecture of the \gls{cnn} $(100,3,3,3)$ network for occupancy classification.
+        The input is a three-channel \gls{rgb} image with $100\times 100$ pixels.
+        There are two convolutional layers (yellow) with a kernal size of $5 \times 5$ and stride $1$, meaning that each convolutional layer reduces the width and height by $4$.
+        The final convolutional layer has a kernel size of $3 \times 3$, thus only reducing the input size by two.
+        Starting with 16 filters in the first convolutional layer, the number of channels is doubled in each subsequent layer, as is common practice in \glspl{cnn} \cite{simonyan2015}.
+        Each convolutional layer uses the \gls{relu} activation function and is followed by a max pooling layer with a $2\times 2$ kernel that is moved with a stride of $2$ such that the width and height are halved.
+        Finally, the output of the last pooling layer is reshaped to a 640,000-dimensional vector that passes through two fully connected \gls{relu}-activated layers before reaching the final fully connected layer with softmax activation.
+    }
+    \label{fig:occupancy_convnet}
+\end{figure}
+The final fully connected layer in each model contains two output units that represent the two classes (occupied and empty).
+The models are trained using the cross-entropy loss function on the outputs.
+Training proceeds using the popular \emph{Adam} optimizer \cite{kingma2017} with a learning rate of $0.001$ for three whole passes over the training set using a batch size of 128.
+After every 100 steps, the model's loss and accuracy is computed over the entire validation set, the results of which are reported in \cref{fig:occupancy_cnn_loss_accuracy}.
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_CNN100_3Conv_3Pool_3FC_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the CNN $(100,3,3,3)$ model.]{Loss and accuracy during training on both the training and validation sets for the \gls{cnn} $(100,3,3,3)$ model. The best validation accuracy is 99.71\%.}
+    \label{fig:occupancy_cnn_loss_accuracy}
+\end{figure}
+The model converges smoothly to a very low loss value, achieving a training accuracy of 99.70\% and validation accuracy of 99.71\%.
+Due to the fact that the difference between training and validation accuracy is very small (in fact, the validation accuracy even happens to be slightly above the training accuracy), we conclude that the model does not overfit the training set.
+
+\subsection{Transfer learning on deeper models}
+VGG \cite{simonyan2015}
+ResNet \cite{he2016}
+AlexNet \cite{krizhevsky2017}
+ImageNet \cite{deng2009}
+
+
+\todo{todo: explain how this was done and explain tradeoff (significantly more parameters in model)}
+
+\subsection{Analysis}
+Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and the same samples except that the squares are cropped tightly.
+In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis that the information around the square itself is useful.
+
+
+\begin{table}
+    \centering
+    \makebox[\textwidth][c]{
+        \pgfplotstabletypeset[
+            col sep=tab,
+            columns={context,model,parameters,val_accuracy,val_precision/occupied,val_recall/occupied,val_misclassified,train_accuracy},
+            every head row/.style={%
+                before row=\toprule,
+                after row=\midrule%
+            },
+            every last row/.style={
+                after row=\bottomrule
+            },
+            columns/model/.style={
+                string type
+            },
+            columns/context/.style={
+                string type,
+                column name={}
+            },
+            columns/val_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={accuracy}
+            },
+            columns/train_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={\makecell{training \\ accuracy}}
+            },
+            columns/val_precision/occupied/.style={
+                dec sep align,
+                precision=3,
+                fixed,
+                fixed zerofill,
+                column name={precision}
+            },
+            columns/val_recall/occupied/.style={
+                dec sep align,
+                precision=3,
+                fixed,
+                fixed zerofill,
+                column name={recall}
+            },
+            columns/val_misclassified/.style={
+                column name={\makecell{errors}}
+            },
+        ]{data/occupancy_classifier.dat}
+    }
+    \caption[Performance of all occupancy classification models on the validation set.]{
+        Performance of all occupancy classification models on the validation set.
+        For the \gls{cnn} models, the 4-tuple denotes the length of the square input size in pixels, the number of convolution layers, the number of pooling layers, and the number of fully connected layers.
+        The check mark in the left column indicates whether the input samples contained contextual information (cropped to include part of the adjacent squares).
+        In the penultimate column, the total number of misclassifications in the validation set are reported (the validation set consists of 9,346 samples).
+        The training accuracy is given in the rightmost column for comparison.
+        Notice that there is no significant difference between the validation and training accuracies, indicating that none of the models suffer from overfitting.
+    }
+\end{table}
+
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-occupancy_classifier_ResNet_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the ResNet model.]{Loss and accuracy during training on both the training and validation sets for the ResNet model. The best validation accuracy is 99.96\%.}
+    \label{fig:occupancy_resnet_loss_accuracy}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{ResNet_val_mistakes.png}
+    \caption[The four samples that the ResNet model misclassified in the validation set.]{The four samples that the ResNet model misclassified in the validation set. The left sample depicts an empty square, and the remaining three are of occupied squares.}
+    \label{fig:occupancy_resnet_mistakes}
+\end{figure}
+
+\section{Piece classification}
+Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece in each of the occupied squares.
+We require a 12-way classifier that takes as input a cropped image of an occupied square and will output the chess piece on that square. 
+There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are 12 classes of pieces.
+
+We must pay some special attention to how the pieces are cropped. 
+Simply following the approach described in \cref{sec:occupancy_classification} for cropping squares does not give enough information to classify pieces.
+Especially tall pieces at the back of the board would be cropped in a manner such that only the bottom part of the piece remains in the \gls{roi}. 
+Consider for example the white king in \cref{fig:occupancy_classification_samples}.
+Cropping only the square it is located in would not include its crown which is an important feature needed to distinguish between kings and queens.
+Instead, we must choose a rectangular bounding box that is tall enough to account for the perspective distortion.
+
+The camera perspective causes another phenomenon that we must account for: pieces on the left of the board tend to `slant' to the left, and vice-versa on the right.
+This is due to the vanishing point of the normal vectors on the chessboard surface being roughly centred horizontally with regards to the location of the chessboard itself%
+\footnote{%
+    Unfortunately, it is not possible to compute the vanishing point of the normals based solely on the information available in the input images as this would require knowledge of the intrinsic and extrinsic camera parameters \cite{hartley2004}.
+    The aim of this work is to recognise chess positions from just the input image without any further information; therefore, we devise a heuristic based on the observation that the vanishing point tends to be vertically below the chessboard and roughly horizontally centred.
+}, as illustrated in \cref{fig:occupancy_classification_normals}.
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\textwidth]{3828_normals.png}
+    \caption[The normals of the chessboard surface converge to a single vanishing point which is below the image.]{The normals of the chessboard surface (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
+    \label{fig:occupancy_classification_normals}
+\end{figure}
+Hence, we must extend the \gls{roi} vertically in the appropriate direction.
+
+To obtain the \glspl{roi}, we first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
+At first, each pieces bounding box will correspond to the square it is located on, i.e. its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
+Depending on the rank $r$, the height is increased by
+\begin{equation*}
+    h_\text{inc}(r) = \frac{2r + 5}{7}
+\end{equation*}
+where the unit of measurement is the height of the chessboard squares.
+This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e. $r=1$) will be increased by one square, and pieces in the top row ($r=8$) will have their height increased by three units.
+
+The increase in width is dependent on the file $f$ and given by the piecewise-defined arithmetic progression
+\begin{equation*}
+    w_\text{inc}(f) = \begin{cases}
+        -\frac{f}{4} & f \leq 4 \\
+        \frac{f-4}{4} & f > 4.
+    \end{cases}
+\end{equation*}
+A negative increase in width means that the bounding box is extended to the left, whereas a positive increase means it is widened to the right.
+Thus, pieces on the left half of the board ($1 \leq f \leq 4$) will have their bounding boxes extended to the left, and vice-versa on the right (for $4 < f \leq 8$).
+
+Experiments demonstrate that this heuristic generates bounding boxes that are large enough to contain even the tallest pieces in most cases, whilst not being needlessly large.
+As a further preprocessing step, the cropped \glspl{roi} for all pieces on the left side of the board ($1 \leq f \leq 4$) are flipped vertically, such that the square that the piece stands on will always be in the bottom left of the image.
+This may help the classifier understand what piece is being referred to in samples where the larger bounding box includes adjacent pieces in the image.
+\Cref{fig:white_queens} shows a random selection of the \glspl{roi} corresponding to white queens in order to demonstrate that the bounding boxes are large enough to contain even tall pieces.
+\begin{figure}
+    \centering
+    \includegraphics[width=.15\textwidth]{white_queen_1.png}
+    \includegraphics[width=.15\textwidth]{white_queen_2.png}
+    \includegraphics[width=.15\textwidth]{white_queen_3.png}
+    \includegraphics[width=.15\textwidth]{white_queen_4.png}
+    \includegraphics[width=.15\textwidth]{white_queen_5.png}
+    \includegraphics[width=.15\textwidth]{white_queen_6.png}
+    \caption[A random selection of six samples of white queens in the training set.]{A random selection of six samples of white queens in the training set. Notice that the square each queen is located on is always in the bottom left of the image and of uniform dimensions across all samples.}
+    \label{fig:white_queens}
+\end{figure}
+
+\subsection{Training \glspl{cnn}}
+Similar to \cref{sec:occupancy_classification}, we train several models on 
+\todo{talk about change in number of epochs etc}
+
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the InceptionV3 model.]{Loss and accuracy during training on both the training and validation sets for the InceptionV3 model. The best validation accuracy is 100.00\%.}
+    \label{fig:pieces_inception_loss_accuracy}
+\end{figure}
+
+\begin{table}
+    \centering
+    \makebox[\textwidth][c]{
+        \pgfplotstabletypeset[
+            col sep=tab,
+            columns={model,parameters,val_accuracy,val_misclassified,train_accuracy},
+            every head row/.style={%
+                before row=\toprule,
+                after row=\midrule%
+            },
+            every last row/.style={
+                after row=\bottomrule
+            },
+            columns/model/.style={
+                string type
+            },
+            columns/val_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={accuracy}
+            },
+            columns/train_accuracy/.style={
+                dec sep align,
+                postproc cell content/.append code={
+                    \ifnum1=\pgfplotstablepartno
+                        \pgfkeysalso{@cell content/.add={}{\%}}%
+                    \fi
+                },
+                fixed,
+                fixed zerofill,
+                column name={\makecell{training \\ accuracy}}
+            },
+            columns/val_misclassified/.style={
+                column name={\makecell{errors}}
+            },
+        ]{data/piece_classifier.dat}
+    }
+    \caption[Performance of all piece classifiers on the validation set.]{
+        Performance of all piece classifiers on the validation set.
+    }
+\end{table}
+
+\section{Identifying plausible game states}
+
+\end{document}

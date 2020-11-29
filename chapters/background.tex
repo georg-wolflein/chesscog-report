@@ -91,6 +91,7 @@ Each link connecting two units $i$ and $j$ is directed and associated with a rea
 
 A particular unit $i$'s \emph{excitation}, denoted $z_i$, is calculated as the weighted sum
 \begin{equation}
+    \label{eq:ann_excitation}
     z_i = \sum_{j=1}^n{w_{j,i} a_j} + b_i
 \end{equation}
 where $a_j \in \mathbb{R}$ is another unit $j$'s \emph{activation} and $b_i \in \mathbb{R}$ is the $i$\textsuperscript{th} unit's \emph{bias}.
@@ -151,6 +152,7 @@ which are depicted in \cref{fig:activation_functions}.
             \end{axis}
         \end{tikzpicture}
         \caption{Sigmoid}
+        \label{fig:activation_functions_sigmoid}
     \end{subfigure}
     \hspace*{\fill}
     \begin{subfigure}{.45\textwidth}
@@ -175,7 +177,8 @@ which are depicted in \cref{fig:activation_functions}.
                 \addplot[black][domain=-1:0] {0};
             \end{axis}
         \end{tikzpicture}
-        \caption{Rectified linear unit}
+        \caption{\Glsentrylong{relu}}
+        \label{fig:activation_functions_relu}
     \end{subfigure}
     \caption{Plots of the the two most common activation functions.}
     \label{fig:activation_functions}
@@ -183,20 +186,78 @@ which are depicted in \cref{fig:activation_functions}.
 Unlike $g_\text{step}$, these activation functions are differentiable which is an advantage for being able to use gradient descent to optimise the weights \cite[729]{russell2010}.
 
 Rectified units do not suffer from the \emph{vanishing gradient effect} \cite{glorot2011}.
-This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal, and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
-As a result, the \gls{relu} activation function (or variants thereof) is the most popular choice nowadays.
+This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal (see \cref{fig:activation_functions_sigmoid}), and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
+As a result, the \gls{relu} activation function (or variants thereof) are the most popular choice nowadays.
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
-\paragraph{\glspl{ann} as regression models}
-We can employ an \gls{ann} to model a regression problem of the form given in \cref{eq:reg_model}. 
-To do so, we need at least $n+1$ neurons in the network. 
-We consider the first $n$ units to be the \emph{input} neurons, and the last neuron is the output unit.
-Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n+1$ and $k \leq n$ to ensure that there are no links feeding into the input neurons.
+\subsection{\Glsentrylongpl{mlp}}
+Thus far, our definition of \glspl{ann} is still very general.
+\Cref{eq:ann_excitation,eq:ann_activation} make no restrictions on how the neurons must be connected.
+% ... more useful to consider layers
+% fully-connected feedforward
 
-To obtain the prediction $\hat{y}$ given the $n$-dimensional feature vector $\vx$, we set the activation of the $i$\textsuperscript{th} unit to the value the $i$\textsuperscript{th} element in $\vx$ for $i=1,\dots,n$.
-Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last neuron, $\hat{y}=a_{n+1}$.
-This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
+% \paragraph{\glspl{ann} as classification models}
+% We can employ an \gls{ann} to model a classification problem of the form given in \cref{eq:cla_model}. 
+% To do so, we need at least $n+c$ neurons in the network.
+% Let us use $N$ to denote the total number of neurons in the network. 
+% We consider the first $n$ units to be the \emph{input} neurons, and the last $c$ neurons to be the output units.
+% Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n+c$ and $k \leq n$ to ensure that there are no links feeding into the input neurons.
 
+% To obtain the prediction $\vyhat$ given the $n$-dimensional feature vector $\vx$, we set the activation of the $i$\textsuperscript{th} unit to the value the $i$\textsuperscript{th} element in $\vx$ for $i=1,\dots,n$.
+% Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last $c$ neurons,
+% \begin{equation*}
+%     \vyhat = \begin{bmatrix}
+%         a_{N-c} &
+%         a_{N-c+1} &
+%         \dots &
+%         a_{N}
+%     \end{bmatrix}.
+% \end{equation*}
+% This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
+
+% \begin{figure}
+%     \centering
+%     \begin{tikzpicture}
+%         [
+%             neuron/.style = {draw, circle, minimum size=25pt, inner sep=0pt, outer sep=0pt},
+%         ]
+%         \node [neuron] (x1) at (0,0) {$a_1$};
+%         \node [neuron] (x2) at (0,-2) {$a_2$};
+%         \node [neuron] (x3) at (0,-4) {$a_3$};
+%         \node [neuron] (n1) at (3,1)  {$a_6$};
+%         \node [neuron] (n2) at (3,-1) {$a_7$};
+%         \node [neuron] (n3) at (3,-3) {$a_8$};
+%         \node [neuron] (n4) at (3,-5) {$a_9$};
+%         \node (b1) at (0, 1) {$b_1=0$};
+%         \node (b2) at (0, -1) {$b_2=0$};
+%         \node (b3) at (0, -3) {$b_3=0$};
+%         \node (b6) at (3, 2) {$b_6$};
+%         \node (b7) at (3, 0) {$b_7$};
+%         \node (b8) at (3, -2) {$b_8$};
+%         \node (b9) at (3, -4) {$b_9$};
+%         \draw[->] (x1) -- (n1);
+%         \draw[->] (x1) -- (n2);
+%         \draw[->] (x1) -- (n3);
+%         \draw[->] (x1) -- (n4);
+%         \draw[->] (x2) -- (n1);
+%         \draw[->] (x2) -- (n2);
+%         \draw[->] (x2) -- (n3);
+%         \draw[->] (x2) -- (n4);
+%         \draw[->] (x3) -- (n1);
+%         \draw[->] (x3) -- (n2);
+%         \draw[->] (x3) -- (n3);
+%         \draw[->] (x3) -- (n4);
+%         \draw[->] (b1) -- (x1);
+%         \draw[->] (b2) -- (x2);
+%         \draw[->] (b3) -- (x3);
+%         \draw[->] (b6) -- (n1);
+%         \draw[->] (b7) -- (n2);
+%         \draw[->] (b8) -- (n3);
+%         \draw[->] (b9) -- (n4);
+%     \end{tikzpicture}
+%     \caption{A single-layer perceptron with three input and four output neurons (not all arrows are shown).}
+%     \label{fig:single_layer_perceptron}
+% \end{figure}
 
 % \chapter{Neural network training}
 % \label{chap:neural_training}
@@ -328,7 +389,7 @@ This process is often called \emph{forward propagation} or \emph{forward pass} \
 %     \end{equation*}
 % \end{example}
 
-
+\section{\Glsentrylongpl{cnn}}
 \section{Transfer learning}
 
 \end{document}

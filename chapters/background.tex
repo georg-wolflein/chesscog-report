@@ -22,7 +22,9 @@ that models the relationship between a $n$-dimensional feature vector $\vx \in \
 Given a particular $\vx$, the model will produce a \emph{prediction} for $y$ which we shall denote $\hat{y}$.
 Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e. the difference between the predicted and observed output.
 
-A labelled dataset for a regression task consists of $m$ tuples of the form $\langle \vx_i, y_i\rangle$ for $i=1,\dots,m$.
+A labelled dataset for a regression task consists of $m$ tuples of the form
+$\langle \vx_i, y_i\rangle$
+for $i=1,\dots,m$.
 For each feature vector $\vx_i$ (a row vector), the corresponding $y_i$ represents the observed output, or \emph{label} \cite{burkov2019}.
 We use the vector
 \begin{equation}
@@ -43,7 +45,7 @@ for representing the corresponding feature vectors.
 \subsection{Classification}
 Classification is a task that finds greater applicability within this project.
 As the name implies, a classification model tries to determine which category each input sample belongs to from a predefined set of classes $\sC$.
-To ease notation, we will let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
+To ease notation, we shall let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
 In practical terms, the elements in $\sC$ could represent any type of mathematical or non-mathematical object, and in that case we only require a one-to-one mapping from those objects to $\sC$.
 Furthermore, in the context of this report, each input sample can only belong to one class, and we will interpret the output of the model to represent the probabilities of the input sample belonging to each of the classes $\sC$.
 Therefore, a classification model is represented by a vector-valued function
@@ -60,8 +62,8 @@ It follows that
     \sum_{i=1}^{\abs{\sC}} \hat{y}_i = 1.
 \end{equation}
 
-The observed output vector $\vy$ uses a \gls{ohe} to represent the sample's class. 
-For a given class $c \in \sC$, the components of $\vy$ would be given by
+The observed output $\vy$ is a row vector that uses a \gls{ohe} to represent the sample's class. 
+This means that for a given class $c \in \sC$, the components of $\vy$ are given by
 \begin{equation*}
     y_i = \begin{cases}
         1 & i=c \\
@@ -69,125 +71,131 @@ For a given class $c \in \sC$, the components of $\vy$ would be given by
     \end{cases},
 \end{equation*}
 which retains the property described in \cref{eq:pmf}.
-Since $\vf$ represents a \gls{pmf}, this means that the probability of class $c$ is 100\%.
-
+Since $\vf$ represents a \gls{pmf}, the one-hot encoded vector essentially states that the probability of class $c$ is 100\% and all other classes have a probability of 0\%.
+Notice that our outputs are now the vectors $\vy_i$ instead of the scalars $y_i$ in the regression task.
+Thus, we will use the matrix
+\begin{equation}
+    \mY = \begin{bmatrix}
+        \vy_1 & \vy_2 & \cdots & \vy_m
+    \end{bmatrix}^\top
+\end{equation}
+to denote the targets. 
+The input matrix $\mX$ can stay as defined in \cref{eq:sup_learn_input_matrix}.
 \todo{Explain how dataset looks like for classification}
 
-% \section{\Glsentrylongpl{ann}}
-% \label{sec:ann}
-% \Glspl{ann} take inspiration from the human brain and can be regarded as a set of interconnected neurons. 
-% More formally, an \gls{ann} is a directed graph of $n$ neurons (referred to as \emph{nodes} or \emph{units}) with weighted edges (\emph{links}).
-% Each link connecting two units $i$ and $j$ is directed and associated with a real-valued weight $w_{i,j}$. 
+\section{\Glsentrylongpl{ann}}
+\label{sec:ann}
+\Glspl{ann} take inspiration from the human brain and can be regarded as a set of interconnected neurons. 
+More formally, an \gls{ann} is a directed graph of $n$ neurons (referred to as \emph{nodes} or \emph{units}) with weighted edges (\emph{links}).
+Each link connecting two units $i$ and $j$ is directed and associated with a real-valued weight $w_{i,j}$. 
 
-% A particular unit $i$'s \emph{excitation}, denoted $z_i$, is calculated as the weighted sum
-% \begin{equation}
-%     z_i = \sum_{j=1}^n{w_{j,i} a_j} + b_i
-% \end{equation}
-% where $a_j \in \mathbb{R}$ is another unit $j$'s \emph{activation} and $b_i \in \mathbb{R}$ is the $i$th unit's \emph{bias}.
-% Notice that in this model, if there exists no link between unit $i$ and a particular $j$ then simply $w_{i,j}=0$ and therefore $j$ will not contribute to $i$'s excitation. 
+A particular unit $i$'s \emph{excitation}, denoted $z_i$, is calculated as the weighted sum
+\begin{equation}
+    z_i = \sum_{j=1}^n{w_{j,i} a_j} + b_i
+\end{equation}
+where $a_j \in \mathbb{R}$ is another unit $j$'s \emph{activation} and $b_i \in \mathbb{R}$ is the $i$\textsuperscript{th} unit's \emph{bias}.
+Notice that in this model, if there exists no link between unit $i$ and a particular $j$ then simply $w_{i,j}=0$ and therefore $j$ will not contribute to $i$'s excitation. 
 
-% The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function}, $g: \mathbb{R} \rightarrow \mathbb{R}$. We have
-% \begin{equation}
-%     \label{eq:ann_activation}
-%     a_i = g\left(z_i\right) = g\left(\sum_{j=1}^n{w_{j,i} a_j} + b_i\right).
-% \end{equation}
+The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function}, $g: \mathbb{R} \rightarrow \mathbb{R}$. We have
+\begin{equation}
+    \label{eq:ann_activation}
+    a_i = g\left(z_i\right) = g\left(\sum_{j=1}^n{w_{j,i} a_j} + b_i\right).
+\end{equation}
 
-% \paragraph{Activation functions}
-% In its original form, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
-% This means that in our model from \cref{eq:ann_activation}, we would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{thres}: \mathbb{R} \rightarrow \{0, 1\}$ which would be defined\footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in our model the bias term $b_i$ acts as the threshold.} as
-% \begin{equation}
-%     \label{eq:thres_activation}
-%     g_\text{thres}(x) = \begin{cases} 
-%         0 & x < 0 \\
-%         1 & x \geq 0
-%     \end{cases}.
-% \end{equation}
+\paragraph{Activation functions}
+In its original form, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
+This means that in our model from \cref{eq:ann_activation}, we would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{step}: \mathbb{R} \rightarrow \{0, 1\}$ like the Heaviside step function%
+\footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in our model the bias term $b_i$ acts as the threshold.}
+\begin{equation*}
+    \label{eq:step_activation}
+    g_\text{step}(x) = \begin{cases} 
+        0 & x < 0 \\
+        1 & x \geq 0
+    \end{cases}.
+\end{equation*}
 
-% Commonly used activation functions in modern neural networks include the sigmoid
-% \begin{equation}
-%     \label{eq:sigmoid}
-%     g_\text{sig}(x) = \frac{1}{1 + e^{-x}}
-% \end{equation}
-% and the rectified linear unit (ReLU)
-% \begin{equation}
-%     g_\text{ReLU} = \begin{cases}
-%         0 & x < 0 \\
-%         x & x \geq 0
-%     \end{cases}
-% \end{equation}
-% which are depicted in \cref{fig:activation_functions}.
-% \begin{figure}
-%     \centering
-%     \begin{subfigure}{.45\textwidth}
-%         \centering
-%         \begin{tikzpicture}
-%             \begin{axis}[
-%                 x=0.75cm,
-%                 y=3cm,
-%                 axis lines=center,
-%                 xlabel={$x$}, xlabel style={anchor=west},
-%                 ylabel={$g_\text{sig}(x)$}, ylabel style={anchor=south},
-%                 ymin=0, ymax=1,
-%                 xmin=-3, xmax=3,
-%                 enlarge x limits,
-%                 enlarge y limits = upper,
-%                 samples=100,
-%                 xtick={-3,...,3},
-%                 ytick={0, 0.5, 1},
-%                 extra x ticks=0
-%             ]
-%                 \addplot[black] {1 / (1 + exp(-x))};
-%             \end{axis}
-%         \end{tikzpicture}
-%         \caption{Sigmoid}
-%     \end{subfigure}
-%     \hspace*{\fill}
-%     \begin{subfigure}{.45\textwidth}
-%         \centering
-%         \begin{tikzpicture}
-%             \begin{axis}[
-%                 x=2.25cm,
-%                 y=3cm,
-%                 axis lines=center,
-%                 xlabel={$x$}, xlabel style={anchor=west},
-%                 ylabel={$g_{\text{ReLU}}(x)$}, ylabel style={anchor=south},
-%                 ymin=0, ymax=1,
-%                 xmin=-1, xmax=1,
-%                 enlarge x limits,
-%                 enlarge y limits = upper,
-%                 samples=100,
-%                 xtick={-1, -0.5, 0, 0.5, 1},
-%                 ytick={0, 0.5, 1},
-%                 extra x ticks=0
-%             ]
-%                 \addplot[black][domain=0:1] {x};
-%                 \addplot[black][domain=-1:0] {0};
-%             \end{axis}
-%         \end{tikzpicture}
-%         \caption{Rectified linear unit}
-%     \end{subfigure}
-%     \caption{Plots of the the two most common activation functions.}
-%     \label{fig:activation_functions}
-% \end{figure}
-% Unlike $g_\text{step}$, these activation functions are differentiable which is an advantage for being able to use gradient descent \cite[729]{russell2010}.
+Commonly used activation functions in modern neural networks include the sigmoid
+\begin{equation*}
+    \label{eq:sigmoid}
+    g_\text{sig}(x) = \frac{1}{1 + e^{-x}}
+\end{equation*}
+and the \gls{relu} \cite{glorot2011}
+\begin{equation}
+    g_\text{ReLU} = \begin{cases}
+        0 & x < 0 \\
+        x & x \geq 0
+    \end{cases}
+\end{equation}
+which are depicted in \cref{fig:activation_functions}.
+\begin{figure}
+    \centering
+    \begin{subfigure}{.45\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                x=0.75cm,
+                y=3cm,
+                axis lines=center,
+                xlabel={$x$}, xlabel style={anchor=west},
+                ylabel={$g_\text{sig}(x)$}, ylabel style={anchor=south},
+                ymin=0, ymax=1,
+                xmin=-3, xmax=3,
+                enlarge x limits,
+                enlarge y limits = upper,
+                samples=100,
+                xtick={-3,...,3},
+                ytick={0, 0.5, 1},
+                extra x ticks=0
+            ]
+                \addplot[black] {1 / (1 + exp(-x))};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Sigmoid}
+    \end{subfigure}
+    \hspace*{\fill}
+    \begin{subfigure}{.45\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                x=2.25cm,
+                y=3cm,
+                axis lines=center,
+                xlabel={$x$}, xlabel style={anchor=west},
+                ylabel={$g_{\text{ReLU}}(x)$}, ylabel style={anchor=south},
+                ymin=0, ymax=1,
+                xmin=-1, xmax=1,
+                enlarge x limits,
+                enlarge y limits = upper,
+                samples=100,
+                xtick={-1, -0.5, 0, 0.5, 1},
+                ytick={0, 0.5, 1},
+                extra x ticks=0
+            ]
+                \addplot[black][domain=0:1] {x};
+                \addplot[black][domain=-1:0] {0};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Rectified linear unit}
+    \end{subfigure}
+    \caption{Plots of the the two most common activation functions.}
+    \label{fig:activation_functions}
+\end{figure}
+Unlike $g_\text{step}$, these activation functions are differentiable which is an advantage for being able to use gradient descent to optimise the weights \cite[729]{russell2010}.
 
-% Rectified units do not suffer from the \emph{vanishing gradient effect} \cite{glorot2011}.
-% This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal.
-% However, the vanishing gradient problem is usually not prevalent in shallow\footnote{Shallow networks refer to \glspl{ann} with few layers.} networks so the sigmoid function still remains popular \cite{neal1992}.
+Rectified units do not suffer from the \emph{vanishing gradient effect} \cite{glorot2011}.
+This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal, and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
+As a result, the \gls{relu} activation function (or variants thereof) is the most popular choice nowadays.
+Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
-% Particularly in deep neural networks, different neurons (grouped in \emph{layers}, see \cref{sec:multi_layer_perceptron}) often have different activation functions \cite{burkov2019}, but for the purposes of this report it is more convenient (in terms of notation) to have the activation function be the same for all neurons, so it does not need to be supplied as a parameter to the function describing the particular neural network.
-% Much of the work in this report can easily be generalised to designs with multiple activation functions.
-% This is because the algorithms explained in this report do not concern themselves with the specifics of the activation functions, as long as they are non-linear.
+\paragraph{\glspl{ann} as regression models}
+We can employ an \gls{ann} to model a regression problem of the form given in \cref{eq:reg_model}. 
+To do so, we need at least $n+1$ neurons in the network. 
+We consider the first $n$ units to be the \emph{input} neurons, and the last neuron is the output unit.
+Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n+1$ and $k \leq n$ to ensure that there are no links feeding into the input neurons.
 
-% \paragraph{\glspl{ann} as regression models}
-% We can employ an \gls{ann} to model a regression problem of the form given in \cref{eq:reg_model}. 
-% To do so, we need at least $D+1$ neurons in the network. 
-% We consider the first $D$ units to be the \emph{input} neurons, and the last neuron, $n$, is the output unit.
-% Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n$ and $k \leq D$ to ensure that there are no links feeding into the input neurons.
-
-% To obtain the prediction $\hat{y}$ given the $D$-dimensional feature vector $\vx$, we set the activation of the $i$th unit to the value the $i$th element in $\vx$ for $i=1,\dots,D$.
-% Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last neuron, $\hat{y}=a_n$.
-% This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
+To obtain the prediction $\hat{y}$ given the $n$-dimensional feature vector $\vx$, we set the activation of the $i$\textsuperscript{th} unit to the value the $i$\textsuperscript{th} element in $\vx$ for $i=1,\dots,n$.
+Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last neuron, $\hat{y}=a_{n+1}$.
+This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
 
 
 % \chapter{Neural network training}

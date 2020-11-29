@@ -3,13 +3,68 @@
 \begin{document}
 
 \chapter{Recognising chess positions}
-\section{Overview}
+
+\begin{wrapfigure}[30]{r}{0pt}
+    \begin{tikzpicture}[
+        node distance = 2.5cm,
+        every text node part/.style={align=center},
+        io/.style = {
+            trapezium,
+            trapezium left angle=70,
+            trapezium right angle=110,
+            minimum width=3cm,
+            minimum height=1cm,
+            text centered,
+            draw=black
+        },
+        process/.style = {
+            rectangle,
+            minimum width=3cm,
+            minimum height=1cm,
+            text centered,
+            draw=black
+        },
+        arrow/.style = {
+            ->,>=stealth
+        }
+    ]
+        \node[io] (input) {input image};
+        \node[process,below=.5cm of input] (localisation) {chessboard localisation\\(\cref{sec:board_localisation})};
+        \node[process,below of=localisation] (occupancy) {occupancy classification\\(\cref{sec:occupancy_classification})};
+        \node[process,below of=occupancy] (piece) {piece classification\\(\cref{sec:piece_classification})};
+        \node[process,below of=piece] (probabilities) {post-processing\\(\cref{sec:preparing_results})};
+        \node[io,below=.5cm of probabilities] (output) {\acs{fen} output};
+
+        \draw[arrow] (input) -- (localisation);
+        \draw[arrow] (localisation) -- node[fill=white, anchor=center] {corner points} (occupancy);
+        \draw[arrow] (occupancy) -- node[fill=white, anchor=center] {occupancy mask} (piece);
+        \draw[arrow] (piece) -- node[fill=white, anchor=center] {piece probabilities} (probabilities);
+        \draw[arrow] (probabilities) -- (output);
+    \end{tikzpicture}
+    \caption{Overview of the chess recognition pipeline.}
+    \label{fig:chess_recognition_pipeline_overview}
+\end{wrapfigure}
+
+The chess recognition system is responsible for taking an \gls{rgb} image of a chessboard with pieces on it and  ultimately produce a \gls{fen} string representing the predicted chess position.
+The pipeline, depicted in \cref{fig:chess_recognition_pipeline_overview}, consists of four main stages which shall be described in detail in the subsequent sections.
+
+The first step is locating the chessboard in the image.
+More specifically, we are interested in finding the pixel coordinates of the four chessboard corners. 
+Using these corner points, we will warp the image such that the chessboard will form a regular square grid, to eliminate perspective distortion in the sizes of the chess squares.
+Next, we train a binary \gls{cnn} classifier to determine the occupancy of each square.
+Each of the occupied squares will then be input to another \gls{cnn} that is responsible for determining the type of piece. 
+Finally, we analyse the output probabilities of the piece classifier to produce a \gls{fen} string representing the position. 
+
 
 \section{Board localisation}
 \label{sec:board_localisation}
+To determine the location of the chessboard's corners, we will rely on its regular geometric nature. 
+Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image will vary due to 3D perspective distortion.
 
+\subsection{Line detection}
+\subsection{Finding the homography}
+\subsection{Inferring missing lines}
 
-\todo{TODO: corner point detection}
 \section{Occupancy classification}
 \label{sec:occupancy_classification}
 
@@ -320,6 +375,7 @@ In each case, the model trained on the samples that contained contexual informat
 \end{figure}
 
 \section{Piece classification}
+\label{sec:piece_classification}
 Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece in each of the occupied squares.
 We require a 12-way classifier that takes as input a cropped image of an occupied square and will output the chess piece on that square. 
 There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are 12 classes of pieces.
@@ -476,6 +532,7 @@ Similar to \cref{sec:occupancy_classification}, we train several models on
     }
 \end{table}
 
-\section{Identifying plausible game states}
+\section{Preparing the results}
+\label{sec:preparing_results}
 
 \end{document}

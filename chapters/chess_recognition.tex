@@ -4,7 +4,8 @@
 
 \chapter{Recognising chess positions}
 
-\begin{wrapfigure}[30]{r}{0pt}
+\begin{wrapfigure}[28]{r}{0pt}
+    \centering
     \begin{tikzpicture}[
         node distance = 2.5cm,
         every text node part/.style={align=center},
@@ -61,9 +62,199 @@ Finally, we analyse the output probabilities of the piece classifier to produce 
 To determine the location of the chessboard's corners, we will rely on its regular geometric nature. 
 Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image will vary due to 3D perspective distortion.
 
-\subsection{Line detection}
+\subsection{Finding intersection points}
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_orig}
+        \caption{original image}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_gray}
+        \caption{grayscale image}
+    \end{subfigure}
+    
+    \bigskip
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_edges}
+        \caption{detected edges}
+        \label{fig:board_localisation_line_detection_edges}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_lines}
+        \caption{detected lines, clustered into horizontal (green) and vertical (blue) lines}
+        \label{fig:board_localisation_line_detection_horizontal_vertical}
+    \end{subfigure}
+    
+    \bigskip
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_lines_clustered}
+        \caption{elimination of similar lines}
+        \label{fig:board_localisation_line_detection_elimination}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{3828_corners_intersection_points}
+        \caption{intersection points (red)}
+        \label{fig:board_localisation_line_detection_intersections}
+    \end{subfigure}
+    \caption{The process of determining the intersection points on the chessboard.}
+    \label{fig:board_localisation_line_detection}
+\end{figure}
+A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, thus there are nine horizontal and nine vertical lines.
+In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
+
+\paragraph{Edge detection}
+To do so, we convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
+Canny edge detection is a multi-stage algorithm that first reduces noise in the image by applying a Gaussian blur, then calculates pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
+
+\paragraph{Line detection}
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            y dir = reverse,
+            axis lines = center,
+            xmin = 0, xmax = 4.5,
+            ymin = 0, ymax = 2.5,
+            xlabel = $x$,
+            ylabel = $y$,
+            xlabel style = {anchor=west},
+            ylabel style = {anchor=north, at={(0,0)}},
+            xtick = {0},
+            ytick = {0},
+            extra x ticks = 0,
+            extra x tick style = {
+                tick label style={
+                    anchor=south east,
+                    at={(-.1,-.1)}
+            }},
+            x=1cm,
+            y=1cm,
+            no markers
+        ]
+            \addplot {.5*-x + 2};
+            \coordinate (O) at (0,0);
+            \coordinate (A) at (.8,1.6);
+            \coordinate (B) at (4,0);
+            \draw[->] (O) -- (A) node[pos=.7,left] {$\rho$};
+            \pic[draw, "$\theta$", <-, angle eccentricity=.6, angle radius=.7cm] {angle = A--O--B};
+            \markRightAngle[size=8pt](B,A,O);
+        \end{axis}
+    \end{tikzpicture}
+    \caption[A line in Hesse normal form.]{A line in Hesse normal form is parameterised by the angle $\theta$ to the $x$-axis and distance $\rho$ from the origin. The line is defined by the equation $\rho = x \cos \theta + y \sin \theta$. Equivalently, in slope-intercept form, we have $y = -x \cot \theta + \frac{\rho}{\sin \theta}$ provided that $\cos \theta \neq 0$, i.e. $\theta$ is not a multiple of $\pi$. Notice that the $y$-axis is pointing down because the origin of the coordinate system is the top left of the image.}
+    \label{fig:hesse_normal_form}
+\end{figure}
+Next, we perform the so-called Hough transform \cite{hough1962,duda1972}, in order to detect lines that are formed by the edges.
+To this end, we will represent lines in Hesse normal form, meaning that that they are parameterised by the angle $\theta$ that the normal vector makes to the $x$-axis, and the distance $\rho$ to the origin.
+\Cref{fig:hesse_normal_form} explains this geometrically and gives rise to the equation of a line in Hesse normal form,
+\begin{equation}
+    \label{eq:hesse_normal_form}
+    \rho = x \cos \theta + y \sin \theta.
+\end{equation}
+In fact, for a particular point $(x,y)$, \cref{eq:hesse_normal_form} represents the family of lines passing through it.
+Here, each pair of $(\rho, \theta)$ values represents one particular line, and we only need to consider pairs where $\rho \geq 0$ and $0 \leq \theta < 2 \pi$ to parameterise all lines.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.4\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                y dir=reverse,
+                xmin=0, 
+                ymin=0, ymax=6,
+                xlabel={$x$},
+                ylabel={$y$},
+                x=1cm,
+                y=1cm
+            ]
+                \addplot+[mark=*] coordinates {(1,5)};
+                \addplot+[mark=*] coordinates {(2,3)};
+                \addplot+[mark=*] coordinates {(3,1)};
+                \addplot[mark=none, dashed] {-2*x+7};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{three points in image space}
+        \label{fig:hough_points_image_space}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.56\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                no markers,
+                xmin=0, xmax=6.28,
+                ymin=0, ymax=6,
+                samples=80,
+                xlabel={$\theta$},
+                ylabel={$\rho$},
+                ylabel near ticks,
+                yticklabel pos=right
+            ]
+                \addplot {1*cos(deg(x))+5*sin(deg(x))};
+                \addplot {2*cos(deg(x))+3*sin(deg(x))};
+                \addplot {3*cos(deg(x))+1*sin(deg(x))};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{lines passing through these three points in $(\rho,\theta)$ space}
+        \label{fig:hough_points_parameter_space}
+    \end{subfigure}
+    \caption[An example of how lines in image space are represented in $(\rho,\theta)$ space.]{An example of how lines in image space are represented in $(\rho,\theta)$ space. The family of lines passing through a particular point in image space \subref{fig:hough_points_image_space} is represented by a sinusoid in $(\rho,\theta)$ space \subref{fig:hough_points_parameter_space}. The intersection point of the three curves represents the line passing through all three points.}
+    \label{fig:hough_points}
+\end{figure}
+Plotting the pairs of $(\rho, \theta)$ values for a particular point in image space will give a sinusoidal curve that represents all lines passing through that point.
+We can take multiple points in image space and plot their sinusoids. 
+Then, each intersection in $(\rho, \theta)$ space will represent a line passing through the corresponding points, as illustrated in \cref{fig:hough_points}.
+
+For a given threshold $t$, the Hough transform essentially plots the sinusoids for all edge points in the input image (which we obtained using the Canny edge detection algorithm) and outputs intersection points in $(\rho,\theta)$ space that are on at least $t$ different sinusoids.
+Consequently, the lines identified by the Hough transform are corroborated by at least $t$ edge points in the image.
+
+\paragraph{Clustering}
+On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
+We will first split them into horizontal and vertical lines and then eliminate similar lines.
+Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
+This is because the camera is often tilted quite severely in the dataset (and might be the case in real chessboard photos taken by humans, too).
+Instead, we employ agglomerative clustering which is a bottom-up hierarchical clustering algorithm.
+In this algorithm, each line starts off in its own cluster, and as the algorithm progresses, pairs of clusters are merged in a manner that aims to minimise the variance within the clusters.
+We cluster the lines based only on their direction, i.e. their angle $\theta$, and use the smallest angle between two given lines as the distance metric.
+Finally, we use the mean angle of both top-level clusters to determine which cluster represents the vertical lines and which the horizontal lines.
+The clustered lines are depicted in \cref{fig:board_localisation_line_detection_horizontal_vertical}.
+
+Next, we must eliminate similar lines by finding clusters of similar lines.
+To eliminate similar horizontal lines, we first find the mean vertical line by considering the $\rho$ and $\theta$ values associated to the lines in the vertical cluster.
+Then, we find the intersection points of all the horizontal lines with the mean vertical line and perform a DBSCAN clustering \cite{ester1996} to group similar lines based on these intersection points.
+We use the mean $\rho$ and $\theta$ values of the lines in each group to represent the final set of discovered horizontal lines. 
+The same procedure is applied vice-versa for the vertical lines, the result of which is shown in \cref{fig:board_localisation_line_detection_elimination}.
+
+\paragraph{Intersection points}
+It remains to find the intersection points of the horizontal and vertical lines.
+Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, we can find their point of intersection by observing that their equations in Hesse normal form (\cref{eq:hesse_normal_form}) forms a system of two linear equations that can be solved for $x$ and $y$. 
+We have
+\begin{align*}
+    \rho_1 &= x \cos \theta_1 + y \sin \theta_1 \\
+    \rho_2 &= x \cos \theta_2 + y \sin \theta_2.
+\end{align*}
+Rearranging for $x$ and $y$, we obtain after some algebraic manipulation
+\begin{align}
+    \label{eq:hesse_intersection_1}
+    x &= \frac{\rho_2 \sin \theta_1 - \rho_1 \sin \theta_2}{\cos \theta_2 \sin \theta_1 - \cos \theta_1 \sin \theta_2}, \\
+    \label{eq:hesse_intersection_2}
+    y &= \frac{\rho_2 \cos \theta_1 - \rho_1 \cos \theta_2}{\sin \theta_2 \cos \theta_1 - \sin \theta_1 \cos \theta_2}.
+\end{align}
+Finally, using \cref{eq:hesse_intersection_1,eq:hesse_intersection_2} on each pair of horizontal and vertical lines, we can find the intersection points as depicted in \cref{fig:board_localisation_line_detection_intersections}.
+
 \subsection{Finding the homography}
 \subsection{Inferring missing lines}
+\subsection{Determining optimal parameters}
+The final stage of the edge detector (hysteresis) is parameterised by two threshold values 
+Grid search
 
 \section{Occupancy classification}
 \label{sec:occupancy_classification}

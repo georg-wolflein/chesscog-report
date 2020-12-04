@@ -311,7 +311,7 @@ Therefore, we can map the four points from the original image to a rectangle who
                 \end{scope}
             \end{axis}
         \end{tikzpicture}
-        \caption{original image (excerpt)}
+        \caption{region of the original image}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.38\textwidth}
@@ -412,8 +412,8 @@ We know that these four points will form a rectangle in the warped image, so we 
         \Parameters minimum number of iterations $i_\text{min}$, maximum number of iterations $i_\text{max}$, minimum number of inliers $c$, inlier threshold $\epsilon_\text{max}$
         \Output a bijective mapping $m : \sI \to \sW$ from a set of inlier points $\sI \subseteq \sP$ to a set of warped points $\sW \subset \mathbb{Z}^2$ that is given by its graph $\sM \subset \sI \times \sW$
         \State $\sP \gets \{h(\vp) : \vp \in \sP\}$ \Comment{convert to homogenous coordinates}
-        \State $i \gets 0$ \Comment{number of iterations}
         \State $\sI, \sW, \sM \gets \emptyset, \emptyset, \emptyset$ \Comment{initialise outputs}
+        \State $i \gets 0$ \Comment{number of iterations}
         \While{$(i < i_\text{min}) \vee (\abs{\sI} < c)$}
             \State $x_1,x_2 \gets \text{choose}(\{1, 2, \dots, x_\text{max}\})$ \Comment{randomly choose such that $x_1<x_2$}
             \State $y_1,y_2 \gets \text{choose}(\{1, 2, \dots, y_\text{max}\})$ \Comment{randomly choose such that $y_1<y_2$}
@@ -422,7 +422,9 @@ We know that these four points will form a rectangle in the warped image, so we 
                 \vp_1 & \vp_2 & \vp_3 & \vp_4
             \end{bmatrix}^\top$ \Comment{matrix of original points}
             \ForAll{$s_x \in \{1, 2, \dots, 8\}$}
+                \label{alg:ransac:for_sx}
                 \ForAll{$s_y \in \{1, 2, \dots, 8\}$}
+                    \label{alg:ransac:for_sy}
                     \State $\mP' \gets \begin{bmatrix}
                         0 & 0 & 1 \\
                         s_x & 0 & 1 \\
@@ -430,19 +432,23 @@ We know that these four points will form a rectangle in the warped image, so we 
                         0 & s_y & 1
                     \end{bmatrix}^\top$ \Comment{matrix of warped points}
                     \State $\mH \gets$ homography matrix calculated for $\mP$ and $\mP'$ using \cref{eq:homography_matrix_relation_corners}
+                        \label{alg:ransac:compute_homography}
                     \State $\sI_C \gets \emptyset$ \Comment{candidate set of inliers for this iteration}
                     \State $\sW_C \gets \emptyset$ \Comment{candidate set of warped points}
                     \State $\sM_C \gets \emptyset$ \Comment{candidate mapping}
-                    \ForAll{$\vp \in \sP$} \Comment{iterate over all intersection points}
+                    \ForAll{$\vp \in \sP$}
+                        \label{alg:ransac:for_loop_over_all_points}
+                        \Comment{iterate over all intersection points}
                         \State $\vp' \gets h^{-1}(\mH \vp)$ \Comment{warp the point according to our model}
+                        \label{alg:ransac:warp}
                         \State $\vq \gets \text{round}(\vp')$ \Comment{snap to grid (round element-wise to nearest whole number)}
                         \If{$\vq \in \sW_C$} \Comment{ignore this point if we already mapped it}
                             \State \textbf{continue}
                         \EndIf
-                        \State $\epsilon \gets \norm{\vp' - \vq}_1$ \Comment{calculate the error}
+                        \State $\epsilon \gets \norm{\vp' - \vq}_1$ \Comment{calculate the error}\label{alg:ransac:error}
                         \If{$\epsilon \leq \epsilon_\text{max}$} \Comment{determine whether we have an inlier}
                             \State $\vp \gets h^{-1}(\vp)$
-                            \State $\sI_C \gets \sI_C \cup \{\vp\}$
+                            \State $\sI_C \gets \sI_C \cup \{\vp\}$ \Comment{add the inlier to our candidate mapping}
                             \State $\sW_C \gets \sW_C \cup \{\vq\}$
                             \State $\sM_C \gets \sM_C \cup \{(\vp, \vq)\}$
                         \EndIf
@@ -462,12 +468,50 @@ We know that these four points will form a rectangle in the warped image, so we 
     \label{alg:ransac}
 \end{algorithm}
 The \gls{ransac}-based method of finding the inlier intersection points is described in \Cref{alg:ransac}. 
-% Explain the h function
-% Explain optimisations
-% - replace foor loop on line 16 with matrix operation
-% - calculate homography only once per iteration for s_x=s_y=1, then scale it
-% - loops on lines 9 and 10 do not need to be nested; the error can be calculated first for the x-direction and then the y-direction and summed (for best x-scale and best y-scale)
-% Explain how how final hommography matrix is calculated
+To simplify notation in the algorithm, we use the function $h : \R^2 \to \R^3$ to convert Euclidean coordinates to homogenous coordinates and $h^{-1} : \R^3 \to \R^2$ to denote the reverse operation.
+These functions can be defined as
+\begin{equation*}
+    h(x,y) = \begin{bmatrix}
+        x\\y\\1
+    \end{bmatrix}
+\end{equation*}
+and
+\begin{equation*}
+    h^{-1}(x,y,z) = \begin{bmatrix}
+        \sfrac{x}{z}\\
+        \sfrac{y}{z}
+    \end{bmatrix}
+\end{equation*}
+provided that $z \neq 0$.
+
+The input to \cref{alg:ransac} is the set of intersection points $\sP \subset \R^2$ in the original image.
+Its output is a bijection $m : \sI \to \sW$ from a set of inlier points $\sI \subseteq \sP$ to a set of warped points $\sW \subset \mathbb{Z}^2$. 
+Notice that the warped points are represented by two-dimensional vectors whose components are whole numbers, meaning that they lie on a grid of whole numbers.
+Each square on the chessboard is represented by a square of unit length on the grid.
+The chessboard itself is represented by a $8 \times 8$ square on that grid.
+However, since the set of inliers will likely not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) we do not yet know the origin of that $8 \times 8$.
+
+Once we have computed the output of \cref{alg:ransac} and obtained the mapping $m$ of points from the original image to points on the grid of the warped image, we can recompute the homography matrix $\mH$ using \cref{eq:homography_matrix_relation_corners} using \emph{all} inliers to obtain a more accurate homography that is based on more than just four points.
+To do so, we take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated by all the intersection points $\sI$ as homogenous coordinate vectors.
+The matrix of warped points $\mP'$ of the same size will be populated by the corresponding points in warped space $\sW$ according to the bijection $m$.
+Using the new $\mP$ and $\mP'$ matrices, \cref{eq:homography_matrix_relation_corners} becomes an overdetermined linear system, so we will compute $\mH$ as the least squared error solution instead of the exact solution.
+
+\subsubsection{Optimisations}
+\Cref{alg:ransac} aims to outline the method of determining the inlier points in a manner that is easy to follow.
+In practise, the employed algorithm will be different in order to achieve improved performance.
+Implementing these differences in \cref{alg:ransac} would have made it too convoluted to follow, so they shall instead briefly be summarised below:
+\begin{itemize}
+    \item The for loop on line \ref{alg:ransac:for_loop_over_all_points} can be vectorised and replaced by matrix operations.
+    \item The computation of the homography matrix on line \ref{alg:ransac:compute_homography} occurs 64 times per iteration of the outer loop, due to the two for loops on lines \ref{alg:ransac:for_sx} and \ref{alg:ransac:for_sy}.
+        Instead, it should be moved before the two aforementioned for loops and computed for the scale $s_x=s_y=1$.
+        To ensure the points are mapped correctly, we must add the instruction $\vp' \gets \vp' \odot \begin{bmatrix}
+            s_x & s_y
+        \end{bmatrix}^\top$ immediately after line \ref{alg:ransac:warp} in order to scale the warped points.
+    \item The for loops on lines \ref{alg:ransac:for_sx} and \ref{alg:ransac:for_sy} do not need to be nested; instead, one could first consider only the $x$-component of the vectors when calculating the errors for each scale $s_x$, and then do the same for the $y$-components and $s_y$.
+        Finally, we would choose the best $s_x$ and $s_y$ (with the least accumulated error), compute the joint error, and use the information to update the mappings if necessary.
+        This is the reason for using the $\ell_1$ norm for computing the error on line \ref{alg:ransac:error}, since it can be easily decomposed into the two directional components.
+\end{itemize}
+
 
 \subsection{Inferring missing lines}
 \subsection{Determining optimal parameters}

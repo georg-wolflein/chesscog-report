@@ -53,14 +53,14 @@ The chessboard lies on the plane formed by the $x$ and $y$ axes, and the chess s
 The pieces are positioned on the squares as dictated by the particular \gls{fen} description.
 However, instead of positioning them at the centre in their respective squares, they are randomly rotated and positioned with a random offset to emulate the conditions in real chess games.
 More specifically, the $x$ and $y$ position of a piece in file $i$ and rank $j$ is sampled from a bivariate normal distribution given by
-\(
+\begin{equation*}
     \rvp_{i,j} \sim \normal \left(
         \begin{bmatrix}
             i \\ j
         \end{bmatrix} - \frac{7}{2},
         \frac{\mI_2}{10}
     \right).
-\)
+\end{equation*}
 Here, we assume that $i$ and $j$ are zero-indexed, i.e. the square \emph{a1} corresponds to $i=j=0$.
 The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, we must add one half.
 Due to the fact that the $x$ and $y$ axes are perpendicular, the two components of $\rvp$ will be independent and thus can be modelled with a covariance matrix that is a multiple of the identity matrix $\mI_2$.

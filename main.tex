@@ -28,8 +28,12 @@
 \usepackage{todonotes}
 \usepackage[toc,acronym,shortcuts]{glossaries}
 \usepackage{cleveref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{subfiles}
 
+
+% \algrenewcommand{\algorithmiccomment}[1]{\hskip3em$\rightarrow$ #1}
 
 \AtEndDocument{%
     \ifSubfilesClassLoaded{%
@@ -43,11 +47,6 @@
 
 \captionsetup[subfigure]{labelformat=simple}
 \renewcommand\thesubfigure{(\alph{subfigure})}
-
-\DeclareRobustCommand{\[}{\begin{equation}}
-\DeclareRobustCommand{\]}{\end{equation}}
-\DeclareRobustCommand{\(}{\begin{equation*}}
-\DeclareRobustCommand{\)}{\end{equation*}}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \def\normal{\mathcal{N}}

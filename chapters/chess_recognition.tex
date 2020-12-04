@@ -363,7 +363,7 @@ We have
     \mP' = \begin{bmatrix}
         0 & 0 & 1 \\
         s_x & 0 & 1 \\
-        s_x & s_x & 0 \\
+        s_x & s_y & 1 \\
         0 & s_y & 1
     \end{bmatrix}^\top.
 \end{equation*}
@@ -374,13 +374,76 @@ Since the homography matrix maps points from the original image to the output im
 \end{equation}
 where the vector $\vq \in \R^4$ represents the scale factor for each point.
 \Cref{eq:homography_matrix_relation_corners} describes a system of linear equations that we can solve computationally for $\mH$.
-Then, we can use \cref{eq:homography_matrix_relation} to project all other intersection points.
+Then, we can use \cref{eq:homography_matrix_relation} to project all other intersection points to the warped image.
 
 \subsubsection{Finding the optimal homography}
+Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), our algorithm must be robust in the face of lines identified in the image that do not correspond to squares on the chessboard.
+\Cref{fig:incorrect_intersection_points} depicts one such example; however, in non-synthetic chessboard images, especially with other objects in the image that exhibit straight lines, there is often an even greater number of outliers. 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{0064_corners_intersection_points.png}    
+    \caption[A sample from the training set with an incorrectly identified line.]{A sample from the training set with an incorrectly identified line. The top horizontal line is at the border of the chessboard instead of the top chessboard squares.}
+    \label{fig:incorrect_intersection_points}
+\end{figure}
 
+\Gls{ransac} \cite{fischler1981} is a non-deterministic iterative model fitting algorithm that can robustly estimate a model's parameters in such a manner that is not significantly influenced by outliers.
+It can be applied to a variety of situations where a model must be fit to a dataset containing outliers.
+In our case, the dataset consists of the intersection points (some of which are outliers due to detecting irrelevant lines) and the model is a homography that corresponds to the inlier intersection points.
+The \gls{ransac} algorithm consists of two main steps:
+\begin{enumerate}
+    \item Randomly sample a set of observations from the dataset that contains the minimum number of samples sufficient to fit the model. 
+        We require four points to compute a homography, so this is the number of intersection points we must sample in this step.
+    \item Fit the model to these samples, and then determine which observations are explained by the model within some threshold (the threshold should be just large enough to account for the expected noise in the dataset). 
+        This is the set of inliers, and if the size of this set is greater than the inliers discovered in the previous iteration, we will retain this model instead of the previous.
+        Repeat from step 1 until reaching a specified number of iterations.
+\end{enumerate}
+We must pay attention to some subtleties that arise 
 
-
-
+\begin{algorithm}
+    \begin{algorithmic}
+        \Require the set of intersection points $\sP$
+        \State $\sP \gets \{h(\vp) : \vp \in \sP\}$ \Comment{convert to homogenous coordinates}
+        \State $i \gets 0$ \Comment{number of iterations}
+        \State $\sI \gets \emptyset$ \Comment{set of inliers}
+        \While{$(i < i_\text{min}) \vee (\abs{\sI} < c)$}
+            \State $x_1,x_2 \gets \text{choose}(\{1, 2, \dots, x_\text{max}\})$ \Comment{randomly choose such that $x_1<x_2$}
+            \State $y_1,y_2 \gets \text{choose}(\{1, 2, \dots, y_\text{max}\})$ \Comment{randomly choose such that $y_1<y_2$}
+            \State $\vp_1,\vp_2,\vp_3,\vp_4 \gets$ intersection points in $\sP$ corresponding to the four points described by vertical lines $x_1,x_2$ and horizontal lines $y_1,y_2$ (in clockwise order)
+            \State $\mP \gets \begin{bmatrix}
+                \vp_1 & \vp_2 & \vp_3 & \vp_4
+            \end{bmatrix}^\top$
+            \ForAll{$s_x \in \{1, 2, \dots, 8\}$}
+                \ForAll{$s_y \in \{1, 2, \dots, 8\}$}
+                    \State $\mP' \gets \begin{bmatrix}
+                        0 & 0 & 1 \\
+                        s_x & 0 & 1 \\
+                        s_x & s_y & 1 \\
+                        0 & s_y & 1
+                    \end{bmatrix}^\top$
+                    \State $\mH \gets$ homography matrix calculated for $\mP$ and $\mP'$ using \cref{eq:homography_matrix_relation_corners}
+                    \State $\sC = \emptyset$ \Comment{candidate set of inliers}
+                    \ForAll{$\vp \in \sP$} \Comment{iterate over all intersection points}
+                        \State $\vp' \gets h^{-1}(\mH \vp)$ \Comment{warp the point according to our model}
+                        \State $\vp' \gets \vp' \odot \begin{bmatrix}
+                            \displaystyle \frac{1}{s_x} & \displaystyle \frac{1}{s_y}
+                        \end{bmatrix}^\top$ \Comment{undo scaling}
+                        \State $\epsilon \gets \norm{\vp' - \text{round}(\vp')}$ \Comment{calculate the error}
+                        \If{$\epsilon \leq \epsilon_\text{max}$}
+                            \State $\sC \gets \sC \cup \{\text{round}(\vp')\}$
+                        \EndIf
+                    \EndFor
+                    \If{$\abs{\sC} > \abs{\sI}$}
+                        \State $\sI \gets \sC$
+                    \EndIf
+                \EndFor
+            \EndFor
+        \If {$i\geq i_\text{max}$}
+            \State \textbf{break}
+        \EndIf
+        \EndWhile
+    \end{algorithmic}
+    \caption{\acs{ransac} for finding the optimal homography.}
+\end{algorithm}
 
 \subsection{Inferring missing lines}
 \subsection{Determining optimal parameters}

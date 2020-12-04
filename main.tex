@@ -33,7 +33,14 @@
 \usepackage{subfiles}
 
 
-% \algrenewcommand{\algorithmiccomment}[1]{\hskip3em$\rightarrow$ #1}
+\algnewcommand\algorithmicinput{\textbf{Input:}}
+\algnewcommand\algorithmicoutput{\textbf{Output:}}
+\algnewcommand\algorithmicparameters{\textbf{Parameters:}}
+\algnewcommand\Input{\item[\algorithmicinput]}
+\algnewcommand\Output{\item[\algorithmicoutput]}
+\algnewcommand\Parameters{\item[\algorithmicparameters]}
+\algnewcommand{\IIf}[1]{\State\algorithmicif\ #1\ \algorithmicthen}
+\algnewcommand{\EndIIf}{\unskip\ \algorithmicend\ \algorithmicif}
 
 \AtEndDocument{%
     \ifSubfilesClassLoaded{%

@@ -255,6 +255,7 @@ Once we have obtained the intersection points, the next step is to project them 
 Using this projection, known as a \emph{homography}, we can warp the original image to eliminate the perspective distortion. 
 
 \subsubsection{Computing the homography matrix}
+\label{sec:homography_matrix}
 The projection is described by a \emph{homography matrix} $\mH \in \R^{3 \times 3}$ \cite{szeliski2011} mapping any point
 $\vp$
 from the original image to
@@ -391,27 +392,35 @@ It can be applied to a variety of situations where a model must be fit to a data
 In our case, the dataset consists of the intersection points (some of which are outliers due to detecting irrelevant lines) and the model is a homography that corresponds to the inlier intersection points.
 The \gls{ransac} algorithm consists of two main steps:
 \begin{enumerate}
-    \item Randomly sample a set of observations from the dataset that contains the minimum number of samples sufficient to fit the model. 
+    \item \label{enum:ransac_1}
+        Randomly sample a set of observations from the dataset that contains the minimum number of samples sufficient to fit the model. 
         We require four points to compute a homography, so this is the number of intersection points we must sample in this step.
-    \item Fit the model to these samples, and then determine which observations are explained by the model within some threshold (the threshold should be just large enough to account for the expected noise in the dataset). 
+    \item \label{enum:ransac_2}
+        Fit the model to these samples, and then determine which observations are explained by the model within some threshold (the threshold should be just large enough to account for the expected noise in the dataset). 
         This is the set of inliers, and if the size of this set is greater than the inliers discovered in the previous iteration, we will retain this model instead of the previous.
         Repeat from step 1 until reaching a specified number of iterations.
 \end{enumerate}
-We must pay attention to some subtleties that arise 
+
+Applied to our problem, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it impossible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
+Instead, we will randomly choose four points that we believe to form a rectangle on the chessboard.
+This means that we will select two horizontal and two vertical lines at random, and choose the four intersection points of these lines as the random sample.
+We know that these four points will form a rectangle in the warped image, so we can map to a rectangle as explained in \cref{sec:homography_matrix} and illustrated in \cref{fig:homography_illustration}.
 
 \begin{algorithm}
-    \begin{algorithmic}
-        \Require the set of intersection points $\sP$
+    \begin{algorithmic}[1]
+        \Input the set of intersection points $\sP \subset \R^2$
+        \Parameters minimum number of iterations $i_\text{min}$, maximum number of iterations $i_\text{max}$, minimum number of inliers $c$, inlier threshold $\epsilon_\text{max}$
+        \Output a bijective mapping $m : \sI \to \sW$ from a set of inlier points $\sI \subseteq \sP$ to a set of warped points $\sW \subset \mathbb{Z}^2$ that is given by its graph $\sM \subset \sI \times \sW$
         \State $\sP \gets \{h(\vp) : \vp \in \sP\}$ \Comment{convert to homogenous coordinates}
         \State $i \gets 0$ \Comment{number of iterations}
-        \State $\sI \gets \emptyset$ \Comment{set of inliers}
+        \State $\sI, \sW, \sM \gets \emptyset, \emptyset, \emptyset$ \Comment{initialise outputs}
         \While{$(i < i_\text{min}) \vee (\abs{\sI} < c)$}
             \State $x_1,x_2 \gets \text{choose}(\{1, 2, \dots, x_\text{max}\})$ \Comment{randomly choose such that $x_1<x_2$}
             \State $y_1,y_2 \gets \text{choose}(\{1, 2, \dots, y_\text{max}\})$ \Comment{randomly choose such that $y_1<y_2$}
             \State $\vp_1,\vp_2,\vp_3,\vp_4 \gets$ intersection points in $\sP$ corresponding to the four points described by vertical lines $x_1,x_2$ and horizontal lines $y_1,y_2$ (in clockwise order)
             \State $\mP \gets \begin{bmatrix}
                 \vp_1 & \vp_2 & \vp_3 & \vp_4
-            \end{bmatrix}^\top$
+            \end{bmatrix}^\top$ \Comment{matrix of original points}
             \ForAll{$s_x \in \{1, 2, \dots, 8\}$}
                 \ForAll{$s_y \in \{1, 2, \dots, 8\}$}
                     \State $\mP' \gets \begin{bmatrix}
@@ -419,31 +428,46 @@ We must pay attention to some subtleties that arise
                         s_x & 0 & 1 \\
                         s_x & s_y & 1 \\
                         0 & s_y & 1
-                    \end{bmatrix}^\top$
+                    \end{bmatrix}^\top$ \Comment{matrix of warped points}
                     \State $\mH \gets$ homography matrix calculated for $\mP$ and $\mP'$ using \cref{eq:homography_matrix_relation_corners}
-                    \State $\sC = \emptyset$ \Comment{candidate set of inliers}
+                    \State $\sI_C \gets \emptyset$ \Comment{candidate set of inliers for this iteration}
+                    \State $\sW_C \gets \emptyset$ \Comment{candidate set of warped points}
+                    \State $\sM_C \gets \emptyset$ \Comment{candidate mapping}
                     \ForAll{$\vp \in \sP$} \Comment{iterate over all intersection points}
                         \State $\vp' \gets h^{-1}(\mH \vp)$ \Comment{warp the point according to our model}
-                        \State $\vp' \gets \vp' \odot \begin{bmatrix}
-                            \displaystyle \frac{1}{s_x} & \displaystyle \frac{1}{s_y}
-                        \end{bmatrix}^\top$ \Comment{undo scaling}
-                        \State $\epsilon \gets \norm{\vp' - \text{round}(\vp')}$ \Comment{calculate the error}
-                        \If{$\epsilon \leq \epsilon_\text{max}$}
-                            \State $\sC \gets \sC \cup \{\text{round}(\vp')\}$
+                        \State $\vq \gets \text{round}(\vp')$ \Comment{snap to grid (round element-wise to nearest whole number)}
+                        \If{$\vq \in \sW_C$} \Comment{ignore this point if we already mapped it}
+                            \State \textbf{continue}
+                        \EndIf
+                        \State $\epsilon \gets \norm{\vp' - \vq}_1$ \Comment{calculate the error}
+                        \If{$\epsilon \leq \epsilon_\text{max}$} \Comment{determine whether we have an inlier}
+                            \State $\vp \gets h^{-1}(\vp)$
+                            \State $\sI_C \gets \sI_C \cup \{\vp\}$
+                            \State $\sW_C \gets \sW_C \cup \{\vq\}$
+                            \State $\sM_C \gets \sM_C \cup \{(\vp, \vq)\}$
                         \EndIf
                     \EndFor
-                    \If{$\abs{\sC} > \abs{\sI}$}
-                        \State $\sI \gets \sC$
+                    \If{$\abs{\sI_C} > \abs{\sI}$} \Comment{update the set of inliers if we found more}
+                        \State $\sI,\sW,\sM \gets \sI_C,\sW_C,\sM_C$
                     \EndIf
                 \EndFor
             \EndFor
-        \If {$i\geq i_\text{max}$}
-            \State \textbf{break}
-        \EndIf
+            \IIf {$i\geq i_\text{max}$}
+                \textbf{break}
+            \EndIIf \Comment{guard against iterating indefinitely}
+            \State $i \gets i + 1$
         \EndWhile
     \end{algorithmic}
-    \caption{\acs{ransac} for finding the optimal homography.}
+    \caption{\acs{ransac}-based algorithm for finding the optimal homography.}
+    \label{alg:ransac}
 \end{algorithm}
+The \gls{ransac}-based method of finding the inlier intersection points is described in \Cref{alg:ransac}. 
+% Explain the h function
+% Explain optimisations
+% - replace foor loop on line 16 with matrix operation
+% - calculate homography only once per iteration for s_x=s_y=1, then scale it
+% - loops on lines 9 and 10 do not need to be nested; the error can be calculated first for the x-direction and then the y-direction and summed (for best x-scale and best y-scale)
+% Explain how how final hommography matrix is calculated
 
 \subsection{Inferring missing lines}
 \subsection{Determining optimal parameters}

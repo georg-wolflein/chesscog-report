@@ -871,9 +871,9 @@ If at least one corner is detected inaccurately, that particular sample is deter
 We perform the grid search only on a small subset of the training set because the number of different parameter sets to be tested is in the order of a thousand.
 The set of parameters achieving the best performance on this subset of the training set is retained as the final configuration.
 
-On the entire training set of 4,400 samples, the corner detection algorithm yielded inaccurate predictions in 60 cases, so its accuracy is 98.64\%.
-The validation set of size 146 sees only 2 mistakes and thus achieves an accuracy of 98.63\%.
-These numbers are quite similar, thus we conclude that the corner detection algorithm is very robust to unseen samples from the dataset and did not overfit as a result of the grid search.
+On the entire training set of 4,400 samples, the corner detection algorithm yielded inaccurate predictions in 13 cases, so its accuracy is 99.71\%.
+The validation set of size 146 sees no mistakes and thus achieves an accuracy of 100.00\%.
+As such, we conclude that the corner detection algorithm is very robust to unseen samples from the dataset and did not overfit as a result of the grid search.
 
 \section{Occupancy classification}
 \label{sec:occupancy_classification}

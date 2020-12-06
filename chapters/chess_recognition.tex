@@ -63,6 +63,7 @@ To determine the location of the chessboard's corners, we will rely on its regul
 Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image will vary due to 3D perspective distortion.
 
 \subsection{Finding intersection points}
+\label{sec:find_intersection_points}
 \begin{figure}
     \centering
     \begin{subfigure}[t]{0.47\textwidth}
@@ -111,9 +112,10 @@ Each square on the physical chessboard has the same width and height, even thoug
 \end{figure}
 A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, thus there are nine horizontal and nine vertical lines.
 In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
+Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
 
 \paragraph{Edge detection}
-To do so, we convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
+To detect edges in the input image, we convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
 Canny edge detection is a multi-stage algorithm that first reduces noise in the image by applying a Gaussian blur, then calculates pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
 
 \paragraph{Line detection}
@@ -302,7 +304,7 @@ Therefore, we can map the four points from the original image to a rectangle who
                 y=1.2cm,
                 no markers
             ]
-                \addplot[thick,blue] graphics[xmin=0,ymin=0,xmax=5,ymax=3] {3828_corners_intersection_points_sample.png};
+                \addplot graphics[xmin=0,ymin=0,xmax=5,ymax=3] {3828_corners_intersection_points_sample.png};
                 \begin{scope}[xscale=5,yscale=3]
                     \coordinate (homography_from1) at (0.303987,0.327397);
                     \coordinate (homography_from2) at (0.791654,0.341584);
@@ -378,6 +380,7 @@ where the vector $\vq \in \R^4$ represents the scale factor for each point.
 Then, we can use \cref{eq:homography_matrix_relation} to project all other intersection points to the warped image.
 
 \subsubsection{Finding the optimal homography}
+\label{sec:find_optimal_homography}
 Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), our algorithm must be robust in the face of lines identified in the image that do not correspond to squares on the chessboard.
 \Cref{fig:incorrect_intersection_points} depicts one such example; however, in non-synthetic chessboard images, especially with other objects in the image that exhibit straight lines, there is often an even greater number of outliers. 
 \begin{figure}
@@ -495,6 +498,58 @@ Once we have computed the output of \cref{alg:ransac} and obtained the mapping $
 To do so, we take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated by all the intersection points $\sI$ as homogenous coordinate vectors.
 The matrix of warped points $\mP'$ of the same size will be populated by the corresponding points in warped space $\sW$ according to the bijection $m$.
 Using the new $\mP$ and $\mP'$ matrices, \cref{eq:homography_matrix_relation_corners} becomes an overdetermined linear system, so we will compute $\mH$ as the least squared error solution instead of the exact solution.
+Finally, we can use the homography matrix to project the pixels of the original image to obtain a warped image as in \cref{fig:homography_warped}. 
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.55\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                y dir = reverse,
+                axis lines = center,
+                xmin = 0, %xmax = 4.5,
+                ymin = 0, %ymax = 2.5,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=north, at={(0,0)}},
+                ticks=none,
+                enlargelimits=upper,
+                x=2cm,
+                y=2cm,
+                no markers
+            ]
+                \addplot graphics[xmin=0,ymin=0,xmax=3,ymax=2] {3828_corners_intersection_points.png};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{original image with intersection points}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.40\textwidth}
+        \begin{tikzpicture}[remember picture]
+            \begin{axis}[
+                y dir = reverse,
+                axis lines = center,
+                xmin = 0, %xmax = 4.5,
+                ymin = 0, %ymax = 2.5,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=north, at={(0,0)}},
+                ticks=none,
+                enlargelimits=upper,
+                x=2cm,
+                y=2cm,
+                no markers
+            ]
+            \addplot graphics[xmin=0,ymin=0,xmax=2,ymax=2] {3828_corners_warped.png};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{warped image}
+        \label{fig:homography_warped_warped}
+    \end{subfigure}
+    \caption[The original image is warped using the computed homography matrix $\mH$.]{The original image is warped using the computed homography matrix $\mH$. Detected lines and intersection points are overlaid in the original image as per \cref{fig:board_localisation_line_detection_elimination}. The corresponding intersection points are marked in red in the warped image and lie on a regular unit-length grid.}
+    \label{fig:homography_warped}
+\end{figure}
 
 \subsubsection{Optimisations}
 \Cref{alg:ransac} aims to outline the method of determining the inlier points in a manner that is easy to follow.
@@ -514,13 +569,314 @@ Implementing these differences in \cref{alg:ransac} would have made it too convo
 
 
 \subsection{Inferring missing lines}
+\label{sec:infer_missing_lines}
+It was noted at the end of \cref{sec:find_optimal_homography} that while the result of \cref{alg:ransac} projects the inlier intersection points onto a regular grid of whole numbers, that result does not explicitly indicate the location of the $8\times 8$ sub-grid that represents the chessboard.
+To understand the set of inliers, we shall first compute the minimum and maximum $x$ and $y$ values of the warped points.
+We shall use the notation
+\begin{align}
+    &x_\text{min} = \min \sW_x,
+    &x_\text{max} = \max \sW_x,\label{eq:infer_lines_x_extrema}\\
+    &y_\text{min} = \min \sW_y,
+    &y_\text{max} = \max \sW_y,
+\end{align}
+where
+\begin{equation}
+    \sW_x = \left\{ x : \begin{bmatrix}
+        x & y
+    \end{bmatrix}^\top \in \sW \right\}%
+    \qquad \text{and} \qquad%
+    \sW_y = \left\{ y : \begin{bmatrix}
+        x & y
+    \end{bmatrix}^\top \in \sW \right\}.
+\end{equation}
+The $x_\text{min}$ value describes the leftmost vertical line in the warped image given by the equation $x=x_\text{min}$, and the value of $x_\text{max}$ describes the rightmost vertical line. 
+Similarly, the values of $y_\text{min}$ and $y_\text{max}$ represent the top and bottom lines.
+Examining the range of $x$-values ($x_\text{max}-x_\text{min}$) gives an indication of whether the vertical lines we identified represent the whole chessboard, part of it, or even a range that is wider than the chessboard itself, horizontally.
+We thus distinguish between three cases based on the $x$-values which we shall outline below. 
+\begin{caselist}
+    \begin{case}{$x_\text{max}-x_\text{min}=8$}\label{case:infer_borders_equal}%
+        In this case, no action is required because we detected the two outer vertical lines.
+        The leftmost vertical line of the chessboard is located at $x=x_\text{min}$ and the rightmost line is at $x=x_\text{max}$ on the warped image.
+    \end{case}
+
+    \begin{case}{$x_\text{max}-x_\text{min}>8$}
+        This case arises when the vertical line $x=x_\text{min}$ is left of the left edge of the chessboard and/or the vertical line $x=x_\text{max}$ is right of the right edge of the chessboard.
+        In other words, the range of $x$-values covers more than just the chessboard.
+        To remedy this, we will iteratively update $\sW_x$ by applying
+        \begin{equation*}
+            \sW_x \gets \sW_x \setminus \{x_\text{min},x_\text{max}\}
+        \end{equation*}
+        and recomputing $x_\text{min}$ and $x_\text{max}$ by \cref{eq:infer_lines_x_extrema}
+        until $x_\text{max}-x_\text{min}\leq 8$.
+        Then, we update the set of warped points $\sW$ as
+        \begin{equation*}
+            \sW = \left\{
+                \begin{bmatrix}
+                    x & y
+                \end{bmatrix}^\top
+                :
+                \begin{bmatrix}
+                    x & y
+                \end{bmatrix}^\top
+                \in \sW, \ x \in \sW_x
+            \right\},
+        \end{equation*}
+        retaining only the warped points whose $x$-component is in the interval $[x_\text{min},x_\text{max}]$.
+        We also remove the corresponding points from $\sI$ and the mapping $m$'s graph $\sM$.
+        Then, we fall either in case \ref{case:infer_borders_equal} or \ref{case:infer_borders_greater}, depending on the values of $x_\text{min}$ and $x_\text{max}$.
+    \end{case}
+
+    \begin{case}{$x_\text{max}-x_\text{min}<8$}\label{case:infer_borders_greater}%
+        This most common scenario arises when the grid that should represent the chessboard in the warped image is smaller than eight units in width.
+        \Cref{fig:homography_warped} illustrates this case makes it clear that it arises because either one or both of the outermost vertical lines were not detected on the chessboard. 
+        Determining whether the grid should be expanded towards the left or the right involves futher processing of the image which will be outlined below.
+        
+        We will calculate the horizontal intensity gradients in the warped image for each pixel in order to determine whether an additional vertical line is more likely to occur one unit to the left or one unit to the right of the currently identified grid.
+        To do so, we first convert the \gls{rgb} image to grayscale and then apply the horizontal Sobel filter which is a discrete differentiation operator that provides an approximation for the gradient intensity in the horizontal direction.
+        Large horizontal gradient intensities will give rise to vertical lines in the warped image which can be used in order to determine whether the chessboard should be expanded to the left or right.
+
+        The Sobel filter is widely used in image processing and consists of two kernels that are convolved over the input image, a horizontal and a vertical one.
+        Typically, the results of both convolution operations is calculated, and then some simple trigonometry can be applied in order to determine the gradient directions for each pixel.
+        However, since we are only interested in determining the gradients in the horizontal direction, it suffices to use the horizontal Sobel kernel
+        \begin{equation}
+            \mS_x = \begin{bmatrix}
+                \label{eq:sobel_kernel_horizontal}
+                +1 & 0 & -1\\
+                +2 & 0 & -2\\
+                +1 & 0 & -1
+            \end{bmatrix}.
+        \end{equation}
+        Given an intensity image (i.e. a grayscale image) of dimensions $h \times w$ that is represented by the matrix $\mA \in \R^{h\times w}$, 
+        we compute the horizontal gradient intensity at each pixel by
+        \begin{equation}
+            \label{eq:sobel_operation_horizontal}
+            \mG_x = \mS_x * \mA
+        \end{equation}
+        where $\mG_x$ is of the same dimensionality as $\mA$ and contains the gradient intensities.
+        Then, we can apply the Canny edge detector (as we did in \cref{sec:find_intersection_points}) to image represented by $\mG_x$ in order to eliminate noise and obtain clear edges. 
+        \begin{figure}
+            \centering
+            \begin{subfigure}[t]{0.48\textwidth}
+                \begin{tikzpicture}
+                    \begin{axis}[
+                        y dir = reverse,
+                        axis lines = center,
+                        xmin = 0, %xmax = 4.5,
+                        ymin = 0, %ymax = 2.5,
+                        xlabel = $x$,
+                        ylabel = $y$,
+                        xlabel style = {anchor=west},
+                        ylabel style = {anchor=north, at={(0,0)}},
+                        ticks=none,
+                        enlargelimits=upper,
+                        x=5cm,
+                        y=5cm,
+                        no markers
+                    ]
+                        \addplot graphics[xmin=0,ymin=0,xmax=1,ymax=1] {3828_corners_warped.png};
+                    \end{axis}
+                \end{tikzpicture}
+                \caption{warped image from \cref{fig:homography_warped_warped}}
+            \end{subfigure}
+            \hfill
+            \begin{subfigure}[t]{0.48\textwidth}
+                \begin{tikzpicture}[remember picture]
+                    \begin{axis}[
+                        y dir = reverse,
+                        axis lines = center,
+                        xmin = 0, %xmax = 4.5,
+                        ymin = 0, %ymax = 2.5,
+                        xlabel = $x$,
+                        ylabel = $y$,
+                        xlabel style = {anchor=west},
+                        ylabel style = {anchor=north, at={(0,0)}},
+                        ticks=none,
+                        enlargelimits=upper,
+                        x=5cm,
+                        y=5cm,
+                        no markers
+                    ]
+                    \addplot graphics[xmin=0,ymin=0,xmax=1,ymax=1] {3828_corners_warped_gray.png};
+                    \end{axis}
+                \end{tikzpicture}
+                \caption{conversion to grayscale}
+            \end{subfigure}
+
+            \bigskip
+            \begin{subfigure}[t]{0.48\textwidth}
+                \begin{tikzpicture}
+                    \begin{axis}[
+                        y dir = reverse,
+                        axis lines = center,
+                        xmin = 0, %xmax = 4.5,
+                        ymin = 0, %ymax = 2.5,
+                        xlabel = $x$,
+                        ylabel = $y$,
+                        xlabel style = {anchor=west},
+                        ylabel style = {anchor=north, at={(0,0)}},
+                        ticks=none,
+                        enlargelimits=upper,
+                        x=5cm,
+                        y=5cm,
+                        no markers
+                    ]
+                        \addplot graphics[xmin=0,ymin=0,xmax=1,ymax=1] {3828_corners_warped_gradients_horizontal.png};
+                    \end{axis}
+                \end{tikzpicture}
+                \caption{horizontal gradient intensities as computed by the Sobel operator (the colour scale shows low values in black and high values in white)}
+            \end{subfigure}
+            \hfill
+            \begin{subfigure}[t]{0.48\textwidth}
+                \begin{tikzpicture}[remember picture]
+                    \begin{axis}[
+                        y dir = reverse,
+                        axis lines = center,
+                        xmin = 0, %xmax = 4.5,
+                        ymin = 0, %ymax = 2.5,
+                        xlabel = $x$,
+                        ylabel = $y$,
+                        xlabel style = {anchor=west},
+                        ylabel style = {anchor=north, at={(0,0)}},
+                        ticks=none,
+                        enlargelimits=upper,
+                        x=5cm,
+                        y=5cm,
+                        no markers
+                    ]
+                    \addplot graphics[xmin=0,ymin=0,xmax=1,ymax=1] {3828_corners_warped_gradients_horizontal_edges.png};
+                    \end{axis}
+                \end{tikzpicture}
+                \caption{result of Canny edge detection on the horizontal gradient image}
+            \end{subfigure}
+            \caption[Horizontal gradient intensities calculated on the warped image in order to detect vertical lines.]{Horizontal gradient intensities calculated on the warped image in order to detect vertical lines. The red dots correspond to the intersection points in $\sI$. Here, $x_\text{max}-x_\text{min}=7$ because there are eight columns of points instead of nine. This is because the rightmost vertical line was not detected.}
+            \label{fig:warped_image_gradients}
+        \end{figure}
+        \Cref{fig:warped_image_gradients} shows the results of these operations on the running example.
+
+        On that image we shall sum the pixel internsities on the vertical lines at $x=x_\text{min}-1$ and $x=x_\text{max}+1$ (with a small tolerance to the left and to the right).
+        Then, if the sum of pixel intensities was greater at $x=x_\text{min}-1$ than $x=x_\text{max}+1$, we will update $x_\text{min} \gets x_\text{min}-1$, or otherwise $x_\text{max} \gets x_\text{max}+1$.
+        We repeat this process until $x_\text{max}-x_\text{min}=8$.
+    \end{case}
+\end{caselist}
+
+Although the three cases above examine only the $x$-values to locate the horizontal position of the chessboard, it is trivial to see how this method applies to determine the vertical position of the chessboard using the $y$-values, too.
+However, the main caveat the reader should acknowledge is that we must use the vertical sobel kernel
+\begin{equation}
+    \mS_x = \begin{bmatrix}
+        +1 & +2 & +1\\
+        0 & 0 & 0\\
+        -1 & -2 & -1\\
+    \end{bmatrix}.
+\end{equation}
+instead of the horizontal one given in \cref{eq:sobel_kernel_horizontal}, and as a consequence \cref{eq:sobel_operation_horizontal} becomes
+\begin{equation}
+    \mG_y = \mS_y * \mA.
+\end{equation}
+
+After following the instructions according to the three cases above for both the horizontal and vertical directions, we will have obtained the
+$x_\text{min},x_\text{max},y_\text{min},y_\text{max}$
+values that describe the location of the chessboard in the warped image. 
+As such, the coordinates of the four corners of the chessboard on the warped image can be expressed as
+\begin{align*}
+    &\vp'_1 = \begin{bmatrix}
+        x_\text{min} & y_\text{min}
+    \end{bmatrix}^\top
+    &\vp'_2 = \begin{bmatrix}
+        x_\text{max} & y_\text{min}
+    \end{bmatrix}^\top
+    \\
+    &\vp'_3 = \begin{bmatrix}
+        x_\text{max} & y_\text{max}
+    \end{bmatrix}^\top
+    &\vp'_4 = \begin{bmatrix}
+        x_\text{min} & y_\text{max}
+    \end{bmatrix}^\top.
+\end{align*}
+The points are supplied in clockwise order, starting from the top left.
+
+Finally, we can use the inverse of the homography matrix in order to project these points back onto the original image by inverting \cref{eq:homography_matrix_relation}.
+Notice that the points must be converted to homogenous coordinates and back again, so the equation becomes 
+\begin{equation}
+    \vp_i =
+    h^{-1}\left(
+        \mH^{-1}
+        h(\vp'_i)
+    \right)
+\end{equation}
+for $i=1,2,3,4$.
+\begin{figure}
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                y dir = reverse,
+                axis lines = center,
+                xmin = 0, %xmax = 4.5,
+                ymin = 0, %ymax = 2.5,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=north, at={(0,0)}},
+                ticks=none,
+                enlargelimits=upper,
+                x=5cm,
+                y=5cm,
+                no markers
+            ]
+                \addplot graphics[xmin=0,ymin=0,xmax=1,ymax=1] {3828_corners_warped_result.png};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{warped image with detected corner points $\vp'_i$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \begin{tikzpicture}[remember picture]
+            \begin{axis}[
+                y dir = reverse,
+                axis lines = center,
+                xmin = 0, %xmax = 4.5,
+                ymin = 0, %ymax = 2.5,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=north, at={(0,0)}},
+                ticks=none,
+                enlargelimits=upper,
+                x=1.67cm,
+                y=1.67cm,
+                no markers
+            ]
+            \addplot graphics[xmin=0,ymin=0,xmax=3,ymax=2] {3828_corners_unwarped_result.png};
+            \end{axis}
+        \end{tikzpicture}
+        \caption{original image with reprojected corner points $\vp_i$}
+    \end{subfigure}
+    \caption{The identified corner points are projected back from the warped image onto the original image using the inverse homography matrix.}
+    \label{fig:corners_result}
+\end{figure}
+The result is depicted in \cref{fig:corners_result}.
+
 \subsection{Determining optimal parameters}
-The final stage of the edge detector (hysteresis) is parameterised by two threshold values 
-Grid search
+The method of finding the four corner points of the chessboard described in the previous sections relies on numerous parameters whose optimal values are yet to be determined.
+The most important parameters are summarised below:
+\begin{itemize}
+    \item low and high thresholds of the final stage of the Canny edge detector (hysteresis);
+    \item threshold $t$ of the Hough transform as explained in \cref{sec:find_intersection_points};
+    \item minimum number of iterations $i_\text{min}$, maximum number of iterations $i_\text{max}$, minimum number of inliers $c$, and the inlier threshold $\epsilon_\text{max}$ from \cref{alg:ransac};
+    \item low and high Canny edge detection thresholds for the horizontal and vertical gradient images, as well as the relative width of the horizontal and vertical lines from \cref{sec:infer_missing_lines}.
+\end{itemize}
+The optimal parametervalues are decided by performing a grid search using sensible presets.
+A corner is classified as being detected accurately if the prediction is within ten pixels of the groundtruth label, which given the fact that the width of the image is 1,200 pixels ensures that the predictions must be very close to the groundtruth.
+If at least one corner is detected inaccurately, that particular sample is determined to be inaccurate.
+We perform the grid search only on a small subset of the training set because the number of different parameter sets to be tested is in the order of a thousand.
+The set of parameters achieving the best performance on this subset of the training set is retained as the final configuration.
+
+On the entire training set of 4,400 samples, the corner detection algorithm yielded inaccurate predictions in 60 cases, so its accuracy is 98.64\%.
+The validation set of size 146 sees only 2 mistakes and thus achieves an accuracy of 98.63\%.
+These numbers are quite similar, thus we conclude that the corner detection algorithm is very robust to unseen samples from the dataset and did not overfit as a result of the grid search.
 
 \section{Occupancy classification}
 \label{sec:occupancy_classification}
-
 Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
 \begin{figure}
     \centering

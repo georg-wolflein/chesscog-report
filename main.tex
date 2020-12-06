@@ -43,11 +43,37 @@
 \algnewcommand{\IIf}[1]{\State\algorithmicif\ #1\ \algorithmicthen}
 \algnewcommand{\EndIIf}{\unskip\ \algorithmicend\ \algorithmicif}
 
+\newenvironment{changemargin}[2]{%
+  \begin{list}{}{%
+    \setlength{\topsep}{0pt}%
+    \setlength{\leftmargin}{#1}%
+    \setlength{\rightmargin}{#2}%
+    \setlength{\listparindent}{\parindent}%
+    \setlength{\itemindent}{\parindent}%
+    \setlength{\parsep}{\parskip}%
+  }%
+  \item[]%
+}{\end{list}}
+
+\newcounter{casectr}
+\newenvironment{case}[1]{%
+  \par\noindent%
+  \refstepcounter{casectr}%
+  \textit{Case \thecasectr.} #1.%
+  \begin{changemargin}{\parindent}{0cm}%
+  \noindent\ignorespaces%
+}{\end{changemargin}}
+
+\newenvironment{caselist}{%
+  \begin{changemargin}{\parindent}{0cm}%
+  \setcounter{casectr}{0}%
+}{\end{changemargin}}
+
 \AtEndDocument{%
-    \ifSubfilesClassLoaded{%
-        \printglossary[type=\acronymtype]%
-        \printbibliography%
-    }{}%
+  \ifSubfilesClassLoaded{%
+    \printglossary[type=\acronymtype]%
+    \printbibliography%
+  }{}%
 }
 
 \usetikzlibrary{patterns,calc,angles,quotes,shapes.geometric,arrows}

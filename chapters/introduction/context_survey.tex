@@ -6,7 +6,6 @@ Early work on chess recognition in the 1990s focused on extracting typeset games
 In recent years, the problem of parsing two-dimensional chess images has effectively been solved using conventional machine learning techniques \cite{khater2012} and deep learning \cite{sameer2020,roy2020}.
 However, recognising chess positions from physical chessboards as opposed to artificial two-dimensional images poses a much more interesting and challenging problem that finds practial application in chess-playing robots, augmented reality, and aiding amateur chess players\footnote{Electronic chess sets are impractical and very costly \cite{wang2013}, thus solutions for chess recognition using just a photo of an unmodified chess board are more compelling for amateur chess players.}.
 
-\vspace{.5cm} % dirty fix because this heading for some reason doesn't consume any space
 \paragraph{Chess robots}
 Initial research into chess recognition emerged from the development of chess robots that included a camera to detect the human opponent's moves from a top-down overhead perspective. 
 The difficulty of distinguishing between chess pieces from a bird's-eye-view due to their similarity is noted in many papers; as a result, chess robots typically implement a three-way classification system that for every square attempts to determine whether it contains a piece, and if so, the piece's colour.

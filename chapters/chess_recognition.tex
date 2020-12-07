@@ -1,8 +1,8 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-\chapter{Recognising chess positions}
 \chapquote{Of chess, it has been said that life is not long enough for it, but that is the fault of life, not chess.}{William Napier}
+\chapter{Recognising chess positions}
 \begin{wrapfigure}[28]{r}{0pt}
     \centering
     \begin{tikzpicture}[
@@ -66,7 +66,6 @@ A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, th
 In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
 Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
 
-\vspace{.5cm} % dirty fix because this heading for some reason doesn't consume any space
 \subsubsection{Edge detection}
 \begin{figure}
     \centering

@@ -1,6 +1,7 @@
 \documentclass[a4paper,oneside]{book}
 \usepackage[utf8]{inputenc}
-\usepackage{epigraph}
+\usepackage{xcolor}
+\usepackage{quotchap}
 \usepackage{breakcites} % don't let citations break out of the text frame
 %\usepackage{microtype} % get rid of some frame busts automatically
 \usepackage[font=small]{caption}
@@ -34,11 +35,34 @@
 \usepackage{algpseudocode}
 \usepackage{subfiles}
 
-\epigraphnoindent
+% BEGIN: left-align quotchap
+\makeatletter
+\renewcommand*{\sectfont}{\bfseries}% make it bold
+\renewcommand\chapter{%
+  \if@openright\cleardoublepage\else\clearpage\fi
+  \thispagestyle{plain}%
+  \global\@topnum\z@
+  \null\hfill\@printcites\par%
+  \@afterindentfalse
+  \secdef\@chapter\@schapter
+}
+\renewcommand{\@makechapterhead}[1]{%
+  \chapterheadstartvskip%
+  {\size@chapter{\sectfont\raggedright%
+    {\chapnumfont
+      \ifnum \c@secnumdepth >\m@ne%
+      \if@mainmatter\thechapter%
+      \fi\fi
+      \par\nobreak}%
+    {\raggedright\advance\leftmargin10em\interlinepenalty\@M #1\par}}% NEW
+  \nobreak\chapterheadendvskip}}
+\makeatother
+% END: left-align quotchap
+
 \newcommand{\chapquote}[2]{%
-  \epigraphhead[70]{%
-    \epigraph{#1}{\textsc{#2}}%
-  }%
+  \begin{savequote}[45mm]
+    #1 \qauthor{#2}
+  \end{savequote}%
 }
 
 \algnewcommand\algorithmicinput{\textbf{Input:}}

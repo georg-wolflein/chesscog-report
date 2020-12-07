@@ -1,9 +1,8 @@
 \documentclass[../main.tex]{subfiles}
 
 \begin{document}
-
 \chapter{Recognising chess positions}
-
+\chapquote{Of chess, it has been said that life is not long enough for it, but that is the fault of life, not chess.}{William Napier}
 \begin{wrapfigure}[28]{r}{0pt}
     \centering
     \begin{tikzpicture}[
@@ -45,7 +44,6 @@
     \caption{Overview of the chess recognition pipeline.}
     \label{fig:chess_recognition_pipeline_overview}
 \end{wrapfigure}
-
 The chess recognition system is responsible for taking an \gls{rgb} image of a chessboard with pieces on it and  ultimately produce a \gls{fen} string representing the predicted chess position.
 The pipeline, depicted in \cref{fig:chess_recognition_pipeline_overview}, consists of four main stages which shall be described in detail in the subsequent sections.
 
@@ -64,6 +62,12 @@ Each square on the physical chessboard has the same width and height, even thoug
 
 \subsection{Finding intersection points}
 \label{sec:find_intersection_points}
+A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, thus there are nine horizontal and nine vertical lines.
+In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
+Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
+
+\vspace{.5cm} % dirty fix because this heading for some reason doesn't consume any space
+\subsubsection{Edge detection}
 \begin{figure}
     \centering
     \begin{subfigure}[t]{0.47\textwidth}
@@ -77,7 +81,6 @@ Each square on the physical chessboard has the same width and height, even thoug
         \includegraphics[width=\textwidth]{3828_corners_gray}
         \caption{grayscale image}
     \end{subfigure}
-    
     \bigskip
     \begin{subfigure}[t]{0.47\textwidth}
         \centering
@@ -92,7 +95,6 @@ Each square on the physical chessboard has the same width and height, even thoug
         \caption{detected lines, clustered into horizontal (green) and vertical (blue) lines}
         \label{fig:board_localisation_line_detection_horizontal_vertical}
     \end{subfigure}
-    
     \bigskip
     \begin{subfigure}[t]{0.47\textwidth}
         \centering
@@ -110,15 +112,10 @@ Each square on the physical chessboard has the same width and height, even thoug
     \caption{The process of determining the intersection points on the chessboard.}
     \label{fig:board_localisation_line_detection}
 \end{figure}
-A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, thus there are nine horizontal and nine vertical lines.
-In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
-Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
-
-\paragraph{Edge detection}
 To detect edges in the input image, we convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
 Canny edge detection is a multi-stage algorithm that first reduces noise in the image by applying a Gaussian blur, then calculates pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
 
-\paragraph{Line detection}
+\subsubsection{Line detection}
 \begin{figure}
     \centering
     \begin{tikzpicture}
@@ -218,7 +215,7 @@ Then, each intersection in $(\rho, \theta)$ space will represent a line passing 
 For a given threshold $t$, the Hough transform essentially plots the sinusoids for all edge points in the input image (which we obtained using the Canny edge detection algorithm) and outputs intersection points in $(\rho,\theta)$ space that are on at least $t$ different sinusoids.
 Consequently, the lines identified by the Hough transform are corroborated by at least $t$ edge points in the image.
 
-\paragraph{Clustering}
+\subsubsection{Clustering}
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
 We will first split them into horizontal and vertical lines and then eliminate similar lines.
 Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
@@ -235,7 +232,7 @@ Then, we find the intersection points of all the horizontal lines with the mean 
 We use the mean $\rho$ and $\theta$ values of the lines in each group to represent the final set of discovered horizontal lines. 
 The same procedure is applied vice-versa for the vertical lines, the result of which is shown in \cref{fig:board_localisation_line_detection_elimination}.
 
-\paragraph{Intersection points}
+\subsubsection{Intersection points}
 It remains to find the intersection points of the horizontal and vertical lines.
 Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, we can find their point of intersection by observing that their equations in Hesse normal form (\cref{eq:hesse_normal_form}) forms a system of two linear equations that can be solved for $x$ and $y$. 
 We have

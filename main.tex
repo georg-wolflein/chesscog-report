@@ -1,7 +1,8 @@
 \documentclass[a4paper,oneside]{book}
 \usepackage[utf8]{inputenc}
+\usepackage{epigraph}
 \usepackage{breakcites} % don't let citations break out of the text frame
-\usepackage{microtype} % get rid of some frame busts automatically
+%\usepackage{microtype} % get rid of some frame busts automatically
 \usepackage[font=small]{caption}
 \usepackage{csquotes}
 \usepackage{fancyhdr}
@@ -33,6 +34,12 @@
 \usepackage{algpseudocode}
 \usepackage{subfiles}
 
+\epigraphnoindent
+\newcommand{\chapquote}[2]{%
+  \epigraphhead[70]{%
+    \epigraph{#1}{\textsc{#2}}%
+  }%
+}
 
 \algnewcommand\algorithmicinput{\textbf{Input:}}
 \algnewcommand\algorithmicoutput{\textbf{Output:}}
@@ -133,9 +140,11 @@
 \subfile{chapters/implementation}
 
 \chapter{Evaluation}
+\chapquote{Chess is the struggle against the error.}{Johannes Zukertort}
 \section{Dataset}
 \section{Critical appraisal}
 \chapter{Conclusion}
+\chapquote{You may learn much more from a game you lose than from a game you win.}{José Capablanca}
 \section{Future work}
 
 \printglossary[type=\acronymtype]

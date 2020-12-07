@@ -4,12 +4,12 @@
 \begin{document}
 
 \chapter{Background}
+\chapquote{To become good at anything you have to know how to apply basic principles. To become great at it, you have to know when to violate those principles.}{Garry Kasparov}
 
 \section{Supervised learning}
 At its core, the purpose of an \gls{ann} is to infer a function that maps some input to some output, based on sample input-output pairs.
 In machine learning, we call this a \emph{supervised learning} task, and there are a great number of machine learning models (not only \glspl{ann}) that have been developed for this task.
-
-There are two main tasks in supervised learning that are relevant to this project: \emph{regression} and \emph{classification}.
+We shall briefly examine the two main disciplines within supervised learning: \emph{regression} and \emph{classification}.
 
 \subsection{Regression}
 A regression model captures the relationship between multiple input variables and one output variable. 
@@ -43,6 +43,7 @@ to denote all the labelled outputs in the dataset, and the $m \times n$ matrix
 for representing the corresponding feature vectors.
 
 \subsection{Classification}
+\label{sec:background_classification}
 Classification is a task that finds greater applicability within this project.
 As the name implies, a classification model tries to determine which category each input sample belongs to from a predefined set of classes $\sC$.
 To ease notation, we shall let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
@@ -53,7 +54,7 @@ $\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
 instead of a scalar function as in \cref{eq:reg_model}, namely
 \begin{equation}
     \label{eq:cla_model}
-    \vf(\vx) = \vyhat + \vec{\epsilon}= \vy.
+    \vf(\vx) = \vyhat = \vy + \vec{\epsilon}.
 \end{equation}
 Here, $\vf(\vx)$ actually represents a \gls{pmf} where the $i$\textsuperscript{th} component $\hat{y}_i$ of the output vector $\vyhat$ represents the probability that the input sample $\vx$ belongs to the class $i\in \sC$.
 It follows that
@@ -73,15 +74,15 @@ This means that for a given class $c \in \sC$, the components of $\vy$ are given
 which retains the property described in \cref{eq:pmf}.
 Since $\vf$ represents a \gls{pmf}, the one-hot encoded vector essentially states that the probability of class $c$ is 100\% and all other classes have a probability of 0\%.
 Notice that our outputs are now the vectors $\vy_i$ instead of the scalars $y_i$ in the regression task.
-Thus, we will use the matrix
+Hence a labelled classification dataset will consist of $m$ tuples of the form $\langle \vx_i,\vy_i \rangle$, meaning that instead of the vector $\vy$ from \cref{sec:background_classification}, we must use a matrix
 \begin{equation}
     \mY = \begin{bmatrix}
         \vy_1 & \vy_2 & \cdots & \vy_m
     \end{bmatrix}^\top
 \end{equation}
-to denote the targets. 
-The input matrix $\mX$ can stay as defined in \cref{eq:sup_learn_input_matrix}.
-\todo{Explain how dataset looks like for classification}
+to denote the targets.
+Each row in $\mY$ represents the one-hot encoded class label for that sample. 
+The input matrix $\mX$ remains as defined in \cref{eq:sup_learn_input_matrix}.
 
 \section{\Glsentrylongpl{ann}}
 \label{sec:ann}
@@ -95,7 +96,53 @@ A particular unit $i$'s \emph{excitation}, denoted $z_i$, is calculated as the w
     z_i = \sum_{j=1}^n{w_{j,i} a_j} + b_i
 \end{equation}
 where $a_j \in \mathbb{R}$ is another unit $j$'s \emph{activation} and $b_i \in \mathbb{R}$ is the $i$\textsuperscript{th} unit's \emph{bias}.
-Notice that in this model, if there exists no link between unit $i$ and a particular $j$ then simply $w_{i,j}=0$ and therefore $j$ will not contribute to $i$'s excitation. 
+In this model, if there exists no link between unit $i$ and a particular $j$ then simply $w_{i,j}=0$ and therefore $j$ will not contribute to $i$'s excitation. 
+\Cref{fig:ann} gives an example how such a network could look like.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        [
+            neuron/.style = {draw, circle, minimum size=25pt, inner sep=0pt, outer sep=0pt},
+        ]
+        \node [neuron] (n1) at (0,0) {$a_1$};
+        \node [neuron] (n2) [below left=1cm and .5cm of n1] {$a_2$};
+        \node [neuron] (n3) [below right=1cm and .5cm of n2] {$a_3$};
+        \node [neuron] (n4) [right=1cm of n3] {$a_4$};
+        \node [neuron] (n5) [above right=1cm and .5cm of n4] {$a_5$};
+        \node [neuron] (n6) [above left=1cm and .5cm of n5] {$a_6$};
+        \node (x1) at (-3, 0 |- n1) {$x_1$};
+        \node (x2) at (-3, 0 |- n2) {$x_2$};
+        \node (x3) at (-3, 0 |- n3) {$x_3$};
+        \node (y1) at (5, 0 |- n6) {$\yhat_1$};
+        \node (y2) at (5, 0 |- n5) {$\yhat_2$};
+        \draw[->] (x1) -- (n1);
+        \draw[->] (x2) -- (n2);
+        \draw[->] (x3) -- (n3);
+        \draw[->] (n6) -- (y1);
+        \draw[->] (n5) -- (y2);
+        \draw[->] (n1) -- (n6) node[midway,above] {$w_{1,6}$};
+        \draw[->] (n1) -- (n4) node[pos=.8,fill=white] {$w_{1,4}$};
+        \draw[->] (n2) -- (n6) node[near start,fill=white] {$w_{2,6}$};
+        \draw[->] (n5) -- (n4) node[midway,fill=white] {$w_{5,4}$};
+        \draw[->] (n6) -- (n5) node[midway,fill=white] {$w_{6,5}$};
+        \draw[->] (n3) -- (n6) node[near start,fill=white] {$w_{3,6}$};
+        \draw[->] (n4) -- (n6) node[midway,fill=white] {$w_{4,6}$};
+        \node (b1) [above of=n1] {$b_1=0$};
+        \node (b2) [above of=n2] {$b_2=0$};
+        \node (b3) [below of=n3] {$b_3=0$};
+        \node (b4) [below of=n4] {$b_4$};
+        \node (b5) [above of=n5] {$b_5$};
+        \node (b6) [above of=n6] {$b_6$};
+        \draw[->] (b1) -- (n1);
+        \draw[->] (b2) -- (n2);
+        \draw[->] (b3) -- (n3);
+        \draw[->] (b4) -- (n4);
+        \draw[->] (b5) -- (n5);
+        \draw[->] (b6) -- (n6);
+    \end{tikzpicture}
+    \caption[An \glsentrylong{ann} with six neurons that could be used to decide a classification problem.]{An \glsentrylong{ann} with six neurons that could be used to decide a classification problem. The inputs $x_1,x_2,x_3$ are set as the activations of the first three units (thus $b_1,b_2,b_3$ have no effect) and the outputs $\yhat_1,\yhat_2$ are the activations received from the final two units. Only some weights are shown in the diagram.}
+    \label{fig:ann}
+\end{figure}
 
 The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function}, $g: \mathbb{R} \rightarrow \mathbb{R}$. We have
 \begin{equation}
@@ -104,7 +151,7 @@ The unit $i$'s activation is its excitation applied to a non-linear \emph{activa
 \end{equation}
 
 \paragraph{Activation functions}
-In its original form, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
+In its original form in \citeyear{mcculloch1943}, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
 This means that in our model from \cref{eq:ann_activation}, we would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{step}: \mathbb{R} \rightarrow \{0, 1\}$ like the Heaviside step function%
 \footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in our model the bias term $b_i$ acts as the threshold.}
 \begin{equation*}
@@ -183,25 +230,168 @@ which are depicted in \cref{fig:activation_functions}.
     \caption{Plots of the the two most common activation functions.}
     \label{fig:activation_functions}
 \end{figure}
-Unlike $g_\text{step}$, these activation functions are differentiable which is an advantage for being able to use gradient descent to optimise the weights \cite[729]{russell2010}.
+Unlike $g_\text{step}$, the range of these these activation functions is the real numbers, and the functions themselves are differentiable which is an advantage for being able to use gradient descent to optimise the weights \cite[729]{russell2010}.
 
-Rectified units do not suffer from the \emph{vanishing gradient effect} \cite{glorot2011}.
+Rectified units do not suffer from the so-called \emph{vanishing gradient effect} \cite{glorot2011}.
 This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal (see \cref{fig:activation_functions_sigmoid}), and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
 As a result, the \gls{relu} activation function (or variants thereof) are the most popular choice nowadays.
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
-\subsection{\Glsentrylongpl{mlp}}
-Thus far, our definition of \glspl{ann} is still very general.
-\Cref{eq:ann_excitation,eq:ann_activation} make no restrictions on how the neurons must be connected.
+\subsection{Feedforward neural networks}
+Our definition of \glspl{ann} is so far still very general and makes virtually no restrictions on the graph of the network.
+It turns out that it is difficult to propagate activations between neurons when they exhibit cycles, as is the case with the last three units in \cref{fig:ann}.
+Thus we impose a constraint that the nodes of the network are not allowed to form cycles, and as a result the network becomes a \gls{dag}.
+This class of \glspl{ann} are referred to as \emph{feedforward neural networks}.
+
+\subsubsection{\Glsentrylong{slp}}
+The most basic type of feedforward neural network is the \gls{slp}.
+It consists of $n_0$ input units that are directly connected to $n_1$ output units, as illustrated in \cref{fig:slp}.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        [
+            neuron/.style = {draw, circle, minimum size=25pt, inner sep=0pt, outer sep=0pt},
+        ]
+        \node [neuron] (n1) at (0,0) {$\yhat_1$};
+        \node [neuron] (n2) [below=1.5cm of n1] {$\yhat_2$};
+        \node [neuron] (n3) [below=1.5cm of n2] {$\yhat_3$};
+        \node [neuron] (x1) [below left=.75cm and 2cm of n1] {$x_1$};
+        \node [neuron] (x2) [below left=.75cm and 2cm of n2] {$x_2$};
+        \draw[->] (x1) -- (n1);
+        \draw[->] (x1) -- (n2);
+        \draw[->] (x1) -- (n3);
+        \draw[->] (x2) -- (n1);
+        \draw[->] (x2) -- (n2);
+        \draw[->] (x2) -- (n3);
+        \node (b1) [above of=n1] {$b_1$};
+        \node (b2) [above of=n2] {$b_2$};
+        \node (b3) [above of=n3] {$b_3$};
+        \draw[->] (b1) -- (n1);
+        \draw[->] (b2) -- (n2);
+        \draw[->] (b3) -- (n3);
+    \end{tikzpicture}
+    \caption{A \acs{slp} with two inputs and three outputs.}
+    \label{fig:slp}
+\end{figure}
+There are no connections between input units, and no connections between output units.
+Likewise, there are no connections from output units to input units. 
+The only connections in the network originate from input units and feed to output units. 
+In fact, that is where the term \emph{feedforward} arises: the network exhibits neither backwards nor intra-layer connections.
+The connections themselves are of course weighted as in any \gls{ann}.
+Due to the unidirectional nature of the links, we can continue to use the notation $w_{i,j}$ to denote weights, but now $i$ refers to the input unit and $j$ refers to the output unit.
+
+From \cref{eq:ann_activation}, we can compute the values of the three output units in \cref{fig:slp} as
+\begin{equation}
+    \label{eq:slp_simple}
+    \yhat_j = g\left(\sum_{i=1}^n{w_{i,j} x_i} + b_j\right)
+\end{equation}
+for $j=1,2,3$.
+Mathematically, a \gls{slp} is represented by a function $\vf:\R^{n_0}\to \R^{n_1}$ that maps an input vector $\vx \in \R^{n_0}$ to an output vector $\vyhat \in \R^{n_1}$.
+Let us use the $n_0 \times n_1$ matrix $\mW$ to contain all weights such that
+\begin{equation*}
+    \mW = \begin{bmatrix}
+        w_{1,1} & w_{1,2} & \cdots & w_{1,n_1} \\ 
+        w_{2,1} & w_{2,2} & \cdots & w_{2,n_1} \\ 
+        \vdots & \vdots & \ddots & \vdots \\ 
+        w_{n_0,1} & w_{n_0,2} & \cdots & w_{n_0,n_1} \\ 
+    \end{bmatrix}.
+\end{equation*}
+and the vector
+\begin{equation*}
+    \vb = \begin{bmatrix}
+        b_1,b_2,\dots,b_{n_1}
+    \end{bmatrix}
+\end{equation*}
+to represent the biases.
+Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} we finally define the function of a \gls{slp} as
+\begin{equation}
+    \vf(\vx) = \vyhat = \vg\left(
+        \vec{W}^\top \vec{x} + \vec{b}
+    \right)
+\end{equation}
+where $\vg(\cdot)$ applies the activation function $g$ pointwise.
+The process of computing the activations of the output units given the input units is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
+
+\subsubsection{\Glsentrylong{mlp}}
+As the name implies, a \gls{mlp} simply stacks multiple \glspl{slp} on top of each other, such that each layer's outputs are connected to the next layer's inputs (except for the final layer, where the outputs represent $\vyhat$).
+A \gls{mlp} with $l$ layers can be expressed mathematically by composing $l$ \glspl{slp} $\vf_1,\vf_2,\dots,\vf_l$ (each weight their own weights and biases):
+\begin{equation}
+    \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_l)(\vx).
+\end{equation}
+Each \gls{slp} inside the \gls{mlp} is constitutes a logical module of the \gls{mlp} which we call a \emph{layer}.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        [
+            neuron/.style = {draw, circle, minimum size=25pt, inner sep=0pt, outer sep=0pt},
+        ]
+        \node [neuron] (x1) at (0,0) {$x_1$};
+        \node [neuron] (x2) at (0,-2) {$x_2$};
+        \node [neuron] (x3) at (0,-4) {$x_3$};
+        \node [neuron] (h11) at (3,1) {};
+        \node [neuron] (h12) at (3,-1) {};
+        \node [neuron] (h13) at (3,-3) {};
+        \node [neuron] (h14) at (3,-5) {};
+        \node [neuron] (h21) at (6,-1) {};
+        \node [neuron] (h22) at (6,-3) {};
+        \node [neuron] (y1) at (9, -1) {$\hat{y}_1$};
+        \node [neuron] (y2) at (9, -3) {$\hat{y}_2$};
+        \node (b11) at (3, 2) {$b^{(1)}_1$};
+        \node (b12) at (3, 0) {$b^{(1)}_2$};
+        \node (b13) at (3, -2) {$b^{(1)}_3$};
+        \node (b14) at (3, -4) {$b^{(1)}_4$};
+        \node (b21) at (6, 0) {$b^{(2)}_1$};
+        \node (b22) at (6, -2) {$b^{(2)}_2$};
+        \node (b31) at (9, 0) {$b^{(3)}_1$};
+        \node (b32) at (9, -2) {$b^{(3)}_2$};
+        \draw[->] (x1) -- (h11);
+        \draw[->] (x1) -- (h12);
+        \draw[->] (x1) -- (h13);
+        \draw[->] (x1) -- (h14);
+        \draw[->] (x2) -- (h11);
+        \draw[->] (x2) -- (h12);
+        \draw[->] (x2) -- (h13);
+        \draw[->] (x2) -- (h14);
+        \draw[->] (x3) -- (h11);
+        \draw[->] (x3) -- (h12);
+        \draw[->] (x3) -- (h13);
+        \draw[->] (x3) -- (h14);
+        \draw[->] (h11) -- (h21);
+        \draw[->] (h11) -- (h22);
+        \draw[->] (h12) -- (h21);
+        \draw[->] (h12) -- (h22);
+        \draw[->] (h13) -- (h21);
+        \draw[->] (h13) -- (h22);
+        \draw[->] (h14) -- (h21);
+        \draw[->] (h14) -- (h22);
+        \draw[->] (b11) -- (h11);
+        \draw[->] (b12) -- (h12);
+        \draw[->] (b13) -- (h13);
+        \draw[->] (b14) -- (h14);
+        \draw[->] (b21) -- (h21);
+        \draw[->] (b22) -- (h22);
+        \draw[->] (b31) -- (y1);
+        \draw[->] (b32) -- (y2);
+        \draw[->] (h21) -- (y1);
+        \draw[->] (h22) -- (y1);
+        \draw[->] (h21) -- (y2);
+        \draw[->] (h22) -- (y2);
+        \draw[dashed] (-1,3) rectangle (1,-6);
+        \draw[dashed] (2,3) rectangle (7,-6);
+        \draw[dashed] (8,3) rectangle (10,-6);
+        \node[below] (input) at (0,3) {input layer};
+        \node[below] (hidden) at (4.5,3) {hidden layers};
+        \node[below] (output) at (9,3) {output layer};
+    \end{tikzpicture}
+    \caption{A \acs{mlp} with three inputs, two hidden layers, and two outputs.}
+    \label{fig:mlp}
+\end{figure}
+
+\subsection{Backpropagation}
+
 % ... more useful to consider layers
 % fully-connected feedforward
 
-% \paragraph{\glspl{ann} as classification models}
-% We can employ an \gls{ann} to model a classification problem of the form given in \cref{eq:cla_model}. 
-% To do so, we need at least $n+c$ neurons in the network.
-% Let us use $N$ to denote the total number of neurons in the network. 
-% We consider the first $n$ units to be the \emph{input} neurons, and the last $c$ neurons to be the output units.
-% Furthermore, we require $w_{j,k}=0$ for $j,k \in \mathbb{Z}^+$ where $j \leq n+c$ and $k \leq n$ to ensure that there are no links feeding into the input neurons.
 
 % To obtain the prediction $\vyhat$ given the $n$-dimensional feature vector $\vx$, we set the activation of the $i$\textsuperscript{th} unit to the value the $i$\textsuperscript{th} element in $\vx$ for $i=1,\dots,n$.
 % Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last $c$ neurons,

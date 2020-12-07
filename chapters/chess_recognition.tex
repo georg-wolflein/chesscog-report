@@ -3,10 +3,10 @@
 \begin{document}
 \chapquote{Of chess, it has been said that life is not long enough for it, but that is the fault of life, not chess.}{William Napier}
 \chapter{Recognising chess positions}
-\begin{wrapfigure}[28]{r}{0pt}
+\begin{wrapfigure}[24]{r}{0pt}
     \centering
     \begin{tikzpicture}[
-        node distance = 2.5cm,
+        node distance = 2cm,
         every text node part/.style={align=center},
         io/.style = {
             trapezium,
@@ -36,9 +36,9 @@
         \node[io,below=.5cm of probabilities] (output) {\acs{fen} output};
 
         \draw[arrow] (input) -- (localisation);
-        \draw[arrow] (localisation) -- node[fill=white, anchor=center] {corner points} (occupancy);
-        \draw[arrow] (occupancy) -- node[fill=white, anchor=center] {occupancy mask} (piece);
-        \draw[arrow] (piece) -- node[fill=white, anchor=center] {piece probabilities} (probabilities);
+        \draw[arrow] (localisation) -- node[right] {corner points} (occupancy);
+        \draw[arrow] (occupancy) -- node[right] {occupancy mask} (piece);
+        \draw[arrow] (piece) -- node[right] {piece probabilities} (probabilities);
         \draw[arrow] (probabilities) -- (output);
     \end{tikzpicture}
     \caption{Overview of the chess recognition pipeline.}

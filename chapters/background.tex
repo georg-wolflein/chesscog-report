@@ -305,7 +305,7 @@ and the vector
 to represent the biases.
 Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} we finally define the function of a \gls{slp} as
 \begin{equation}
-    \vf(\vx) = \vyhat = \vg\left(
+    \vf_{\mW,\vb}(\vx) = \vyhat = \vg\left(
         \vec{W}^\top \vec{x} + \vec{b}
     \right)
 \end{equation}
@@ -314,11 +314,20 @@ The process of computing the activations of the output units given the input uni
 
 \subsubsection{\Glsentrylong{mlp}}
 As the name implies, a \gls{mlp} simply stacks multiple \glspl{slp} on top of each other, such that each layer's outputs are connected to the next layer's inputs (except for the final layer, where the outputs represent $\vyhat$).
-A \gls{mlp} with $l$ layers can be expressed mathematically by composing $l$ \glspl{slp} $\vf_1,\vf_2,\dots,\vf_l$ (each weight their own weights and biases):
+A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \glspl{slp} $\vf_1,\vf_2,\dots,\vf_L$:
 \begin{equation}
-    \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_l)(\vx).
+    \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_L)(\vx).
 \end{equation}
+
 Each \gls{slp} inside the \gls{mlp} is constitutes a logical module of the \gls{mlp} which we call a \emph{layer}.
+Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, we will use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
+Further, the notation $b_j^{(l)}$ refers to the $j$\textsuperscript{th} unit's bias in layer $l$, and $w_{i,j}^{(l)}$ is the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$.
+This notation follows \textcite{goodfellow2016} and is customary in describing neural networks
+We shall use $n_0,n_1,\dots,n_L$ to describe the number of units in each layer.
+Layer zero is considered the \emph{input layer}, meaning that $n_0$ must be equal to the dimensionality of $\vx$. 
+The layers $1, 2, \dots, L-1$ are the \emph{hidden layers} because they are not directly connected to the input or output units.
+Finally, we refer to layer $L$ as the \emph{output layer}, since its units represent the prediction $\vyhat$, and so $n_L$ must be equal to the dimensionality of $\vyhat$. 
+\Cref{fig:mlp} gives an example of a \gls{mlp} architecture.
 \begin{figure}
     \centering
     \begin{tikzpicture}
@@ -386,73 +395,27 @@ Each \gls{slp} inside the \gls{mlp} is constitutes a logical module of the \gls{
     \caption{A \acs{mlp} with three inputs, two hidden layers, and two outputs.}
     \label{fig:mlp}
 \end{figure}
+It can clearly be seen that since \glspl{mlp} are simply nested \glspl{slp}, they still form \glspl{dag} and thus are feedforward networks.
+In fact, such networks are usually \emph{fully-connected feedforward networks} because all units from a particular layer connect to all units from the previous layer.
 
 \subsection{Backpropagation}
+\emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e. how far they are `off'. 
+This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that was introduced at the very beginning of this chapter to define supervised learning.
 
-% ... more useful to consider layers
-% fully-connected feedforward
+%We will use a simple loss function that uses mean squared error for this purpose.
+% \begin{definition}[Mean squared error]
+%     \label{def:mean_squared_error}
+%     Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^N$ be a labelled dataset (see \cref{def:labelled_dataset}).
+%     The mean squared error of a set of predictions $\vec{\hat{y}}$ is given as an average over the sum of squared differences,
+%     \begin{equation}
+%         \label{eq:mean_squared_error}
+%         E\left( \vec{y}, \vec{\hat{y}} \right) = \frac{1}{N} \sum_{i=1}^N{\left(\hat{y}_i - y_i\right)^2}.
+%     \end{equation}
+% \end{definition}
 
-
-% To obtain the prediction $\vyhat$ given the $n$-dimensional feature vector $\vx$, we set the activation of the $i$\textsuperscript{th} unit to the value the $i$\textsuperscript{th} element in $\vx$ for $i=1,\dots,n$.
-% Then, we propagate the activations using \cref{eq:ann_activation} until finally the prediction is the activation of the last $c$ neurons,
-% \begin{equation*}
-%     \vyhat = \begin{bmatrix}
-%         a_{N-c} &
-%         a_{N-c+1} &
-%         \dots &
-%         a_{N}
-%     \end{bmatrix}.
-% \end{equation*}
-% This process is often called \emph{forward propagation} or \emph{forward pass} \cite{burkov2019}.
-
-% \begin{figure}
-%     \centering
-%     \begin{tikzpicture}
-%         [
-%             neuron/.style = {draw, circle, minimum size=25pt, inner sep=0pt, outer sep=0pt},
-%         ]
-%         \node [neuron] (x1) at (0,0) {$a_1$};
-%         \node [neuron] (x2) at (0,-2) {$a_2$};
-%         \node [neuron] (x3) at (0,-4) {$a_3$};
-%         \node [neuron] (n1) at (3,1)  {$a_6$};
-%         \node [neuron] (n2) at (3,-1) {$a_7$};
-%         \node [neuron] (n3) at (3,-3) {$a_8$};
-%         \node [neuron] (n4) at (3,-5) {$a_9$};
-%         \node (b1) at (0, 1) {$b_1=0$};
-%         \node (b2) at (0, -1) {$b_2=0$};
-%         \node (b3) at (0, -3) {$b_3=0$};
-%         \node (b6) at (3, 2) {$b_6$};
-%         \node (b7) at (3, 0) {$b_7$};
-%         \node (b8) at (3, -2) {$b_8$};
-%         \node (b9) at (3, -4) {$b_9$};
-%         \draw[->] (x1) -- (n1);
-%         \draw[->] (x1) -- (n2);
-%         \draw[->] (x1) -- (n3);
-%         \draw[->] (x1) -- (n4);
-%         \draw[->] (x2) -- (n1);
-%         \draw[->] (x2) -- (n2);
-%         \draw[->] (x2) -- (n3);
-%         \draw[->] (x2) -- (n4);
-%         \draw[->] (x3) -- (n1);
-%         \draw[->] (x3) -- (n2);
-%         \draw[->] (x3) -- (n3);
-%         \draw[->] (x3) -- (n4);
-%         \draw[->] (b1) -- (x1);
-%         \draw[->] (b2) -- (x2);
-%         \draw[->] (b3) -- (x3);
-%         \draw[->] (b6) -- (n1);
-%         \draw[->] (b7) -- (n2);
-%         \draw[->] (b8) -- (n3);
-%         \draw[->] (b9) -- (n4);
-%     \end{tikzpicture}
-%     \caption{A single-layer perceptron with three input and four output neurons (not all arrows are shown).}
-%     \label{fig:single_layer_perceptron}
-% \end{figure}
 
 % \chapter{Neural network training}
 % \label{chap:neural_training}
-% We will now introduce the two neural training techniques outlined in \cref{sec:motivation} (gradient descent and simulated annealing) more formally in the context of how we defined neural networks in the previous chapter.
-% For gradient descent, we will derive the famous backpropagation algorithm, but we will also look at a derivative-free notion of gradient descent which we will call \emph{greedy probing}.
 % Simulated annealing is of course derivative-free in nature.
 % We also define some issues related to these methods more precisely as a means of setting the scene for the neural surfing technique later on.
 

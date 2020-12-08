@@ -5,6 +5,8 @@
 
 \chapquote{To become good at anything you have to know how to apply basic principles. To become great at it, you have to know when to violate those principles.}{Garry Kasparov}
 \chapter{Background}
+This chapter will introduce some of the basic concepts involved in \glspl{ann}, \glspl{cnn}, and transfer learning required to understand this report.
+Readers familiar with this subject matter should feel free to skip this chapter and resume at \cref{chap:data_synthesis}.
 
 \section{Supervised learning}
 At its core, the purpose of an \gls{ann} is to infer a function that maps some input to some output, based on sample input-output pairs.
@@ -12,6 +14,7 @@ In machine learning, we call this a \emph{supervised learning} task, and there a
 We shall briefly examine the two main disciplines within supervised learning: \emph{regression} and \emph{classification}.
 
 \subsection{Regression}
+\label{sec:regression}
 A regression model captures the relationship between multiple input variables and one output variable. 
 As such, it can be defined a mathematical function of the form $f:\mathbb{R}^n\rightarrow \mathbb{R}$ given by
 \begin{equation}
@@ -305,8 +308,9 @@ and the vector
 to represent the biases.
 Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} we finally define the function of a \gls{slp} as
 \begin{equation}
+    \label{eq:slp}
     \vf_{\mW,\vb}(\vx) = \vyhat = \vg\left(
-        \vec{W}^\top \vec{x} + \vec{b}
+        \vw^\top \vx + \vb
     \right)
 \end{equation}
 where $\vg(\cdot)$ applies the activation function $g$ pointwise.
@@ -316,6 +320,7 @@ The process of computing the activations of the output units given the input uni
 As the name implies, a \gls{mlp} simply stacks multiple \glspl{slp} on top of each other, such that each layer's outputs are connected to the next layer's inputs (except for the final layer, where the outputs represent $\vyhat$).
 A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \glspl{slp} $\vf_1,\vf_2,\dots,\vf_L$:
 \begin{equation}
+    \label{eq:mlp}
     \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_L)(\vx).
 \end{equation}
 
@@ -400,147 +405,138 @@ In fact, such networks are usually \emph{fully-connected feedforward networks} b
 
 \subsection{Backpropagation}
 \emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e. how far they are `off'. 
-This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that was introduced at the very beginning of this chapter to define supervised learning.
+This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that we introduced at the very beginning of this chapter in the context of supervised learning.
 
-%We will use a simple loss function that uses mean squared error for this purpose.
-% \begin{definition}[Mean squared error]
-%     \label{def:mean_squared_error}
-%     Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^N$ be a labelled dataset (see \cref{def:labelled_dataset}).
-%     The mean squared error of a set of predictions $\vec{\hat{y}}$ is given as an average over the sum of squared differences,
-%     \begin{equation}
-%         \label{eq:mean_squared_error}
-%         E\left( \vec{y}, \vec{\hat{y}} \right) = \frac{1}{N} \sum_{i=1}^N{\left(\hat{y}_i - y_i\right)^2}.
-%     \end{equation}
-% \end{definition}
+Backpropagation with gradient descent is an iterative algorithm for training neural networks that, provided a suitable learning rate $\alpha$, is guaranteed to converge to a \emph{local minimum}.
+The main idea is as follows:
+\begin{enumerate}
+    \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vp$ (weights and biases) as
+        $\vec{\Delta p} = \frac{\delta L}{\delta \vp}\left(\vp\right)$.
+    \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ where $\alpha \in \R$ is the learning rate.
+    \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
+\end{enumerate}
+\Cref{fig:gradient_descent_local_minimum} shows the steps that this algorithm would make on a simple error-weight surface with only one parameter.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+        declare function={
+            f(\x) = \x^4 + 0.5*\x^3 - 2*\x^2;
+            g(\x) = f(.5*\x-2)+2;
+        }
+    ]
+        \begin{axis}[
+            x=1.5cm,
+            y=1.5cm,
+            axis lines=center,
+            xlabel={$p$}, xlabel style={anchor=west},
+            ylabel={$L(p)$}, ylabel style={anchor=south},
+            ymin=-0, ymax=4.2,
+            xmin=0, xmax=7.2,
+            samples=100,
+            domain=0.1:7.5,
+            ticks=none
+        ]
+            \addplot[black] {g(x)};
+            \addplot[-{Latex[length=2mm]},black,samples at={6.85,6.5},mark=*] {g(x)};
+            \addplot[-{Latex[length=2mm]},black,samples at={6.5,6.2},mark=*] {g(x)};
+            \addplot[-{Latex[length=2mm]},black,samples at={6.2,5.9},mark=*] {g(x)};
+            \addplot[-{Latex[length=2mm]},black,samples at={5.9,5.7},mark=*] {g(x)};
+            \node[left] at (6.85,{g(6.85)}) {initial position};
+            \node[below,align=center] at (5.7,{g(5.7)}) {final position\\(local minimum)};
+            \addplot[mark=*] coordinates {(1.6,{g(1.6)})};
+            \node[below,align=center] at (1.6,{g(1.6)}) {global minimum};
+        \end{axis}
+    \end{tikzpicture}
+    \caption[An illustration gradient descent training on an error-weight surface.]{An illustration gradient descent training on an error-weight surface with only one parameter (not drawn to scale). Gradient descent minimises the objective loss function and converges to a local minimum. In practice, deep neural networks have parameters in the order of one million, resulting in a high-dimensional error surface, and local minima often turn out to be `good enough' in that their error is only slightly higher than the global minimum \cite{lecun2015}.}
+    \label{fig:gradient_descent_local_minimum}
+\end{figure}
 
+To explain the backpropagation algorithm, we shall examine the case of a regression task, meaning that the network has only one output unit.
+The algorithm can, of course, be generalised to classification problems with multiple output units.
+Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^m$ be a labelled regression dataset as defined in \cref{sec:regression}.
 
-% \chapter{Neural network training}
-% \label{chap:neural_training}
-% Simulated annealing is of course derivative-free in nature.
-% We also define some issues related to these methods more precisely as a means of setting the scene for the neural surfing technique later on.
+We must first introduce a measure indicating how good our predictions are.
+For simplicity, we will use the \gls{mse}, although note that for classification problems, the cross-entropy loss is preferred.
+The \gls{mse} of a set of predictions $\vyhat$ is the average squared difference between the predictions and targets,
+\begin{equation}
+    \label{eq:mean_squared_error}
+    E\left( \vyhat, \vy \right) = \frac{1}{m} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2} = \norm{\vyhat-\vy}_2^2.
+\end{equation}
+The reader should not confuse this notation with that of a classification problem; here, we use $\vy$ to denote the targets for each sample in the dataset and $\vyhat$ to denote the corresponding predictions.
 
-% \emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e. how far they are `off'. 
-% This is how the network facilitates \emph{learning} the input-output function from \cref{def:supervised_learning}.
-% We will use a simple loss function that uses mean squared error for this purpose.
-% \begin{definition}[Mean squared error]
-%     \label{def:mean_squared_error}
-%     Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^N$ be a labelled dataset (see \cref{def:labelled_dataset}).
-%     The mean squared error of a set of predictions $\vec{\hat{y}}$ is given as an average over the sum of squared differences,
-%     \begin{equation}
-%         \label{eq:mean_squared_error}
-%         E\left( \vec{y}, \vec{\hat{y}} \right) = \frac{1}{N} \sum_{i=1}^N{\left(\hat{y}_i - y_i\right)^2}.
-%     \end{equation}
-% \end{definition}
+We can formulate a loss function
+\begin{equation}
+    \label{eq:mse}
+    L\left( \vyhat, \vy \right) = \frac{1}{2} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2}
+\end{equation}
+that behaves similarly to \cref{eq:mean_squared_error} in that reducing the loss function will also reduce the \gls{mse}, but it will be easier to work with.
 
-% \begin{definition}[Loss function]
-%     \label{def:loss_function}
-%     Given an MLP $M$ with $P$ trainable parameters (weights and biases), the loss function $L:\mathbb{R}^P\rightarrow \mathbb{R}$ is a function that maps weight (and bias) configurations to their associated error values.
-%     Let $\vec{y} \in \mathbb{R}^N$ be the target outputs for training.
-%     Then the loss function is defined as
-%     \begin{equation}
-%         \label{eq:loss_function}
-%         L(\vec{p}) = \sum_{i=1}^N{\left(M\left(\vx_i; \vec{p}\right) - y_i\right)^2}.
-%     \end{equation}
-%     Notice the similarity to \cref{eq:mean_squared_error}; we have only omitted the factor $\frac{1}{N}$ since the actual loss values are not as important as their relationship to each other, and multiplying by $N$ will retain that relationship.
-%     We use the term \emph{error-weight surface} to refer to the graph of this function.
-% \end{definition}
+\subsubsection{\Glsentrylong{slp}}
+In a \gls{slp}, we can easily express the loss in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
+\begin{equation}
+    L = \frac{1}{2} \sum_{i=1}^m{\left(g\left(
+        \vw \vx_i + b
+    \right) - y_i\right)^2}.
+\end{equation}
+Calculating the derivative of the loss function with respect to each of the trainable parameters is a core part of the gradient descent algorithm.
+% Let us take a look at calculating this gradient.
+The trainable parameters in our network are $\vw$ and $b$, so we will differentiate $L$ with respect to each of these.
+We obtain the partial derivative of the loss with respect to the bias as
+\begin{align}
+    \label{eq:backprop_dL_db}
+    \frac{\delta L}{\delta b}
+    &= \sum_{i=1}^m{
+        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \frac{\delta}{\delta b} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+    } \nonumber \\
+    &= \sum_{i=1}^m{
+        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        g' \left(\vw^\top\vx_i+b\right)
+    },
+\end{align}
+and similarly we can differentiate with respect to the weights
+\begin{align}
+    \label{eq:backprop_dL_dw}
+    \frac{\delta L}{\delta \vw}
+    &= \sum_{i=1}^m{
+        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \frac{\delta}{\delta \vw} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+    } \nonumber \\
+    &= \sum_{i=1}^m{
+        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        g' \left(\vw^\top\vx_i+b\right)
+        \vx_i
+    }.
+\end{align}
+Here, the derivative $g'(\cdot)$ depends on the choice of activation function $g(\cdot)$.
 
-% \section{Backpropagation with gradient descent}
-% \label{sec:backpropagation}
-% Backpropagation (BP) with gradient descent is an iterative algorithm for training neural networks that, provided a suitable learning rate $\alpha$, is guaranteed to converge to a \emph{local minimum}.
-% The main idea is as follows:
-% \begin{enumerate}
-%     \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vec{p}$ as
-%         $\vec{\Delta p} = \frac{\delta L}{\delta \vec{p}}\left(\vec{p}\right)$.
-%     \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vec{p} \leftarrow \vec{p} - \alpha \vec{\Delta p}$ where $\alpha \in \mathbb{R}$ is the learning rate.
-%     \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
-% \end{enumerate}
-% \cref{fig:gradient_descent_local_minimum} shows the steps that this algorithm would make on a simple error-weight surface with only one parameter.
-% \begin{figure}
-%     \centering
-%     \begin{tikzpicture}[
-%         declare function={
-%             f(\x) = \x^4 + 0.5*\x^3 - 2*\x^2;
-%             g(\x) = f(.5*\x-2)+2;
-%         }
-%     ]
-%         \begin{axis}[
-%             x=1.5cm,
-%             y=1.5cm,
-%             axis lines=center,
-%             xlabel={$p$}, xlabel style={anchor=west},
-%             ylabel={$L(p)$}, ylabel style={anchor=south},
-%             ymin=-0, ymax=4.2,
-%             xmin=0, xmax=7.2,
-%             samples=100,
-%             domain=0.1:7.5,
-%             ticks=none
-%         ]
-%             \addplot[black] {g(x)};
-%             \addplot[-{Latex[length=2mm]},black,samples at={6.85,6.5},mark=*] {g(x)};
-%             \addplot[-{Latex[length=2mm]},black,samples at={6.5,6.2},mark=*] {g(x)};
-%             \addplot[-{Latex[length=2mm]},black,samples at={6.2,5.9},mark=*] {g(x)};
-%             \addplot[-{Latex[length=2mm]},black,samples at={5.9,5.7},mark=*] {g(x)};
-%             \node[left] at (6.85,{g(6.85)}) {initial position};
-%             \node[below,align=center] at (5.7,{g(5.7)}) {final position\\(local minimum)};
-%             \addplot[mark=*] coordinates {(1.6,{g(1.6)})};
-%             \node[below,align=center] at (1.6,{g(1.6)}) {global minimum};
-%         \end{axis}
-%     \end{tikzpicture}
-%     \caption{An illustration gradient descent training on an error-weight surface with only one parameter (not drawn to scale).}
-%     \label{fig:gradient_descent_local_minimum}
-% \end{figure}
+At each iteration, the gradient descent algorithm updates the trainable parameters by taking a step in the direction opposite to the gradient.
+The size of this step is governed by the learning rate $\alpha \in \R$.
+Mathematically, this is expressed as
+\begin{align}
+    \label{eq:backprop_update_weights}
+    \vw &\gets \vw - \alpha \frac{\delta L}{\delta \vw}(\vw),\\
+    \label{eq:backprop_update_bias}
+    b &\gets b - \alpha \frac{\delta L}{\delta b}(b).
+\end{align}
 
-% Calculating the derivative of the loss function with respect to each of the trainable parameters is a core part of the gradient descent algorithm.
-% Let us look at calculating this gradient for the example of a single-layer MLP. 
-% We will come back to these results in \cref{sec:stripe_problem}.
-% \begin{example}[Gradient in a single-layer MLP]
-%     \label{ex:gradient_single_layer_mlp}
-%     Let us revisit the SLN with $m$ inputs and one output from \cref{fig:sln_m_in_1_out}.
-%     The loss function will be in terms of the trainable parameters, i.e. the weights $\vec{w}$ and bias $b$, so
-%     \begin{align}
-%         L = L(\vec{w}, b)
-%         &= \sum_{i=1}^N{\left(S\left(\vx_i; \vec{w}, b\right) - y_i\right)^2} \nonumber \\
-%         &= \sum_{i=1}^N{\left(g\left(\vec{w}\tran \vx_i + b\right) - y_i\right)^2}.
-%     \end{align}
+\subsubsection{\Glsentrylong{mlp}}
+To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e. each layer's weights and biases).
+We must compute $\frac{\delta L}{\delta \mW_l}$ and $\frac{\delta L}{\delta \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader due to the scope of this report.
+The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
+Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, we update the weights and biases by applying the rule
+\begin{align}
+    \label{eq:backprop_mlp_update_weights}
+    \mW_l &\gets \mW_l - \alpha \frac{\delta L}{\delta \mW_l}(\mW_l),\\
+    \label{eq:backprop_mlp_update_biases}
+    \vb_l &\gets \vb_l - \alpha \frac{\delta L}{\delta \vb_l}(\vb_l).
+\end{align}
 
-%     We obtain the partial derivative of the loss with respect to the bias as
-%     \begin{align}
-%         \frac{\delta L}{\delta b}
-%         &=2 \sum_{i=1}^N{
-%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%             \frac{\delta}{\delta b} \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%         } \nonumber \\
-%         &= 2 \sum_{i=1}^N{
-%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%             g' \left(\vec{w}\tran\vx_i+b\right)
-%         },
-%     \end{align}
-%     and similarly we can differentiate with respect to the weights
-%     \begin{align}
-%         \frac{\delta L}{\delta \vec{w}}
-%         &= 2 \sum_{i=1}^N{
-%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%             \frac{\delta}{\delta \vec{w}} \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%         } \nonumber \\
-%         &= 2 \sum_{i=1}^N{
-%             \left(g \left(\vec{w}\tran\vx_i+b\right) - y_i \right)
-%             g' \left(\vec{w}\tran\vx_i+b\right)
-%             \vx_i
-%         }.
-%     \end{align}
-
-%     Now we would denote the gradient of the loss with respect to the trainable parameters $\vec{p}$ as the row vector
-%     \begin{equation*}
-%         \frac{\delta L}{\delta \vec{p}} = \begin{bmatrix}
-%             \frac{\delta L}{\delta w_1} &
-%             \frac{\delta L}{\delta w_2} &
-%             \cdots &
-%             \frac{\delta L}{\delta w_m} &
-%             \frac{\delta L}{\delta b}
-%         \end{bmatrix}.
-%     \end{equation*}
-% \end{example}
+A major limitation of gradient descent as we described it here is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
+This becomes impractical for large datasets due to memory consumption and computational complexity, so instead we commonly split the dataset into batches and estimate the gradients for each batch in a process known as \emph{stochastic gradient descent}.
+Furthermore, we typically apply more sophisticated optimisation algorithms than the update rules outlined in \cref{eq:backprop_mlp_update_weights,eq:backprop_mlp_update_biases} to improve the speed and quality of convergence.
+A very popular choice that demonstrates empirically demonstrates good results in many settings is the Adam optimiser \cite{kingma2017}.
+However, such details are unfortunately outwith the scope of this report.
 
 \section{\Glsentrylongpl{cnn}}
 \section{Transfer learning}

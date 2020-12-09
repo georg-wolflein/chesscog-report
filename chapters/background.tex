@@ -539,6 +539,19 @@ A very popular choice that demonstrates empirically demonstrates good results in
 However, such details are unfortunately outwith the scope of this report.
 
 \section{\Glsentrylongpl{cnn}}
+Let us examine how \glspl{ann} can be applied to a simple image classification problem.
+Consider an input image of $512 \times 512$ pixels with three colour channels (\gls{rgb}).
+If we flatten this image to a single vector, that vector will contain $3 \cdot 2^{16}$ values.
+We could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined set of classes.
+If the first layer has half as many units as the input, the weight matrix $\mW_1$ will be of size $(3 \cdot 2^{16}) \times (3 \cdot 2^{15})$, meaning that it will hold $9 \cdot 2^{31}$ values.
+This means that the first layer alone will already have over two billion parameters.
+Networks with so many parameters are infeasible to train because the number of parameters exceeds the memory and computational ability of modern hardware.
+Furthermore, networks with too many parameters are much more likely to overfit to the training data.
+
+\Glspl{cnn} are a special class of \glspl{ann} that require significantly fewer parameters in each layer.
+They are well-suited for image tasks and can be trained on modern hardware even when they have many layers (which we refer to as \emph{deep neural networks}).
+
+
 \section{Transfer learning}
 
 \end{document}

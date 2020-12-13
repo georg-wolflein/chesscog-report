@@ -5,8 +5,8 @@
 
 \chapquote{To become good at anything you have to know how to apply basic principles. To become great at it, you have to know when to violate those principles.}{Garry Kasparov}
 \chapter{Background}
-This chapter will introduce some of the basic concepts involved in \glspl{ann}, \glspl{cnn}, and transfer learning required to understand this report.
-Readers familiar with this subject matter should feel free to skip this chapter and resume at \cref{chap:data_synthesis}.
+This chapter will introduce some of the basic concepts involved in \glspl{ann}, \glspl{cnn}, and transfer learning as they relate to this project.
+Readers familiar with this subject matter may skip this chapter and resume at \cref{chap:data_synthesis}.
 
 \section{Supervised learning}
 At its core, the purpose of an \gls{ann} is to infer a function that maps some input to some output, based on sample input-output pairs.
@@ -48,9 +48,9 @@ for representing the corresponding feature vectors.
 \subsection{Classification}
 \label{sec:background_classification}
 Classification is a task that finds greater applicability within this project.
-As the name implies, a classification model tries to determine which category each input sample belongs to from a predefined set of classes $\sC$.
+As the name implies, a classification model tries to determine to which category each input sample belongs from a predefined set of classes $\sC$.
 To ease notation, we shall let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
-In practical terms, the elements in $\sC$ could represent any type of mathematical or non-mathematical object, and in that case we only require a one-to-one mapping from those objects to $\sC$.
+In practical terms, the elements in $\sC$ could represent any type of mathematical or non-mathematical object, and in that case we only require a one-to-one mapping (bijection) from those objects to $\sC$.
 Furthermore, in the context of this report, each input sample can only belong to one class, and we will interpret the output of the model to represent the probabilities of the input sample belonging to each of the classes $\sC$.
 Therefore, a classification model is represented by a vector-valued function
 $\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
@@ -241,10 +241,10 @@ As a result, the \gls{relu} activation function (or variants thereof) are the mo
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
 \subsection{Feedforward neural networks}
-Our definition of \glspl{ann} is so far still very general and makes virtually no restrictions on the graph of the network.
+Our definition of \glspl{ann} so far still is very general and makes virtually no restrictions on the graph of the network.
 It turns out that it is difficult to propagate activations between neurons when they exhibit cycles, as is the case with the last three units in \cref{fig:ann}.
 Thus we impose a constraint that the nodes of the network are not allowed to form cycles, and as a result the network becomes a \gls{dag}.
-This class of \glspl{ann} are referred to as \emph{feedforward neural networks}.
+This class of \glspl{ann} is referred to as \emph{feedforward neural networks}.
 
 \subsubsection{\Glsentrylong{slp}}
 The most basic type of feedforward neural network is the \gls{slp}.
@@ -306,7 +306,7 @@ and the vector
     \end{bmatrix}
 \end{equation*}
 to represent the biases.
-Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} we finally define the function of a \gls{slp} as
+Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} can be expressed using the dot product. We finally define the function of a \gls{slp} as
 \begin{equation}
     \label{eq:slp}
     \vf_{\mW,\vb}(\vx) = \vyhat = \vg\left(
@@ -324,11 +324,11 @@ A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \gl
     \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_L)(\vx).
 \end{equation}
 
-Each \gls{slp} inside the \gls{mlp} is constitutes a logical module of the \gls{mlp} which we call a \emph{layer}.
+Each \gls{slp} inside the \gls{mlp} is constitutes a logical module which we call a \emph{layer}.
 Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, we will use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
 Further, the notation $b_j^{(l)}$ refers to the $j$\textsuperscript{th} unit's bias in layer $l$, and $w_{i,j}^{(l)}$ is the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$.
 This notation follows \textcite{goodfellow2016} and is customary in describing neural networks
-We shall use $n_0,n_1,\dots,n_L$ to describe the number of units in each layer.
+We shall use $n_0,n_1,\dots,n_L$ to denote the number of units in each layer.
 Layer zero is considered the \emph{input layer}, meaning that $n_0$ must be equal to the dimensionality of $\vx$. 
 The layers $1, 2, \dots, L-1$ are the \emph{hidden layers} because they are not directly connected to the input or output units.
 Finally, we refer to layer $L$ as the \emph{output layer}, since its units represent the prediction $\vyhat$, and so $n_L$ must be equal to the dimensionality of $\vyhat$. 
@@ -412,7 +412,7 @@ The main idea is as follows:
 \begin{enumerate}
     \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vp$ (weights and biases) as
         $\vec{\Delta p} = \frac{\delta L}{\delta \vp}\left(\vp\right)$.
-    \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ where $\alpha \in \R$ is the learning rate.
+    \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ for some learning rate $\alpha \in \R$.
     \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
 \end{enumerate}
 \Cref{fig:gradient_descent_local_minimum} shows the steps that this algorithm would make on a simple error-weight surface with only one parameter.
@@ -460,7 +460,7 @@ For simplicity, we will use the \gls{mse}, although note that for classification
 The \gls{mse} of a set of predictions $\vyhat$ is the average squared difference between the predictions and targets,
 \begin{equation}
     \label{eq:mean_squared_error}
-    E\left( \vyhat, \vy \right) = \frac{1}{m} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2} = \norm{\vyhat-\vy}_2^2.
+    E\left( \vyhat, \vy \right) = \frac{1}{m} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2} = \frac{1}{m} \norm{\vyhat-\vy}_2^2.
 \end{equation}
 The reader should not confuse this notation with that of a classification problem; here, we use $\vy$ to denote the targets for each sample in the dataset and $\vyhat$ to denote the corresponding predictions.
 
@@ -522,9 +522,10 @@ Mathematically, this is expressed as
 
 \subsubsection{\Glsentrylong{mlp}}
 To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e. each layer's weights and biases).
-We must compute $\frac{\delta L}{\delta \mW_l}$ and $\frac{\delta L}{\delta \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader due to the scope of this report.
+We must compute $\frac{\delta L}{\delta \mW_l}$ and $\frac{\delta L}{\delta \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader.
 The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
-Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, we update the weights and biases by applying the rule
+
+Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once we have the gradients, we update the weights and biases by applying the rule
 \begin{align}
     \label{eq:backprop_mlp_update_weights}
     \mW_l &\gets \mW_l - \alpha \frac{\delta L}{\delta \mW_l}(\mW_l),\\
@@ -532,10 +533,10 @@ Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, we update 
     \vb_l &\gets \vb_l - \alpha \frac{\delta L}{\delta \vb_l}(\vb_l).
 \end{align}
 
-A major limitation of gradient descent as we described it here is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
+A major limitation of gradient descent as we describe it here is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
 This becomes impractical for large datasets due to memory consumption and computational complexity, so instead we commonly split the dataset into batches and estimate the gradients for each batch in a process known as \emph{stochastic gradient descent}.
 Furthermore, we typically apply more sophisticated optimisation algorithms than the update rules outlined in \cref{eq:backprop_mlp_update_weights,eq:backprop_mlp_update_biases} to improve the speed and quality of convergence.
-A very popular choice that demonstrates empirically demonstrates good results in many settings is the Adam optimiser \cite{kingma2017}.
+A very popular choice that empirically demonstrates good results in many settings is the Adam optimiser \cite{kingma2017}.
 However, such details are unfortunately outwith the scope of this report.
 
 \section{\Glsentrylongpl{cnn}}

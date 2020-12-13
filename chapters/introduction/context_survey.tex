@@ -8,7 +8,7 @@ However, recognising chess positions from physical chessboards as opposed to art
 
 \paragraph{Chess robots}
 Initial research into chess recognition emerged from the development of chess robots that included a camera to detect the human opponent's moves from a top-down overhead perspective. 
-The difficulty of distinguishing between chess pieces from a bird's-eye-view due to their similarity is noted in many papers; as a result, chess robots typically implement a three-way classification system that for every square attempts to determine whether it contains a piece, and if so, the piece's colour.
+The difficulty of distinguishing between chess pieces from a bird's-eye-view due to their similarity is noted in many papers; as a result, chess robots typically implement a three-way classification system that for every square attempts to determine whether it contains a piece, and, if so, that piece's colour.
 Various approaches have been explored including
   employing manual thresholding \cite{cour2002,urting2003,banerjee2012,chen2016} and clustering \cite{goncalves2005} in different colour spaces, as well as
   differential imaging (classifying based on the per-pixel difference between two images) \cite{khan2014,chen2019}.
@@ -16,22 +16,22 @@ Although the \emph{Gambit} robot proposed by \textcite{matuszek2011} does not re
 
 \paragraph{Chess move recording}
 Several techniques for recording chess moves from video footage have been proposed that follow a similar three-way occupancy and colour classification scheme, both from a top-down perspective \cite{sokic2008,wang2013} as well as from a camera positioned at an acute angle to the board \cite{hack2014}.
-However, in any three-way classification approach, the robot or move recorder requires knowledge of the previous board state in addition to its predictions for each square's occupancy and piece colour to deduce the last move. 
-While this information is readily available to a chess robot or move recording software, this is not the case for a chess recognition system that should deduce the position from a single still image.
+However, in any such three-way classification approach, the robot or move recorder requires knowledge of the previous board state in addition to its predictions for each square's occupancy and piece colour to deduce the last move. 
+While this information is readily available to a chess robot or move recording software, it is not for a chess recognition system that should deduce the position from a single still image.
 Furthermore, these approaches experience severe shortcomings in terms of their inability to recover once a single move was predicted incorrectly and fail to identify promoted pieces\footnote{Piece promotion occurs when a pawn reaches the last rank, in which case the player must choose to promote to a queen, rook, bishop or knight. Evidently, a vision system that can only detect the piece's colour is unable to detect what it was promoted to.} \cite{cour2002}.
 
 \paragraph{Single-image chess recognition}
 A number of techniques have been developed to address the issue of chess recognition from a single image. 
-Unlike move recording software or chess robots, it does not suffice to only determine the occupancy and colour of each square, but each piece must be identified.
-These techniques must implement a classification algorithm for each piece type (pawn, knight, bishop, queen, and king) of each colour which poses a significantly more difficult problem, attracting research mainly in the last five years.
-From a bird's-eye view, the pieces are nearly indestinguishable, so the photo is usually taken at an angle to the board.
+Unlike move recording software or chess robots, the squares' occupancy and colour alone provide insufficient information to determine the position. 
+These techniques must instead implement a classification algorithm for each piece type (pawn, knight, bishop, queen, and king) of each colour which poses a significantly more difficult problem, attracting research mainly in the last five years.
+From a bird's-eye view, the pieces are nearly indestinguishable, hence the photo is usually taken at an acute angle to the board.
 \textcite{ding2016} proposes a piece classifier that uses one-versus-rest \glspl{svm} trained on \gls{sift} and \gls{hog} feature descriptors, achieving an accuracy of 85\%. 
-\textcite{danner2015} as well as \textcite{xie2018} claim that \gls{sift} and \gls{hog} provide inadequate features for the problem of piece classification due to the similarity in texture between chess pieces, and instead focus on the pieces' outlines.
-As such, \textcite{danner2015} use Fourier descriptors calculated for the pieces' contours, but this requires a manually-created database of piece silhouettes.
+Conversely, \textcite{danner2015} as well as \textcite{xie2018} claim that \gls{sift} and \gls{hog} provide inadequate features for the problem of piece classification due to the similarity in texture between chess pieces, and instead focus on the pieces' outlines.
+As such, \textcite{danner2015} use Fourier descriptors calculated based on the pieces' contours, but this requires a manually-created database of piece silhouettes.
 Furthermore, they modify the board colours to red and green instead of black and white, in order distinguish the pieces from the board more easily\footnote{Similar board modifications have also been proposed as part of chess robots \cite{banerjee2012} and chess move trackers \cite{wang2013}, but any such modification imposes an unreasonable constraint on normal chess games.}.
 On the other hand, \textcite{xie2018} perform contour-based template matching with an interesting caveat: the camera angle is calculated based on the perspective transformation of the chessboard, and then depending on the angle, different templates are utilised for matching the chess pieces.
-As part of the same work, \citeauthor{xie2018} developed another approach that instead utilised \glspl{cnn}, but found that their original template-matching technique achieved superior results in terms of speed and accuracy in low-resolution images.
-However, it is important to note that their \glspl{cnn} were trained on only 40 images per class and deep learning methods tend to excel when trained on larger datasets.
+As part of the same work, \citeauthor{xie2018} develop another approach that instead utilises \glspl{cnn}, but find that their original template-matching technique achieves superior results in terms of speed and accuracy in low-resolution images.
+However, the reader should note that their \glspl{cnn} are trained on only 40 images per class and deep learning methods tend to excel when trained on larger datasets.
 
 \paragraph{Chessboard detection}
 A prerequisite to any chess recognition system is the ability to detect the location of the chessboard and each of the 64 squares. 
@@ -46,7 +46,7 @@ A recent chess grid detection algorithm that is highly successful even on popula
 They apply several clustering algorithms on the lines detected via a Hough transform in order to find the horizontal and vertical grid lines belonging to the chessboard, and use this algorithm as a preprocessing step in their template-matching piece classification technique \cite{xie2018} described above. 
 
 \paragraph{Chess recognition using \glspl{cnn}}
-Since \citeauthor{xie2018} pioneered the use of \glspl{cnn} in the domain of chess recognition from monocular images in \citeyear{xie2018}%
+Ever since \citeauthor{xie2018} pioneered the use of \glspl{cnn} in the domain of chess recognition from monocular images in \citeyear{xie2018}%
 \footnote{%
     \textcite{wei2017} developed a chess recognition system using a volumetric CNN one year previously, but this approach requires three-dimensional chessboard data obtained from a depth camera. 
     Their approach achieved a per-class accuracy over 90\% except for the ``king'' class, was trained on \gls{cad} models, and evaluated on real three-dimensional images (point clouds) of a chessboard.
@@ -54,10 +54,11 @@ Since \citeauthor{xie2018} pioneered the use of \glspl{cnn} in the domain of che
 a few more techniques have been developed that employ \glspl{cnn} at various stages in the recognition pipeline.
 \textcite{czyzewski2020} achieve an accuracy of 95\% on chessboard detection from non-vertical camera angles by designing an iterative algorithm that gereates heatmaps over the input image representing the likelihood of each pixel being part of the chessboard. 
 They then employ a \gls{cnn} to refine the corner points that were found using the heatmap, outperforming the results obtained by \textcite{goncalves2005}.
-Furthermore, they compare a \gls{cnn}-based piece classification algorithm to the SVM-based solution proposed by \textcite{ding2016} and find no notable improvement, but manage to obtain major improvements by implementing a probabilistic reasoning system that uses the open source Stockfish chess engine \cite{romstad2020} as well as chess statistics \cite{acher2016}.
+Furthermore, they compare a \gls{cnn}-based piece classification algorithm to the SVM-based solution proposed by \textcite{ding2016} and find no notable amelioration, but manage to obtain major improvements by implementing a probabilistic reasoning system that uses the open source Stockfish chess engine \cite{romstad2020} as well as chess statistics \cite{acher2016}.
 Although reasoning techniques were already employed for refining the predictions of chess recognition systems before \cite{neufeld2010,danner2015}, \citeauthor{czyzewski2020} demonstrate the potential of combining information obtained from a chess engine with large-scale chess statistics.  
 Very recently, \textcite{mehta2020} implemented an augmented reality app using the popular \emph{AlexNet} \gls{cnn} architecture introduced by \textcite{krizhevsky2017}, achieving promising results.
-Despite using an overhead camera perspective and not performing any techniques to ensure probable and legal chess positions, \citeauthor{mehta2020} achieve an end-to-end accuracy of 93\% for the entire chessboard detection and piece classification pipeline.
+Despite using an overhead camera perspective and not performing any techniques to ensure probable and legal chess positions, \citeauthor{mehta2020} achieve an end-to-end accuracy of 93\% for the entire chessboard detection and piece classification pipeline, which -- to the best of our knowledge -- constitutes the current state of the art.
+However, it is unclear whether this accuracy is reported on the training set or a possible held-out test set.
 
 \paragraph{Datasets}
 The lack of adequate datasets for chess recognition has been recognised by many \cite{czyzewski2020,ding2016,mehta2020}.

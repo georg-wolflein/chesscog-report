@@ -7,13 +7,14 @@
 \label{chap:data_synthesis}
 
 Studies in human cognition by \textcite{bilalic2010} and \textcite{zhou2018} compared skilled chess players with novices in terms of their ability to remember a chess position for a short amount time confirmed that highly skilled players outperform novices at this task.
-Perhaps more interestingly, both studies found that skilled players remembered \emph{random} positions (where pieces are positioned on random squares, not necessarily obeying the rules of chess) significantly less accurately than they did positions from actual chess games. 
+Perhaps more interestingly, both studies find that skilled players remember \emph{random} positions (where pieces are positioned on random squares, not necessarily obeying the rules of chess) significantly less accurately than positions from actual chess games. 
 Thus it stands to reason that in general, highly skilled chess players exhibit a more developed pattern recognition ability for chess positions than novices, but this ability is specific to positions that conform to the rules of chess and are likely to occur in actual games.
 
 This project aims to develop a similar pattern recognition ability using machine learning, and therefore our dataset will consist of positions from real chess games. 
-In doing so, we automatically ensure that the chess positions are legal according to chess rules such that a probabilistic reasoning system could later yield sensible results in a post-processing step (see Objective 2.2).
+In doing so, we automatically ensure that the chess positions are legal and sensible.
 
 \section{Chess positions}
+\label{sec:data_chess_positions}
 The positions are generated from a publicly available dataset of 2,851 games played by current World Chess Champion Magnus Carlsen \cite{64squares2020}.
 Each move in each game is included in our dataset with a probability of 2\%, and duplicate positions are discarded.
 A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
@@ -166,17 +167,17 @@ For each chess position, a random choice is made between two different lighting 
             \label{fig:chessboard_lighting_circle}
         \end{figure}
         Furthermore, each spotlight's $z$-component is sampled uniformly in the range $[5, 10)$.
-        Finally, the for each spotlight, a focus point on the chessboard surface (i.e. the $xy$ plane) is sampled from
+        Finally, for each spotlight, a focus point on the chessboard surface (i.e. the $xy$ plane) is sampled from
         \(
             \normal\left(
                 \begin{bmatrix}
                     0 \\ 0
                 \end{bmatrix},
-                \frac{5}{2} \mI_2
+                \displaystyle \frac{5}{2} \mI_2
             \right)
         \)
         and the corresponding spotlight is rotated such that it points in that direction.
-        Consequently, there is greater variabililty in the lighting because the spotlights could be pointing at different areas of the board, thus producing different types of shadows.
+        Consequently, there is greater variabililty in the lighting because the spotlights could be pointing at different areas on the board, thus producing different types of shadows.
         \Cref{fig:lighting_spotlights_example} shows an example rendering where the lighting produced by the spotlights is poorer than the camera flash mode.
 \end{enumerate}
 

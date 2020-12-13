@@ -50,9 +50,9 @@ The pipeline, depicted in \cref{fig:chess_recognition_pipeline_overview}, consis
 The first step is locating the chessboard in the image.
 More specifically, we are interested in finding the pixel coordinates of the four chessboard corners. 
 Using these corner points, we will warp the image such that the chessboard will form a regular square grid, to eliminate perspective distortion in the sizes of the chess squares.
-Next, we train a binary \gls{cnn} classifier to determine the occupancy of each square.
+Next, we train a binary \gls{cnn} classifier to determine individual squares' occupancies.
 Each of the occupied squares will then be input to another \gls{cnn} that is responsible for determining the type of piece. 
-Finally, we analyse the output probabilities of the piece classifier to produce a \gls{fen} string representing the position. 
+Finally, we use the output probabilities of the piece classifier to produce a \gls{fen} string representing the position. 
 
 
 \section{Board localisation}
@@ -151,8 +151,8 @@ Canny edge detection is a multi-stage algorithm that first reduces noise in the 
     \caption[A line in Hesse normal form.]{A line in Hesse normal form is parameterised by the angle $\theta$ to the $x$-axis and distance $\rho$ from the origin. The line is defined by the equation $\rho = x \cos \theta + y \sin \theta$. Equivalently, in slope-intercept form, we have $y = -x \cot \theta + \frac{\rho}{\sin \theta}$ provided that $\cos \theta \neq 0$, i.e. $\theta$ is not a multiple of $\pi$. Notice that the $y$-axis is pointing down because the origin of the coordinate system is the top left of the image.}
     \label{fig:hesse_normal_form}
 \end{figure}
-Next, we perform the so-called Hough transform \cite{hough1962,duda1972}, in order to detect lines that are formed by the edges.
-To this end, we will represent lines in Hesse normal form, meaning that that they are parameterised by the angle $\theta$ that the normal vector makes to the $x$-axis, and the distance $\rho$ to the origin.
+Next, we perform the so-called Hough transform \cite{hough1962,duda1972} in order to detect lines that are formed by the edges.
+To this end, we will represent lines in Hesse normal form, meaning that that they are parameterised by the angle $\theta$ that their normal vector makes to the $x$-axis, and the distance $\rho$ to the origin.
 \Cref{fig:hesse_normal_form} explains this geometrically and gives rise to the equation of a line in Hesse normal form,
 \begin{equation}
     \label{eq:hesse_normal_form}
@@ -218,7 +218,7 @@ Consequently, the lines identified by the Hough transform are corroborated by at
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
 We will first split them into horizontal and vertical lines and then eliminate similar lines.
 Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
-This is because the camera is often tilted quite severely in the dataset (and might be the case in real chessboard photos taken by humans, too).
+This is because the camera is often tilted quite severely in the synthetic dataset as a result of the procedure outlined in \cref{sec:data_chess_positions} (and might be the case in real chessboard photos taken by humans, too).
 Instead, we employ agglomerative clustering which is a bottom-up hierarchical clustering algorithm.
 In this algorithm, each line starts off in its own cluster, and as the algorithm progresses, pairs of clusters are merged in a manner that aims to minimise the variance within the clusters.
 We cluster the lines based only on their direction, i.e. their angle $\theta$, and use the smallest angle between two given lines as the distance metric.
@@ -233,13 +233,13 @@ The same procedure is applied vice-versa for the vertical lines, the result of w
 
 \subsubsection{Intersection points}
 It remains to find the intersection points of the horizontal and vertical lines.
-Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, we can find their point of intersection by observing that their equations in Hesse normal form (\cref{eq:hesse_normal_form}) forms a system of two linear equations that can be solved for $x$ and $y$. 
+Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, we can find their point of intersection by observing that their equations in Hesse normal form (\cref{eq:hesse_normal_form}) constitute a system of two linear equations that can be solved for $x$ and $y$. 
 We have
 \begin{align*}
     \rho_1 &= x \cos \theta_1 + y \sin \theta_1 \\
     \rho_2 &= x \cos \theta_2 + y \sin \theta_2.
 \end{align*}
-Rearranging for $x$ and $y$, we obtain after some algebraic manipulation
+Rearranging for $x$ and $y$, we obtain after some algebraic manipulation that
 \begin{align}
     \label{eq:hesse_intersection_1}
     x &= \frac{\rho_2 \sin \theta_1 - \rho_1 \sin \theta_2}{\cos \theta_2 \sin \theta_1 - \cos \theta_1 \sin \theta_2}, \\
@@ -249,6 +249,7 @@ Rearranging for $x$ and $y$, we obtain after some algebraic manipulation
 Finally, using \cref{eq:hesse_intersection_1,eq:hesse_intersection_2} on each pair of horizontal and vertical lines, we can find the intersection points as depicted in \cref{fig:board_localisation_line_detection_intersections}.
 
 \subsection{Finding the homography}
+\label{sec:find_homography}
 Once we have obtained the intersection points, the next step is to project them on to a regular grid. 
 Using this projection, known as a \emph{homography}, we can warp the original image to eliminate the perspective distortion. 
 
@@ -277,7 +278,6 @@ In practical terms, we can thus convert a homogenous coordinate to the correspon
 To compute a homography, we require four source points on the original image and four corresponding destination points in the warped image.
 We can choose four instersection points that lie on two distinct horizontal and two distinct vertical lines (according to the lines found in \cref{fig:board_localisation_line_detection_elimination}) and therefore represent a rectangle on the chessboard.
 Let the $3 \times 4$ matrix $\mP$ contain these points' homogenous coordinates as column vectors in clockwise order.
-
 Let $\mP'$ be a matrix of the same size as $\mP$ containing this rectangle's coordinates in clockwise order.
 In the warped space, the squares of the chessboard will be of unit length. 
 Therefore, we can map the four points from the original image to a rectangle whose top left vertex coincides with the origin and whose side lengths are $s_x$ and $s_y$ (see \cref{fig:homography_illustration}).
@@ -377,7 +377,7 @@ Then, we can use \cref{eq:homography_matrix_relation} to project all other inter
 
 \subsubsection{Finding the optimal homography}
 \label{sec:find_optimal_homography}
-Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), our algorithm must be robust in the face of lines identified in the image that do not correspond to squares on the chessboard.
+Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), our algorithm must be robust when facing lines identified in the image that do not correspond to squares on the chessboard.
 \Cref{fig:incorrect_intersection_points} depicts one such example; however, in non-synthetic chessboard images, especially with other objects in the image that exhibit straight lines, there is often an even greater number of outliers. 
 \begin{figure}
     \centering
@@ -400,9 +400,9 @@ The \gls{ransac} algorithm consists of two main steps:
         Repeat from step 1 until reaching a specified number of iterations.
 \end{enumerate}
 
-Applied to our problem, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it impossible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
-Instead, we will randomly choose four points that we believe to form a rectangle on the chessboard.
-This means that we will select two horizontal and two vertical lines at random, and choose the four intersection points of these lines as the random sample.
+Applied to our problem, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it infeasible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
+Instead, we randomly choose four points that we believe to form a rectangle on the chessboard.
+This means that we select two horizontal and two vertical lines at random, and choose the four intersection points of these lines as the random sample.
 We know that these four points will form a rectangle in the warped image, so we can map to a rectangle as explained in \cref{sec:homography_matrix} and illustrated in \cref{fig:homography_illustration}.
 
 \begin{algorithm}
@@ -468,7 +468,7 @@ We know that these four points will form a rectangle in the warped image, so we 
 \end{algorithm}
 The \gls{ransac}-based method of finding the inlier intersection points is described in \Cref{alg:ransac}. 
 To simplify notation in the algorithm, we use the function $h : \R^2 \to \R^3$ to convert Euclidean coordinates to homogenous coordinates and $h^{-1} : \R^3 \to \R^2$ to denote the reverse operation.
-These functions can be defined as
+Based on our characterisation of homogenous coordinates from \cref{sec:homography_matrix}, these functions can be defined as
 \begin{equation*}
     h(x,y) = \begin{bmatrix}
         x\\y\\1
@@ -488,12 +488,12 @@ Its output is a bijection $m : \sI \to \sW$ from a set of inlier points $\sI \su
 Notice that the warped points are represented by two-dimensional vectors whose components are whole numbers, meaning that they lie on a grid of whole numbers.
 Each square on the chessboard is represented by a square of unit length on the grid.
 The chessboard itself is represented by a $8 \times 8$ square on that grid.
-However, since the set of inliers will likely not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) we do not yet know the origin of that $8 \times 8$.
+However, since the set of inliers will likely not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) we do not yet know the location of that $8 \times 8$ square.
 
-Once we have computed the output of \cref{alg:ransac} and obtained the mapping $m$ of points from the original image to points on the grid of the warped image, we can recompute the homography matrix $\mH$ using \cref{eq:homography_matrix_relation_corners} using \emph{all} inliers to obtain a more accurate homography that is based on more than just four points.
-To do so, we take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated by all the intersection points $\sI$ as homogenous coordinate vectors.
+Once we have computed the output of \cref{alg:ransac} and obtained the mapping $m$ of points from the original image to points on the grid of the warped image, we can recompute the homography matrix $\mH$ using \cref{eq:homography_matrix_relation_corners} with \emph{all} inliers to obtain a more accurate homography that is based on more than just four points.
+To do so, we take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated with all the intersection points $\sI$ as homogenous coordinate vectors.
 The matrix of warped points $\mP'$ of the same size will be populated by the corresponding points in warped space $\sW$ according to the bijection $m$.
-Using the new $\mP$ and $\mP'$ matrices, \cref{eq:homography_matrix_relation_corners} becomes an overdetermined linear system, so we will compute $\mH$ as the least squared error solution instead of the exact solution.
+Using the new $\mP$ and $\mP'$ matrices, \cref{eq:homography_matrix_relation_corners} becomes an overdetermined linear system, so we compute $\mH$ as the least squared error solution instead of the exact solution.
 Finally, we can use the homography matrix to project the pixels of the original image to obtain a warped image as in \cref{fig:homography_warped}. 
 \begin{figure}
     \centering
@@ -559,14 +559,14 @@ Implementing these differences in \cref{alg:ransac} would have made it too convo
             s_x & s_y
         \end{bmatrix}^\top$ immediately after line \ref{alg:ransac:warp} in order to scale the warped points.
     \item The for loops on lines \ref{alg:ransac:for_sx} and \ref{alg:ransac:for_sy} do not need to be nested; instead, one could first consider only the $x$-component of the vectors when calculating the errors for each scale $s_x$, and then do the same for the $y$-components and $s_y$.
-        Finally, we would choose the best $s_x$ and $s_y$ (with the least accumulated error), compute the joint error, and use the information to update the mappings if necessary.
+        Finally, we would choose the best $s_x$ and $s_y$ (with the least accumulated error), compute the total error, and use the information to update the mappings if necessary.
         This is the reason for using the $\ell_1$ norm for computing the error on line \ref{alg:ransac:error}, since it can be easily decomposed into the two directional components.
 \end{itemize}
 
 
 \subsection{Inferring missing lines}
 \label{sec:infer_missing_lines}
-It was noted at the end of \cref{sec:find_optimal_homography} that while the result of \cref{alg:ransac} projects the inlier intersection points onto a regular grid of whole numbers, that result does not explicitly indicate the location of the $8\times 8$ sub-grid that represents the chessboard.
+It was noted at the end of \cref{sec:find_optimal_homography} that while the result of \cref{alg:ransac} projects the inlier intersection points onto a regular grid of whole numbers, it does not explicitly indicate the location of the $8\times 8$ sub-grid that represents the chessboard.
 To understand the set of inliers, we shall first compute the minimum and maximum $x$ and $y$ values of the warped points.
 We shall use the notation
 \begin{align}
@@ -596,7 +596,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
     \end{case}
 
     \begin{case}{$x_\text{max}-x_\text{min}>8$}
-        This case arises when the vertical line $x=x_\text{min}$ is left of the left edge of the chessboard and/or the vertical line $x=x_\text{max}$ is right of the right edge of the chessboard.
+        This case arises when the vertical line $x=x_\text{min}$ is to the left of the left edge of the chessboard and/or the vertical line $x=x_\text{max}$ is right of the right edge of the chessboard.
         In other words, the range of $x$-values covers more than just the chessboard.
         To remedy this, we will iteratively update $\sW_x$ by applying
         \begin{equation*}
@@ -624,7 +624,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
 
     \begin{case}{$x_\text{max}-x_\text{min}<8$}\label{case:infer_borders_greater}%
         This most common scenario arises when the grid that should represent the chessboard in the warped image is smaller than eight units in width.
-        \Cref{fig:homography_warped} illustrates this case makes it clear that it arises because either one or both of the outermost vertical lines were not detected on the chessboard. 
+        \Cref{fig:homography_warped} illustrates this case and makes clear that it arises because either one or both of the outermost vertical lines were not detected on the chessboard. 
         Determining whether the grid should be expanded towards the left or the right involves futher processing of the image which will be outlined below.
         
         We will calculate the horizontal intensity gradients in the warped image for each pixel in order to determine whether an additional vertical line is more likely to occur one unit to the left or one unit to the right of the currently identified grid.
@@ -632,7 +632,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
         Large horizontal gradient intensities will give rise to vertical lines in the warped image which can be used in order to determine whether the chessboard should be expanded to the left or right.
 
         The Sobel filter is widely used in image processing and consists of two kernels that are convolved over the input image, a horizontal and a vertical one.
-        Typically, the results of both convolution operations is calculated, and then some simple trigonometry can be applied in order to determine the gradient directions for each pixel.
+        Typically, the results of both convolution operations is calculated, and then some elementary trigonometry can be applied in order to determine the gradient directions for each pixel.
         However, since we are only interested in determining the gradients in the horizontal direction, it suffices to use the horizontal Sobel kernel
         \begin{equation}
             \mS_x = \begin{bmatrix}
@@ -640,7 +640,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
                 +1 & 0 & -1\\
                 +2 & 0 & -2\\
                 +1 & 0 & -1
-            \end{bmatrix}.
+            \end{bmatrix}
         \end{equation}
         Given an intensity image (i.e. a grayscale image) of dimensions $h \times w$ that is represented by the matrix $\mA \in \R^{h\times w}$, 
         we compute the horizontal gradient intensity at each pixel by
@@ -648,7 +648,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
             \label{eq:sobel_operation_horizontal}
             \mG_x = \mS_x * \mA
         \end{equation}
-        where $\mG_x$ is of the same dimensionality as $\mA$ and contains the gradient intensities.
+        where $\mG_x$ is of the same dimensionality as $\mA$ and contains the computed gradient intensities.
         Then, we can apply the Canny edge detector (as we did in \cref{sec:find_intersection_points}) to image represented by $\mG_x$ in order to eliminate noise and obtain clear edges. 
         \begin{figure}
             \centering
@@ -769,25 +769,32 @@ instead of the horizontal one given in \cref{eq:sobel_kernel_horizontal}, and as
     \mG_y = \mS_y * \mA.
 \end{equation}
 
-After following the instructions according to the three cases above for both the horizontal and vertical directions, we will have obtained the
-$x_\text{min},x_\text{max},y_\text{min},y_\text{max}$
+By following the instructions according to the three cases above for both the horizontal and vertical directions, we obtain the
+$x_\text{min}$,
+$x_\text{max}$,
+$y_\text{min}$, and
+$y_\text{max}$
 values that describe the location of the chessboard in the warped image. 
 As such, the coordinates of the four corners of the chessboard on the warped image can be expressed as
-\begin{align*}
-    &\vp'_1 = \begin{bmatrix}
-        x_\text{min} & y_\text{min}
-    \end{bmatrix}^\top
-    &\vp'_2 = \begin{bmatrix}
-        x_\text{max} & y_\text{min}
-    \end{bmatrix}^\top
-    \\
-    &\vp'_3 = \begin{bmatrix}
-        x_\text{max} & y_\text{max}
-    \end{bmatrix}^\top
-    &\vp'_4 = \begin{bmatrix}
-        x_\text{min} & y_\text{max}
-    \end{bmatrix}^\top.
-\end{align*}
+\begin{equation*}
+    \begin{split}
+        \vp'_1 &= \begin{bmatrix}
+            x_\text{min} & y_\text{min}
+        \end{bmatrix}^\top \\
+        \vp'_3 &= \begin{bmatrix}
+            x_\text{max} & y_\text{max}
+        \end{bmatrix}^\top
+    \end{split}
+    \qquad\qquad
+    \begin{split}
+        \vp'_2 &= \begin{bmatrix}
+            x_\text{max} & y_\text{min}
+        \end{bmatrix}^\top \\
+        \vp'_4 &= \begin{bmatrix}
+            x_\text{min} & y_\text{max}
+        \end{bmatrix}^\top.
+    \end{split}
+\end{equation*}
 The points are supplied in clockwise order, starting from the top left.
 
 Finally, we can use the inverse of the homography matrix in order to project these points back onto the original image by inverting \cref{eq:homography_matrix_relation}.
@@ -853,7 +860,7 @@ for $i=1,2,3,4$.
 The result is depicted in \cref{fig:corners_result}.
 
 \subsection{Determining optimal parameters}
-The method of finding the four corner points of the chessboard described in the previous sections relies on numerous parameters whose optimal values are yet to be determined.
+The method of finding the four corner points of the chessboard described in the previous sections relies on numerous parameters whose optimal values must still be determined.
 The most important parameters are summarised below:
 \begin{itemize}
     \item low and high thresholds of the final stage of the Canny edge detector (hysteresis);
@@ -861,13 +868,13 @@ The most important parameters are summarised below:
     \item minimum number of iterations $i_\text{min}$, maximum number of iterations $i_\text{max}$, minimum number of inliers $c$, and the inlier threshold $\epsilon_\text{max}$ from \cref{alg:ransac};
     \item low and high Canny edge detection thresholds for the horizontal and vertical gradient images, as well as the relative width of the horizontal and vertical lines from \cref{sec:infer_missing_lines}.
 \end{itemize}
-The optimal parametervalues are decided by performing a grid search using sensible presets.
+The optimal parameter values are decided by performing a grid search using sensible presets.
 A corner is classified as being detected accurately if the prediction is within ten pixels of the groundtruth label, which given the fact that the width of the image is 1,200 pixels ensures that the predictions must be very close to the groundtruth.
 If at least one corner is detected inaccurately, that particular sample is determined to be inaccurate.
 We perform the grid search only on a small subset of the training set because the number of different parameter sets to be tested is in the order of a thousand.
 The set of parameters achieving the best performance on this subset of the training set is retained as the final configuration.
 
-On the entire training set of 4,400 samples, the corner detection algorithm yielded inaccurate predictions in 13 cases, so its accuracy is 99.71\%.
+Using this configuration, the corner detection algorithm yields inaccurate predictions in 13 cases out of 4,400 samples in the training set, so its accuracy is 99.71\%.
 The validation set of size 146 sees no mistakes and thus achieves an accuracy of 100.00\%.
 As such, we conclude that the corner detection algorithm is very robust to unseen samples from the dataset and did not overfit as a result of the grid search.
 
@@ -897,12 +904,8 @@ Notice that squares further away from the camera must be cropped with increasing
 If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was inclined to report a false positive.
 
 To solve this problem, a binary classifier is trained on cropped squares to decide whether they are empty or not.
-Before cutting out the squares from the original image, the input image is warped to a two-dimensional overhead view by means of a projective transformation.
-This ensures that all squares are of equal size and that the corners form right angles (which is not the case in the original image due to perspective distortion).
-
-\todo{...}
-Finally, we can use $\mH$ to apply the projective transformation to the original image such as depicted in \cref{fig:occupancy_classification_samples_original}, obtaining the warped image in \cref{fig:occupancy_classification_samples_warped}.
-
+Before cutting out the squares from the original image, the input image is warped to a two-dimensional overhead view by means of the projective transformation outlined in \cref{sec:find_homography}.
+This ensures that all squares are of equal size and that the corners form right angles (which is not the case in the original image due to perspective distortion), as depicted in \cref{fig:occupancy_classification_samples_original,fig:occupancy_classification_samples_warped}.
 
 \begin{figure}
     \centering
@@ -939,7 +942,7 @@ Finally, we can use $\mH$ to apply the projective transformation to the original
 \end{figure}
 
 Cropping the squares from the warped image is trivial because the squares are of equal size.
-In training the occupancy classifiers, it is conjectured that it would be useful to include contextual information with each square; therefore, the squares are not cropped tightly around their boundaries but instead with a 50\% increase in length on all four sides, as shown in \cref{fig:occupancy_classification_samples_empty,fig:occupancy_classification_samples_occupied}.
+In training the occupancy classifiers, we hypothesise that it would be useful to include contextual information with each square; therefore, the squares are not cropped tightly around their boundaries but instead with a 50\% increase in length on all four sides, as shown in \cref{fig:occupancy_classification_samples_empty,fig:occupancy_classification_samples_occupied}.
 This might aid the classifier's decision in difficult situations where a chess piece from another square reaches into the cropped one due to the camera perspective.
 
 \subsection{Training \glspl{cnn}}
@@ -1022,7 +1025,7 @@ ImageNet \cite{deng2009}
 
 \subsection{Analysis}
 Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and the same samples except that the squares are cropped tightly.
-In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis that the information around the square itself is useful.
+In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis voiced at the beginning of \cref{sec:occupancy_classification} that the information around the square itself is useful.
 
 
 \begin{table}
@@ -1153,7 +1156,7 @@ We require a 12-way classifier that takes as input a cropped image of an occupie
 There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are 12 classes of pieces.
 
 We must pay some special attention to how the pieces are cropped. 
-Simply following the approach described in \cref{sec:occupancy_classification} for cropping squares does not give enough information to classify pieces.
+Simply following the approach described in \cref{sec:occupancy_classification} would provide insufficient information to classify pieces.
 Especially tall pieces at the back of the board would be cropped in a manner such that only the bottom part of the piece remains in the \gls{roi}. 
 Consider for example the white king in \cref{fig:occupancy_classification_samples}.
 Cropping only the square it is located in would not include its crown which is an important feature needed to distinguish between kings and queens.
@@ -1171,15 +1174,15 @@ This is due to the vanishing point of the normal vectors on the chessboard surfa
     \caption[The normals of the chessboard surface converge to a single vanishing point which is below the image.]{The normals of the chessboard surface (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
     \label{fig:occupancy_classification_normals}
 \end{figure}
-Hence, we must extend the \gls{roi} vertically in the appropriate direction.
+Hence, we must extend the \gls{roi} horizontally in the appropriate direction.
 
 To obtain the \glspl{roi}, we first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
-At first, each pieces bounding box will correspond to the square it is located on, i.e. its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
+At first, each piece's bounding box will correspond to the square it is located on, i.e. its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
 Depending on the rank $r$, the height is increased by
 \begin{equation*}
     h_\text{inc}(r) = \frac{2r + 5}{7}
 \end{equation*}
-where the unit of measurement is the height of the chessboard squares.
+where the unit of measurement corresponds to the warped coordinate system described in \cref{sec:homography_matrix} (each chess square is one square unit).
 This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e. $r=1$) will be increased by one square, and pieces in the top row ($r=8$) will have their height increased by three units.
 
 The increase in width is dependent on the file $f$ and given by the piecewise-defined arithmetic progression

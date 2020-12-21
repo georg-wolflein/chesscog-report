@@ -871,5 +871,109 @@ Nonetheless, they have three hyperparameters: the padding $p$, stride $s$ and wi
 We often set $s=k=2$ and use no padding in order to halve the spatial dimensions (the arithmetic from \cref{eq:cnn_output_size} holds for pooling layers as well).
 
 \section{Transfer learning}
+The underlying motivation behind transfer learning is to reuse knowledge gained in one task as a basis for learning a different task.
+It is an important tool that we employ in two different settings throught this project:
+\begin{enumerate*}[label=(\roman*)]
+    \item training \glspl{cnn} for classifying chess squares pieces in \cref{sec:occupancy_classification,sec:piece_classification}; and
+    \item fine-tuning these models in order to adapt to new chess sets in \cref{chap:adapting}.
+\end{enumerate*}
+
+Training a deep \gls{cnn} from scratch (starting from randomly initialised weights) can take several days even on modern \glspl{gpu}. 
+Furthermore, to achieve good performance, we require very large labelled datasets.
+Obtaining the required compute capability and quantity of data is often infeasible, and so it is very common to initialise the weights based on an already trained network.
+This makes sense because as discussed in \cref{sec:cnns}, \glspl{cnn} learn patterns at the beginning of the network that are to a similar level of abstraction for different datasets.
+Understanding these feature representations is still a very active area of research; in fact, a recent paper shows that when training the same deep neural network architecture on different datasets, the learned features are very similar at the beginning of the network until a depth of around two thirds \cite{kornblith2019}.
+In practice, this means that it is only in the last third of the network that it specialises on the task at hand, and before that it learns only very general features.
+
+For many popular deep \gls{cnn} architectures, weight states are available online that were trained for a long period of time on large datasets such as \emph{ImageNet} \cite{deng2009}, a classification dataset with millions of samples that are annotated for thousands of categories.
+Naturally, the \emph{classification head} (the \gls{mlp} after the convolutional and pooling layers that is responsible for classification) will need to be quite different for the target domain, especially if the target domain has a different number of classes.
+Thus, we will simply replace the classification head by a \gls{mlp} that contains the desired number of output units, but use the pretrained weights and architecture for the preceding layers.
+Then, we can train the classification head in isolation by \emph{freezing} the weights in all the other layers.
+In essence, this will train the final \gls{mlp} based on the features learnt from the pretrained model.
+Finally, we can train the whole network by unfreezing all layers in a process called \emph{fine-tuning}.
+Typically, this is performed with a smaller learning rate because the network will be significantly more sensitive.
+\Cref{fig:transfer_learning} shows which layers are copied and trained using a simple example.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[
+        node distance = 1cm,
+        every text node part/.style={align=center},
+        layer/.style = {
+            rectangle,
+            minimum width=3cm,
+            minimum height=.75cm,
+            text centered,
+            draw=black
+        },
+        arrow/.style = {
+            ->,>=stealth
+        },
+        darrow/.style = {
+            ->,>=stealth,dashed
+        }
+    ]
+        \node (orig_in) [layer] {input image};
+        \node (orig_c1) [layer,below=.75cm of orig_in] {conv \#1};
+        \node (orig_c2) [layer,below of=orig_c1] {conv \#2};
+        \node (orig_p1) [layer,below of=orig_c2] {pool \#1};
+        \node (orig_c3) [layer,below of=orig_p1] {conv \#3};
+        \node (orig_re) [layer,below=1cm of orig_c3] {reshape};
+        \node (orig_f1) [layer,below of=orig_re] {fc \#1};
+        \node (orig_f2) [layer,below of=orig_f1] {fc \#2};
+        \node (orig_f3) [layer,below of=orig_f2] {fc \#3};
+        \node (orig_ou) [layer,below=.75cm of orig_f3] {output};
+
+        \node[above=0cm of orig_in] {pre-trained model};
+
+        \draw[arrow] (orig_in) -- (orig_c1);
+        \draw[arrow] (orig_c1) -- (orig_c2);
+        \draw[arrow] (orig_c2) -- (orig_p1);
+        \draw[arrow] (orig_p1) -- (orig_c3);
+        \draw[arrow] (orig_c3) -- (orig_re) node[midway,fill=white] {$\cdots$};
+        \draw[arrow] (orig_re) -- (orig_f1);
+        \draw[arrow] (orig_f1) -- (orig_f2);
+        \draw[arrow] (orig_f2) -- (orig_f3);
+        \draw[arrow] (orig_f3) -- (orig_ou);
+
+        \node (tran_in) [layer,right=4cm of orig_in] {input image};
+        \node (tran_c1) [layer,below=.75cm of tran_in] {conv \#1};
+        \node (tran_c2) [layer,below of=tran_c1] {conv \#2};
+        \node (tran_p1) [layer,below of=tran_c2] {pool \#1};
+        \node (tran_c3) [layer,below of=tran_p1] {conv \#3};
+        \node (tran_re) [layer,below=1cm of tran_c3] {reshape};
+        \node (tran_f1) [layer,below of=tran_re] {fc \#1};
+        \node (tran_f2) [layer,below of=tran_f1] {fc \#2};
+        \node (tran_ou) [layer,below=.75cm of tran_f2] {output};
+
+        \node[above=0cm of tran_in] {new model};
+
+        \draw[arrow] (tran_in) -- (tran_c1);
+        \draw[arrow] (tran_c1) -- (tran_c2);
+        \draw[arrow] (tran_c2) -- (tran_p1);
+        \draw[arrow] (tran_p1) -- (tran_c3);
+        \draw[arrow] (tran_c3) -- (tran_re) node[midway,fill=white] {$\cdots$};
+        \draw[arrow] (tran_re) -- (tran_f1);
+        \draw[arrow] (tran_f1) -- (tran_f2);
+        \draw[arrow] (tran_f2) -- (tran_ou);
+
+        \draw[darrow] (orig_c1) -- (tran_c1) node[midway,fill=white] {\footnotesize copy};
+        \draw[darrow] (orig_c2) -- (tran_c2) node[midway,fill=white] {\footnotesize copy};
+        \draw[darrow] (orig_p1) -- (tran_p1) node[midway,fill=white] {\footnotesize copy};
+        \draw[darrow] (orig_c3) -- (tran_c3) node[midway,fill=white] {\footnotesize copy};
+        \draw[darrow] (3.5, 0 |- tran_f1) node[fill=white] {\footnotesize random init} -- (tran_f1);
+        \draw[darrow] (3.5, 0 |- tran_f2) node[fill=white] {\footnotesize random init} -- (tran_f2);
+
+        \draw [decorate,decoration={brace,amplitude=10pt}]
+            ($(tran_c1)+(2,.375)$) -- ($(tran_re)+(2,.875)$)
+            node [black,midway,right,xshift=10pt] {\footnotesize freeze};
+        \draw [decorate,decoration={brace,amplitude=10pt}]
+            ($(tran_f1)+(2,.375)$) -- ($(tran_f2)+(2,-.375)$)
+            node [black,midway,right,xshift=10pt] {\footnotesize train};
+    \end{tikzpicture}
+    \caption[Illustration of the transfer learning process for domain adaption in deep neural networks.]{Illustration of the transfer learning process for domain adaption in deep neural networks. The boxes represent different types of layers: convolutional (conv), pooling (pool), and fully connected (fc). In the first instance, we train only the classification head, while the other layers are frozen. Then, we train the whole network.}
+    \label{fig:transfer_learning}
+\end{figure}
+
+
 
 \end{document}

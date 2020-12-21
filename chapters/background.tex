@@ -792,8 +792,9 @@ Of course, the activation function $g$ is also be regarded as a hyperparameter, 
 Let us consider a convolutional layer with input of spatial size $h_\text{in} \times w_\text{in}$ with $c_\text{in}$ channels.
 By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, we can derive the equations
 \begin{equation}
-    h_\text{out} = \left\lfloor \frac{h_\text{in} + 2p - k + 1}{s} \right\rfloor \qquad \text{and} \qquad
-    w_\text{out} = \left\lfloor \frac{w_\text{in} + 2p - k + 1}{s} \right\rfloor
+    \label{eq:cnn_output_size}
+    h_\text{out} = \left\lfloor \frac{h_\text{in} + 2p - k }{s} \right\rfloor + 1 \qquad \text{and} \qquad
+    w_\text{out} = \left\lfloor \frac{w_\text{in} + 2p - k }{s} \right\rfloor + 1
 \end{equation}
 relating the input spatial dimensions to the output spatial dimensions of a convolutional layer.
 It is important to know this when designing a \gls{cnn} architecture in order to keep track how the spatial size shrinks with each convolutional layer.
@@ -867,7 +868,7 @@ In a max-pooling layer, we slide a window over the input and retain only the hig
 \end{figure}
 It is easy to see that unlike convolutions, pooling layers have no trainable parameters.
 Nonetheless, they have three hyperparameters: the padding $p$, stride $s$ and window size $k$.
-We often set $s=k=2$ in order to halve the spatial dimensions.
+We often set $s=k=2$ and use no padding in order to halve the spatial dimensions (the arithmetic from \cref{eq:cnn_output_size} holds for pooling layers as well).
 
 \section{Transfer learning}
 

@@ -521,6 +521,7 @@ Mathematically, this is expressed as
 \end{align}
 
 \subsubsection{\Glsentrylong{mlp}}
+\label{sec:mlp_training}
 To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e. each layer's weights and biases).
 We must compute $\frac{\delta L}{\delta \mW_l}$ and $\frac{\delta L}{\delta \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader.
 The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
@@ -540,18 +541,333 @@ A very popular choice that empirically demonstrates good results in many setting
 However, such details are unfortunately outwith the scope of this report.
 
 \section{\Glsentrylongpl{cnn}}
+\label{sec:cnns}
 Let us examine how \glspl{ann} can be applied to a simple image classification problem.
 Consider an input image of $512 \times 512$ pixels with three colour channels (\gls{rgb}).
 If we flatten this image to a single vector, that vector will contain $3 \cdot 2^{16}$ values.
 We could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined set of classes.
 If the first layer has half as many units as the input, the weight matrix $\mW_1$ will be of size $(3 \cdot 2^{16}) \times (3 \cdot 2^{15})$, meaning that it will hold $9 \cdot 2^{31}$ values.
 This means that the first layer alone will already have over two billion parameters.
-Networks with so many parameters are infeasible to train because the number of parameters exceeds the memory and computational ability of modern hardware.
-Furthermore, networks with too many parameters are much more likely to overfit to the training data.
+Networks with this many parameters are infeasible to train because the number of parameters exceeds the memory capacity and computational ability of modern hardware.
+Furthermore, networks with too many parameters are much more likely to overfit to training data.
 
 \Glspl{cnn} are a special class of \glspl{ann} that require significantly fewer parameters in each layer.
 They are well-suited for image tasks and can be trained on modern hardware even when they have many layers (which we refer to as \emph{deep neural networks}).
+Originally, the concept of \glspl{cnn} evolved from the so-called \emph{neocognitron} that was introduced in 1980 and inspired studies of the visual cortex in humans and animals \cite{fukushima1980}.
+In \citeyear{lecun1998}, \citeauthor{lecun1998} proposed the famous \emph{LeNet-5} architecture that is considered to be the first \gls{cnn} \cite{lecun1998}. 
+The main concepts developed in the seminal work of \citeauthor{lecun1998} carry through to today.
 
+David Hubel and Torsten Wiesel\footnote{Hubel and Wiesel recieved the Nobel Prize in Physiology or Medicine in 1981 for their work in understanding information processing in the visual system.} found by conducting experiments on animals that biological neurons in the visual cortex respond to patterns in specific areas of the visual field, known as \emph{receptive fields} \cite{hubel1959}.
+Moreover, different neurons may respond to different patterns even if their receptive fields overlap.
+Hubel and Wiesel demonstrated this by showing that some neurons activate only for horizontal lines while others active for vertical lines.
+They also showed that some neurons with larger receptive fields respond to more compex patterns that are combinations of such lower-level patterns.
+
+\Glspl{cnn} follow the same intuition: neurons at the beginning of the network learn to recognise very simple, low-level patterns, while neurons deeper in the network compose these patterns to perceive more complex features.
+They are comprised of \emph{convolutional} and \emph{pooling} layers, which we shall describe below.
+
+\subsection{Convolutional layers}
+Convolutional layers are the most important component in a \gls{cnn}.
+However, the term \emph{convolution} is actually used as a misnomer to mean \emph{cross-correlation} in the context of \glspl{cnn}.
+Both terms refer to a mathematical operation where we slide a matrix (known as \emph{filter} or \emph{kernel}) over the input image and compute the sum of products at each location.
+A convolution operation is equivalent to cross-correlation if we pre-rotate the filter matrix by 180 degrees.
+For the remainder of this report we shall follow the convention in machine learning and use the term convolution to refer to cross-correlation.
+
+Each neuron in the first convolutional layer is connected to a square region of pixels (the receptive field) from the input image, as opposed to being connected to the entire input image as is the case in fully-connected \glspl{mlp}.
+Similarly, subsequent layers' neurons connect only to a square region of neurons in the previous layer, so that the network begins to form a hierarchy of filters.
+
+Let us consider a neuron in the first convolutional layer.
+It is connected to a square patch of pixels from the input image (for now, we consider only one colour channel), so let us represent this patch using the $k\times k$ matrix $\mP$ where $k$ indicates the side length of the square.
+The convolutional layer is associated with a filter matrix $\mF$ of the same size as $\mP$.
+The convolution of the matrices $\mP$ and $\mF$, denoted $\mP * \mF$, is obtained by performing a pointwise multiplication of the corresponding elements in $\mP$ and $\mF$, and then computing the sum of these results.
+More formally, using the notation $p_{ij}$ and $f_{ij}$ to index into those two matrices, we can define the convolution operation as
+\begin{equation}
+    \mP * \mF = \sum_{i=1}^k \sum_{j=1}^k p_{ij} f_{ij}.
+\end{equation}
+
+A patch $\mP$ convolved with a particular filter $\mF$ will achieve a high value if the patch follows the pattern described by the filter.
+To see this, consider the filter
+\begin{equation*}
+    \mF = \begin{bmatrix}
+        -1 & 2 & -1 \\
+        -1 & 2 & -1 \\
+        -1 & 2 & -1
+    \end{bmatrix}
+\end{equation*}
+that tries to detect vertical lines.
+For a patch
+\begin{equation*}
+    \mP = \begin{bmatrix}
+        1 & 8 & 2 \\
+        2 & 9 & 2 \\
+        1 & 11 & 1
+    \end{bmatrix}
+\end{equation*}
+that clearly has high values in the middle column and thus describes a vertical line, 
+we have $\mP * \mF = 47$. However, if we consider a different patch
+\begin{equation*}
+    \mP_2 = \begin{bmatrix}
+        10 & 11 & 10 \\
+        9 & 11 & 10 \\
+        10 & 10 & 9
+    \end{bmatrix}
+\end{equation*}
+where the intensities are quite uniform (and thus not describing a vertical line), the convolution with $\mF$ achieves a much lower result of $6$.
+
+Coming back to our examination of the first layer of a \gls{cnn}, we know that it will be associated with a filter $\mF$. 
+The output of the layer is computed by sliding a $k \times k$ window over the input image, and at each location of the window, we compute the convolution $\mP * \mF$ where $\mP$ are the pixels in the current window.
+This process is illustrated using an example in \cref{fig:conv_simple}.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \draw[black,step=1] (0,0) grid +(4,4);
+        \draw[black,step=1] (5,1) grid +(2,2);
+        \draw[black,step=1,yshift=-.5cm] (8,1) grid +(3,3);
+        \draw[very thick] (1,0) rectangle +(2,2);
+        \draw[very thick] (9,.5) rectangle +(1,1);
+        \draw[dotted,thick] (1,0) -- (5,1);
+        \draw[dotted,thick] (3,0) -- (7,1);
+        \draw[dotted,thick] (1,2) -- (5,3);
+        \draw[dotted,thick] (3,2) -- (7,3);
+        \draw[dashed] (9,.5) -- (5,1);
+        \draw[dashed] (10,.5) -- (7,1);
+        \draw[dashed] (9,1.5) -- (5,3);
+        \draw[dashed] (10,1.5) -- (7,3);
+        \node at (4.5, 2) {$*$};
+        \node at (7.5, 2) {$=$};
+        \node[above] at (2, 4) {input image};
+        \node[above] at (6, 3) {kernel};
+        \node[above] at (9.5, 3.5) {pre-activation output};
+
+        \node at (0.5,0.5) {$1$};
+        \node at (1.5,0.5) {$4$};
+        \node at (2.5,0.5) {$3$};
+        \node at (3.5,0.5) {$7$};
+        \node at (0.5,1.5) {$6$};
+        \node at (1.5,1.5) {$8$};
+        \node at (2.5,1.5) {$0$};
+        \node at (3.5,1.5) {$2$};
+        \node at (0.5,2.5) {$5$};
+        \node at (1.5,2.5) {$3$};
+        \node at (2.5,2.5) {$3$};
+        \node at (3.5,2.5) {$2$};
+        \node at (0.5,3.5) {$6$};
+        \node at (1.5,3.5) {$3$};
+        \node at (2.5,3.5) {$1$};
+        \node at (3.5,3.5) {$2$};
+        
+        \node at (5.5,1.5) {$2$};
+        \node at (6.5,1.5) {$0$};
+        \node at (5.5,2.5) {$1$};
+        \node at (6.5,2.5) {$2$};
+
+        \node at (8.5,3)  {$22$};
+        \node at (9.5,3)  {$11$};
+        \node at (10.5,3) {$11$};
+        \node at (8.5,2)  {$23$};
+        \node at (9.5,2)  {$25$};
+        \node at (10.5,2) {$7$};
+        \node at (8.5,1)  {$24$};
+        \node at (9.5,1)  {$16$};
+        \node at (10.5,1) {$10$};
+
+    \end{tikzpicture}
+    \caption[Illustration of a convolution operation with a $2\times 2$ kernel.]{Illustration of a convolution operation with a $2\times 2$ kernel. The bias $b$ will be added to the output on the right before the activation function $g$ is applied pointwise in order to obtain the activations.}
+    \label{fig:conv_simple}
+\end{figure}
+The result will be a matrix, too, and so the output of the layer is obtained by applying the nonlinear activation function $g$ pointwise to that matrix plus a bias $b$.
+
+Now let us consider the case where the previous layer has multiple channels. 
+The input image, for instance, has three colour channels. 
+Thus, the first convolutional layer will need three filters: one for each input colour channel.
+The output is still only one matrix where the elements are summed across the channels, as explained in \cref{fig:conv_multiple_channels} for a two-channel input.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \draw[black,step=1,yshift=-.5cm] (0,3) grid +(4,4);
+        \draw[black,step=1,yshift=-.5cm] (0,-2) grid +(4,4);
+        \draw[black,step=1,yshift=-.5cm] (5,4) grid +(2,2);
+        \draw[black,step=1,yshift=-.5cm] (5,-1) grid +(2,2);
+        \draw[black,step=1,yshift=-.5cm] (8,1) grid +(3,3);
+        \draw[very thick,yshift=-.5cm] (1,-2) rectangle +(2,2);
+        \draw[very thick,yshift=-.5cm] (1,3) rectangle +(2,2);
+        \draw[very thick] (9,.5) rectangle +(1,1);
+        \draw[dotted,thick] (1,2.5)  -- (5,3.5);
+        \draw[dotted,thick] (3,2.5)  -- (7,3.5);
+        \draw[dotted,thick] (1,4.5)  -- (5,5.5);
+        \draw[dotted,thick] (3,4.5)  -- (7,5.5);
+        \draw[dotted,thick] (1,-2.5) -- (5,-1.5);
+        \draw[dotted,thick] (3,-2.5) -- (7,-1.5);
+        \draw[dotted,thick] (1,-.5)  -- (5,.5);
+        \draw[dotted,thick] (3,-.5)  -- (7,.5);
+        \draw[dashed] (9,.5)   -- (5,3.5);
+        \draw[dashed] (10,.5)  -- (7,3.5);
+        \draw[dashed] (9,1.5)  -- (5,5.5);
+        \draw[dashed] (10,1.5) -- (7,5.5);
+        \draw[dashed] (9,.5)   -- (5,-1.5);
+        \draw[dashed] (10,.5)  -- (7,-1.5);
+        \draw[dashed] (9,1.5)  -- (5,.5);
+        \draw[dashed] (10,1.5) -- (7,.5);
+        \node at (4.5, 2) {$*$};
+        \node at (7.5, 2) {$=$};
+        \node[above] at (2, 6.5) {input channel \#1};
+        \node[above] at (2, 1.5) {input channel \#2};
+        \node[above] at (6, 5.5) {kernel \#1};
+        \node[above] at (6, .5) {kernel \#2};
+        \node[above] at (9.5, 3.5) {pre-activation output};
+
+        \node at (0.5,3) {$1$};
+        \node at (1.5,3) {$4$};
+        \node at (2.5,3) {$3$};
+        \node at (3.5,3) {$7$};
+        \node at (0.5,4) {$6$};
+        \node at (1.5,4) {$8$};
+        \node at (2.5,4) {$0$};
+        \node at (3.5,4) {$2$};
+        \node at (0.5,5) {$5$};
+        \node at (1.5,5) {$3$};
+        \node at (2.5,5) {$3$};
+        \node at (3.5,5) {$2$};
+        \node at (0.5,6) {$6$};
+        \node at (1.5,6) {$3$};
+        \node at (2.5,6) {$1$};
+        \node at (3.5,6) {$2$};
+
+        \node at (0.5,-2) {$2$};
+        \node at (1.5,-2) {$3$};
+        \node at (2.5,-2) {$6$};
+        \node at (3.5,-2) {$8$};
+        \node at (0.5,-1) {$5$};
+        \node at (1.5,-1) {$3$};
+        \node at (2.5,-1) {$6$};
+        \node at (3.5,-1) {$7$};
+        \node at (0.5,0)  {$0$};
+        \node at (1.5,0)  {$7$};
+        \node at (2.5,0)  {$6$};
+        \node at (3.5,0)  {$2$};
+        \node at (0.5,1)  {$4$};
+        \node at (1.5,1)  {$0$};
+        \node at (2.5,1)  {$4$};
+        \node at (3.5,1)  {$2$};
+        
+        \node at (5.5,4) {$2$};
+        \node at (6.5,4) {$0$};
+        \node at (5.5,5) {$1$};
+        \node at (6.5,5) {$2$};
+        
+        \node at (5.5,-1) {$0$};
+        \node at (6.5,-1) {$1$};
+        \node at (5.5,0) {$1$};
+        \node at (6.5,0) {$0$};
+
+        \node at (8.5,3)  {$33$};
+        \node at (9.5,3)  {$17$};
+        \node at (10.5,3) {$17$};
+        \node at (8.5,2)  {$26$};
+        \node at (9.5,2)  {$38$};
+        \node at (10.5,2) {$20$};
+        \node at (8.5,1)  {$32$};
+        \node at (9.5,1)  {$25$};
+        \node at (10.5,1) {$24$};
+    \end{tikzpicture}
+    \caption[Illustration of a convolution operation acting on two input channels.]{Illustration of a convolution operation with $2\times 2$ kernels acting on two input channels.}
+    \label{fig:conv_multiple_channels}
+\end{figure}
+In practice, a convolutional layer will stack multiple such operations on top of each other (with different filters) so that we obtain more than one output matrix.
+These matrices, after adding the bias and applying the activation function $g$, will constitute the input channels for the subsequent layer.
+Each output channel will have its own bias $b$, so we require a bias vector $\vb$ to denote all of the biases.
+
+The astute reader might wonder how we obtain the values for each of the filters so that they are correspond to useful features in the image that will ultimately allow a series of fully-connected feedforward layers following the convolutional layers to perform a classification prediction at the end of the network.
+As in \glspl{mlp}, the answer is to use backpropagation and gradient descent.
+Each of the values in the filter matrices is a trainable parameter and the biases are of course trainable, too.
+It is possible to calculate the gradients of these trainable parameters with respect to the loss function, so we can use an optimisation algorithm such as the popular \emph{Adam} optimizer \cite{kingma2017} to update the parameters as discussed at the end of \cref{sec:mlp_training}.
+
+There are a number of hyperparameters associated with convolutional layers that impact the output dimensions as well as number of trainable parameters in the layer:
+\begin{itemize}
+    \item the filter size $k$;
+    \item the padding $p$ which indicates by how many rows/columns we extend the input matrix in each direction, setting these new values to zero (\cref{fig:conv_simple,fig:conv_multiple_channels} use $p=0$);
+    \item the stride $s$, indicating how many pixels we move the sliding window each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
+    \item the desired number of output channels $c_\text{out}$.
+\end{itemize}
+Of course, the activation function $g$ is also be regarded as a hyperparameter, but it has no effect on the size of the layer's output.
+Let us consider a convolutional layer with input of spatial size $h_\text{in} \times w_\text{in}$ with $c_\text{in}$ channels.
+By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, we can derive the equations
+\begin{equation}
+    h_\text{out} = \left\lfloor \frac{h_\text{in} + 2p - k + 1}{s} \right\rfloor \qquad \text{and} \qquad
+    w_\text{out} = \left\lfloor \frac{w_\text{in} + 2p - k + 1}{s} \right\rfloor
+\end{equation}
+relating the input spatial dimensions to the output spatial dimensions of a convolutional layer.
+It is important to know this when designing a \gls{cnn} architecture in order to keep track how the spatial size shrinks with each convolutional layer.
+
+Having said that, we can finally provide evidence for the claim at the beginning of section \cref{sec:cnns} that \glspl{cnn} require significantly fewer trainable parameters than \glspl{mlp}.
+Notice that the number of trainable parameters is simply the number of elements in each filter $\mF$ multiplied by the number of filters, plus the number of biases.
+For one output channel, we need $c_\text{in}$ filters as shown in \cref{fig:conv_multiple_channels}.
+So, for $c_\text{out}$ output channels, we require $c_\text{in} \cdot c_\text{out}$ filters, and since each filter is a $k \times k$ matrix, the number of kernel parameters is
+$c_\text{in} \cdot c_\text{out} \cdot k^2$.
+Each filter is associated with a bias that is trainable, so the total number of trainable parameters is 
+$c_\text{in} \cdot c_\text{out} \cdot (k^2+1)$.
+In contrast to \glspl{mlp}, this is independent of the spatial size of the input ($h_\text{in} \times w_\text{in}$), and since the value of $k$ is typically quite small, the number of trainable parameters will be orders of magnitude smaller than that of a layer in a \gls{mlp}.
+As such, the weights in a \gls{cnn} are considered to be \emph{shared} because we slide the filters over the entire input and can therefore identify similar features in different spatial locations.
+
+\subsection{Pooling layers}
+To understand the motivation of pooling layers, we shall first examine the general architecture of a \gls{cnn}.
+Typically, a \gls{cnn} consists of a number of convolutional and pooling layers followed by a small \gls{mlp} consisting of one or two fully-connected layers.
+Since the output of the convolutional/pooling layers is a tensor with three dimensions (more specifically, we have $c_\text{out}$ feature maps, each of size $h_\text{out} \times w_\text{out}$), it must first be flattened so that all elements are concatenated into a vector.
+However, to ensure that this vector contains useful information for classification, we would like to have a relatively small spatial size $h_\text{out} \times w_\text{out}$, but a large number of channels. 
+The reasoning for this is twofold:
+\begin{enumerate*}[label=(\roman*)]
+    \item a low spatial size will reduce the size of the vector and thus the number of trainable parameters in the \gls{mlp}; and
+    \item a high number of channels will allow the \gls{cnn} to detect many different useful features. 
+\end{enumerate*}
+Pooling layers provide a means of reducing the spatial size while keeping the number of channels constant.
+They are used immediately after convolutional layers and typically occur less often than convolutional layers in \gls{cnn} architectures because excessive use will prevent the network from learning any useful features.
+This is because pooling layers remove some information.
+
+Pooling is applied on a per-channel basis, so the number of input channels is equal to the number of output channels.
+Furthermore, we do not apply an activation function because that is the job of the convolutional layers.
+The most common type of pooling is maximum pooling.
+In a max-pooling layer, we slide a window over the input and retain only the highest activation, as illustrated in \cref{fig:maxpool}.
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \draw[black,step=1] (0,0) grid +(4,4);
+        \draw[black,step=1] (5,1) grid +(2,2);
+        \draw[very thick] (0,0) rectangle +(2,2);
+        \draw[very thick] (5,1) rectangle +(1,1);
+        \draw[dotted,thick] (0,0) -- (5,1);
+        \draw[dotted,thick] (2,0) -- (6,1);
+        \draw[dotted,thick] (0,2) -- (5,2);
+        \draw[dotted,thick] (2,2) -- (6,2);
+        \node[above] at (2, 4) {input};
+        \node[above] at (6, 3) {output};
+
+        \node at (0.5,0.5) {$1$};
+        \node at (1.5,0.5) {$4$};
+        \node at (2.5,0.5) {$3$};
+        \node at (3.5,0.5) {$7$};
+        \node at (0.5,1.5) {$6$};
+        \node at (1.5,1.5) {$8$};
+        \node at (2.5,1.5) {$0$};
+        \node at (3.5,1.5) {$2$};
+        \node at (0.5,2.5) {$5$};
+        \node at (1.5,2.5) {$3$};
+        \node at (2.5,2.5) {$3$};
+        \node at (3.5,2.5) {$2$};
+        \node at (0.5,3.5) {$6$};
+        \node at (1.5,3.5) {$3$};
+        \node at (2.5,3.5) {$1$};
+        \node at (3.5,3.5) {$2$};
+        
+        \node at (5.5,1.5) {$8$};
+        \node at (6.5,1.5) {$7$};
+        \node at (5.5,2.5) {$6$};
+        \node at (6.5,2.5) {$3$};
+    \end{tikzpicture}
+    \caption{Illustration of maximum pooling for $k=s=2$.}
+    \label{fig:maxpool}
+\end{figure}
+It is easy to see that unlike convolutions, pooling layers have no trainable parameters.
+Nonetheless, they have three hyperparameters: the padding $p$, stride $s$ and window size $k$.
+We often set $s=k=2$ in order to halve the spatial dimensions.
 
 \section{Transfer learning}
 

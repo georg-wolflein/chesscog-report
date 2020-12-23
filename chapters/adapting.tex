@@ -50,39 +50,186 @@ The training set, consisting of the two images obtained in the aforementioned ma
 \end{figure}
 For this task, we do not employ a validation dataset because the availability of labelled data is limited (it would be unreasonable to ask the user for more photos and then even requiring them to manually annotate the positions).
 The test dataset consists of 27 images which were obtained by playing a game of chess and taking a photo of the board after each move.
-Each photo is taken from the current player's perspective, so the images are alternating between White's and Black's perspective.
+Each photo is taken from the current player's perspective, so the images alternate between White's and Black's perspectives.
+All samples are associated with a manually labelled \gls{fen} string describing the position.
 
 At this point, it is a good idea to establish a baseline for the quality of predictions the chess recognition pipeline achieves without fine-tuning the \glspl{cnn} on the test set.
+These results are summarised in \cref{tbl:transfer_learning_results_without_finetuning}.
 \begin{table}
     \centering
     \begin{tabular}{lrr}
         \toprule
-        metric & train set & test set \\
+        metric & training set & test set \\
         \midrule
-        mean number of incorrect squares per board          & 9.50     & 9.33 \\
-        per-board end-to-end accuracy                       & 0.00\%   & 0.00\%   \\
-        per-board end-to-end accuracy, allowing one mistake & 0.00\%   & 0.00\%   \\
-        per-board corner detection accuracy                 & 100.00\% & 100.00\% \\
-        per-square occupancy classification accuracy        & 100.00\% & 99.88\% \\
-        per-square piece classification accuracy            & 85.16\%  & 85.52\% \\
+        mean number of incorrect squares per board           & 9.50     & 9.33 \\
+        percentage of boards predicted with no mistakes      & 0.00\%   & 0.00\%   \\
+        percentage of boards predicted with $\leq 1$ mistake & 0.00\%   & 0.00\%   \\
+        per-board corner detection accuracy                  & 100.00\% & 100.00\% \\
+        per-square occupancy classification accuracy         & 100.00\% & 99.88\% \\
+        per-square piece classification accuracy             & 85.16\%  & 85.52\% \\
         \bottomrule
     \end{tabular}
-    \caption{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning.}
+    \caption{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning. In this case, the training set is not used for training because the model is not fine-tuned. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
+    \label{tbl:transfer_learning_results_without_finetuning}
 \end{table}
-\section{}
+This regime is unable to completely identify any of the positions; on average, it misclassifies 9.33 out of 64 squares per board.
+The accuracy of the corner detection algorithm is 100\%, meaning that it can generalise nicely to new chess sets as hypothesised at the beginning of this chapter.
+While the occupancy classification \gls{cnn} is able to adapt quite well to this new dataset as well (achieving an accuracy of 99.88\% on the test set), the underlying reason for the poor performance stems from the piece classifier that achieves only around 85\% accuracy.
+
+\section{Training}
+Our ability to fine-tune the models to this new dataset is mainly constrained by the limited availability of data.
+Since we only have two input images, the occupancy classifier will have 128 samples for training (each board has 64 squares).
+The piece classifier will only have 64 samples because there are 32 pieces on the board at the starting position.
+While the \gls{cnn} for occupancy detection is a binary classifier, the piece classifier must undertake the more challenging task of distinguishing between a dozen different piece types.
+Furthermore, the data is not balanced between the classes: for example, there are 16 training samples for black pawns, but only two for the black king.
+Given this premise, it is clear that we should employ data augmentations at training time in order to increase the variability of the data and reduce the risk of overfitting.
+
+\subsection{Data augmentation}
+The use of various types of data augmentation resulted in a net increase in the accuracy of the position inference by 45 percentage points (from 44\% without data augmentation to 89\% with augmentation).
+Furthermore, the mean number errors per position was decreased from 2.3 squares to 0.11 squares.
+Of course, these augmentations are only applied while training the networks and not at test time.
+The following sections lay out various data augmentations employed to increase the performance of the piece classifier.
+While the occupancy classifier was fine-tuned as well, augmentations were not used as aggresively in that \gls{cnn}'s training process because its accuracy was already quite high.
+These augmentations had little to no effect on the performance, so in the interest of brevity we will instead focus on the augmentations of the piece classifier.
+
+\subsubsection{Shearing}
+Of all augmentations, we observe the most significant performance gains in the shear transformation, likely due to its similarity to actual perspective distortion.
+In \cref{sec:piece_classification}, we explain that the piece images are transformed (by performing a horizontal flip where appropriate) in a manner such that the bottom left part of the sample always depicts the square on which the piece stands, as can be seen in \cref{fig:white_queens}.
+Consequently, we must carefully design our use of the shear transform to retain this property in broad terms.
+
+A shear transform is a linear map that dispaces pixels from the original image. 
+In our case, the magnitude of displacement will be proportional to the $y$-axis, but each pixel will remain on its row.
+Mathematically, a shear is a function $\vs : \R^2 \to \R^2$ that maps a 2D coordinate to another.
+We define it as
+\begin{equation}
+    \vs(x,y) = \begin{bmatrix}
+        x + \lambda y \\ y
+    \end{bmatrix}
+\end{equation}
+for some $\lambda \in \R$ affecting severety of the distortion.
+For $\lambda=0$, there is no distortion.
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                axis lines = center,
+                xmin = 0, xmax = 4,
+                ymin = 0, ymax = 4,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=south},
+                xtick = {0},
+                ytick = {0},
+                extra x ticks = 0,
+                extra x tick style = {
+                    tick label style={
+                        anchor=north east,
+                        at={(-.1,-.1)}
+                }},
+                x=1cm,
+                y=1cm,
+                no markers,
+                enlargelimits=upper
+            ]
+                \draw[blue] (0, 0) -- (0, 4);
+                \draw[blue] (1, 0) -- (1, 4);
+                \draw[blue] (2, 0) -- (2, 4);
+
+                \draw[blue] (0, 0) -- (2, 0);
+                \draw[blue] (0, 1) -- (2, 1);
+                \draw[blue] (0, 2) -- (2, 2);
+                \draw[blue] (0, 3) -- (2, 3);
+                \draw[blue] (0, 4) -- (2, 4);
+            \end{axis}
+        \end{tikzpicture}
+        \caption{original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                axis lines = center,
+                xmin = 0, xmax = 4,
+                ymin = 0, ymax = 4,
+                xlabel = $x$,
+                ylabel = $y$,
+                xlabel style = {anchor=west},
+                ylabel style = {anchor=south},
+                xtick = {0},
+                ytick = {0},
+                extra x ticks = 0,
+                extra x tick style = {
+                    tick label style={
+                        anchor=north east,
+                        at={(-.1,-.1)}
+                }},
+                x=1cm,
+                y=1cm,
+                no markers,
+                enlargelimits=upper
+            ]
+                \draw[blue] (0, 0) -- (2, 4);
+                \draw[blue] (1, 0) -- (3, 4);
+                \draw[blue] (2, 0) -- (4, 4);
+
+                \draw[blue] (0, 0) -- (2, 0);
+                \draw[blue] (.5, 1) -- (2.5, 1);
+                \draw[blue] (1, 2) -- (3, 2);
+                \draw[blue] (1.5, 3) -- (3.5, 3);
+                \draw[blue] (2, 4) -- (4, 4);
+            \end{axis}
+        \end{tikzpicture}
+        \caption{after shearing}
+    \end{subfigure}
+    \caption[Illustration of the shear transform with $\lambda=\sfrac{1}{2}$.]{Illustration of the shear transform with $\lambda=\sfrac{1}{2}$. Notice that the $y$-axis points in the opposite direction as is used to represent images, thus in practice, the input sample is flipped vertically before applying the shear transform and then flipped back.}
+    \label{fig:shear}
+\end{figure}
+\Cref{fig:shear} demonstrates the shear transform on a conceptual level and shows that the bottom left corner of the image is affected the least.
+At each iteration during training, we sample $\lambda$ from a uniform distribution in the interval $[-0.1, 0.25]$.
+
+\subsubsection{Affine transform}
+Apart from shearing, we employ two more affine transformations: translation and scaling.
+The random $x$ and $y$ displacements are sampled uniformly in the interval $[-0.03, 0.1]$, meaning that the piece may shift up to 3\% left or down (relative to the total width/height), but up to 10\% up or right.
+Again, this is because the most important information is in the bottom left of the image.
+
+Similar to the translation, scaling is performed separately on both axes, meaning that the $x$ and $y$ scales may be different.
+The scale factor for each axis is chosen uniformly in the interval $[0.8, 1.2]$.
+
+\subsubsection{Colour jitter}
+A popular means of image augmentation is inducing colour perturbation.
+We achieve this by jointly varying brightness, contrast, hue, and saturation.
+For each of these factors, we choose the degree of alteration from four separate uniform distributions over intervals that are sensibly selected such that the alteration does not appear too drastic upon visual inspection.
+
+\Cref{fig:augmentations} shows five augmentations of the same input image, drawing attention to the random parameter selection which creates the indended variability in the training images.
+\begin{figure}
+    \centering
+    \includegraphics[width=1.9cm]{augmentation_orig}
+    \includegraphics[width=1.9cm]{augmentation_0}
+    \includegraphics[width=1.9cm]{augmentation_1}
+    \includegraphics[width=1.9cm]{augmentation_2}
+    \includegraphics[width=1.9cm]{augmentation_3}
+    \includegraphics[width=1.9cm]{augmentation_4}
+    \caption[The augmentation pipeline applied to an input image.]{The augmentation pipeline applied to an input image (left). Each output looks different due to the random parameter selection.}
+    \label{fig:augmentations}
+\end{figure}
+The augmentation pipeline is applied to each image for each batch during training, meaning that different augmentations are used each time even though the underlying images might be the same.
+
+\subsection{Fine-tuning}
 
 \begin{table}
     \centering
     \begin{tabular}{lrr}
         \toprule
-        metric & train set & test set \\
+        metric & training set & test set \\
         \midrule
-        mean number of incorrect squares per board          & 0.00     & 0.11 \\
-        per-board end-to-end accuracy                       & 100.00\% & 88.89\%   \\
-        per-board end-to-end accuracy, allowing one mistake & 100.00\% & 100.00\%   \\
-        per-board corner detection accuracy                 & 100.00\% & 100.00\% \\
-        per-square occupancy classification accuracy        & 100.00\% & 99.88\% \\
-        per-square piece classification accuracy            & 100.00\% & 99.94\% \\
+        mean number of incorrect squares per board           & 0.00     & 0.11 \\
+        percentage of boards predicted with no mistakes      & 100.00\% & 88.89\%   \\
+        percentage of boards predicted with $\leq 1$ mistake & 100.00\% & 100.00\%   \\
+        per-board corner detection accuracy                  & 100.00\% & 100.00\% \\
+        per-square occupancy classification accuracy         & 100.00\% & 99.88\% \\
+        per-square piece classification accuracy             & 100.00\% & 99.94\% \\
         \bottomrule
     \end{tabular}
     \caption{Performance of the fine-tuned chess recognition pipeline on the transfer learning dataset.}

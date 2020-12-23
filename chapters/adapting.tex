@@ -198,7 +198,7 @@ Similar to the translation, scaling is performed separately on both axes, meanin
 The scale factor for each axis is chosen uniformly in the interval $[0.8, 1.2]$.
 
 \subsubsection{Colour jitter}
-A popular means of image augmentation is inducing colour perturbation.
+A popular means of image augmentation is inducing colour perturbations.
 We achieve this by jointly varying brightness, contrast, hue, and saturation.
 For each of these factors, we choose the degree of alteration from four separate uniform distributions over intervals that are sensibly selected such that the alteration does not appear too drastic upon visual inspection.
 
@@ -217,6 +217,12 @@ For each of these factors, we choose the degree of alteration from four separate
 The augmentation pipeline is applied to each image for each batch during training, meaning that different augmentations are used each time even though the underlying images might be the same.
 
 \subsection{Fine-tuning}
+To train the networks, we follow a two-stage approach as motivated in \cref{sec:background_transfer_learning} and already employed in \cref{sec:occupancy_classification,sec:piece_classification}.
+First, we train only the classification head with a learning rate of 0.001, and then we decrease the learning rate by a factor of ten and train all layers.
+In the case of the occupancy classifier, we perform 100 iterations over the entire training set at both stages, essentially following the same regime as \cref{sec:occupancy_classification}.
+However, for the piece classifier, we execute an additional 50 iterations in the second stage to ensure reliable convergence.
+As expected, we are unable to achieve gains in the occupancy classifier's accuracy because it already achieved such a strong performance from the outset.
+In fact, the loss is already below 0.001 at the beginning of training which can be seen in \cref{fig:transfer_learning_loss_accuracy_occupancy}.
 \begin{figure}
     \centering
     \begin{subfigure}{\textwidth}
@@ -297,7 +303,13 @@ The augmentation pipeline is applied to each image for each batch during trainin
     \caption[Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset.]{Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset. Due to the limited availability of data, the validation set is simply the training set without augmentations. Both fine-tuned models achieves an accuracy of 100\% on the training data.}
     \label{fig:transfer_learning_loss_accuracy}
 \end{figure}
+Thus the ocupancy classifier achieves an accuracy of 100\% quite quickly during training, even before all layers are unfrozen halfway though the training.
 
+On the other hand, the piece classifier starts with a loss value just under 2, and only converges during the second training stage which starts around step\footnote{Recall that the number of steps is different to the number of iterations over the dataset, due to the fact that the dataset consists of multiple batches.} 300, as depicted in \cref{fig:transfer_learning_loss_accuracy_pieces}.
+Nonetheless, the convergence of the loss is relatively smooth.
+The fluctuations in accuracy at the beginning of training can be explained by the small size of the dataset.
+
+Key indicators for evaluating the performance of the chess recognition pipeline using the newly fine-tuned models on the transfer learning dataset are summarised in \cref{tbl:transfer_learning_results}.
 \begin{table}
     \centering
     \begin{tabular}{lrr}
@@ -313,6 +325,13 @@ The augmentation pipeline is applied to each image for each batch during trainin
         \bottomrule
     \end{tabular}
     \caption{Performance of the fine-tuned chess recognition pipeline on the transfer learning dataset.}
+    \label{tbl:transfer_learning_results}
 \end{table}
+Comparing that to \cref{tbl:transfer_learning_results_without_finetuning}, we experience drastic improvements in all aspects.
+Even in absolute terms, the results are very strong and a testament to the effectiveness of using transfer learning and careful data augmentation in order to adapt to a slightly different data distribution.
+The mean number of incorrect squares per board decreased by almost two orders of magnitude to $0.11$.
+This allowed an increase in the percentage of correctly identified positions from 0\% to 89\%. 
+The remaining 11\% of positions were identified with just one mistake.
+In other words, there were only three errors in all 27 samples in the test set.
 
 \end{document}

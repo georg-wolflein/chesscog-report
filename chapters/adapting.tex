@@ -69,7 +69,7 @@ These results are summarised in \cref{tbl:transfer_learning_results_without_fine
         per-square piece classification accuracy             & 85.16\%  & 85.52\% \\
         \bottomrule
     \end{tabular}
-    \caption{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning. In this case, the training set is not used for training because the model is not fine-tuned. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
+    \caption[Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning.]{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning. In this case, the training set is not used for training because the model is not fine-tuned. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
     \label{tbl:transfer_learning_results_without_finetuning}
 \end{table}
 This regime is unable to completely identify any of the positions; on average, it misclassifies 9.33 out of 64 squares per board.
@@ -217,6 +217,86 @@ For each of these factors, we choose the degree of alteration from four separate
 The augmentation pipeline is applied to each image for each batch during training, meaning that different augmentations are used each time even though the underlying images might be the same.
 
 \subsection{Fine-tuning}
+\begin{figure}
+    \centering
+    \begin{subfigure}{\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                no markers,
+                xlabel={step},
+                ylabel={cross-entropy loss},
+                title={Loss},
+                scale only axis,
+                width=.4\textwidth,
+                legend style={at={(0.98,0.98)},anchor=north east}
+            ]
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_occupancy_classifier_train-tag-Loss.csv};
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_occupancy_classifier_val-tag-Loss.csv};
+                \legend{training,validation}
+            \end{axis}
+        \end{tikzpicture}
+        \hfill
+        \begin{tikzpicture}
+            \begin{axis}[
+                no markers,
+                xlabel={step},
+                ylabel={accuracy},
+                title={Accuracy},
+                scale only axis,
+                width=.4\textwidth,
+                ylabel near ticks,
+                yticklabel pos=right,
+                legend style={at={(0.98,0.02)},anchor=south east}
+            ]
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_occupancy_classifier_train-tag-Accuracy.csv};
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_occupancy_classifier_val-tag-Accuracy.csv};
+                \legend{training,validation}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{occupancy classifier}
+        \label{fig:transfer_learning_loss_accuracy_occupancy}
+    \end{subfigure}
+    \par\vspace{1cm}
+    \begin{subfigure}{\textwidth}
+        \begin{tikzpicture}
+            \begin{axis}[
+                no markers,
+                xlabel={step},
+                ylabel={cross-entropy loss},
+                title={Loss},
+                scale only axis,
+                width=.4\textwidth,
+                legend style={at={(0.98,0.98)},anchor=north east}
+            ]
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_piece_classifier_train-tag-Loss.csv};
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_piece_classifier_val-tag-Loss.csv};
+                \legend{training,validation}
+            \end{axis}
+        \end{tikzpicture}
+        \hfill
+        \begin{tikzpicture}
+            \begin{axis}[
+                no markers,
+                xlabel={step},
+                ylabel={accuracy},
+                title={Accuracy},
+                scale only axis,
+                width=.4\textwidth,
+                ylabel near ticks,
+                yticklabel pos=right,
+                legend style={at={(0.98,0.02)},anchor=south east}
+            ]
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_piece_classifier_train-tag-Accuracy.csv};
+                \addplot table [x=Step, y=Value, col sep=comma] {data/run-transfer_learning_piece_classifier_val-tag-Accuracy.csv};
+                \legend{training,validation}
+            \end{axis}
+        \end{tikzpicture}
+        \caption{piece classifier}
+        \label{fig:transfer_learning_loss_accuracy_pieces}
+    \end{subfigure}
+    \caption[Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset.]{Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset. Due to the limited availability of data, the validation set is simply the training set without augmentations. Both fine-tuned models achieves an accuracy of 100\% on the training data.}
+    \label{fig:transfer_learning_loss_accuracy}
+\end{figure}
 
 \begin{table}
     \centering

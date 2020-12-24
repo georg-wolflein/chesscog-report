@@ -12,6 +12,93 @@ Explain the use of:
     \item Testing
 \end{itemize}
 
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{tikzpicture}[
+            node distance = 3cm,
+            every text node part/.style={align=center},
+            repo/.style = {
+                circle,
+                text width=2.5cm,
+                inner xsep=0pt,
+                outer sep=0pt,
+                draw=black
+            },
+            action/.style = {
+                trapezium,
+                trapezium angle=70,
+                trapezium stretches=true,
+                align=center,
+                minimum width=2.5cm,
+                minimum height=1cm,
+                draw=black
+            },
+            process/.style = {
+                rectangle,
+                text width=2.5cm,
+                minimum height=1cm,
+                text centered,
+                draw=black
+            },
+            arrow/.style = {
+                ->,>=stealth
+            },
+            thickarrow/.style = {
+                -{Triangle[width=18pt,length=8pt]}, line width=10pt,lightgray
+            }
+        ]
+            \draw[dashed] (0,0) node[below,right,anchor=north west] {\texttt{chesscog} repository} rectangle (8,-6.5);
+            \node[action] (chesscog_commit) at (4,-1.5) {};
+            \node at (chesscog_commit) {push\\commit};
+            \node[process,below left=1cm and 0cm of chesscog_commit] (chesscog_build) {build};
+            \node[process,below right=1cm and 0cm of chesscog_commit] (chesscog_test) {run tests};
+            \node[action,below=3cm of chesscog_commit] (chesscog_release) {};
+            \node at (chesscog_release) {publish\\release};
+            \node[process,below=1cm of chesscog_release] (chesscog_pr) {open \acs{pr} in \texttt{chesscog-app}};
+            
+            \draw[dashed] (0,-8.5) node[below,right,anchor=north west] {\texttt{chesscog-app} repository} rectangle +(8,-9);
+            \node[action,below right=1.5cm and 0cm of chesscog_pr] (chesscogapp_merge) {};
+            \node at (chesscogapp_merge) {merge};
+            \node[action,below left=1.5cm and 0cm of chesscog_pr] (chesscogapp_commit) {};
+            \node at (chesscogapp_commit) {push\\commit};
+            \node[process,below=1cm of chesscogapp_commit] (chesscogapp_build) {build};
+            \node[process,below=1cm of chesscogapp_merge] (chesscogapp_test) {run tests};
+            \node[draw,diamond,below=6cm of chesscog_pr] (chesscogapp_success) {success and\\on \texttt{master}?};
+            \coordinate[above=.75cm of chesscogapp_success] (chesscogapp_success_dummy);
+            \node[process,below=1cm of chesscogapp_success] (chesscogapp_deploy) {deploy to\\web server};
+
+            \draw[dashed] (9,0) node[below,right,anchor=north west] {\texttt{recap} repository} rectangle +(8,-6.5);
+            \node[action] (recap_commit) at (13,-1.5) {};
+            \node at (recap_commit) {push\\commit};
+            \node[process,below left=1cm and 0cm of recap_commit] (recap_build) {build};
+            \node[process,below right=1cm and 0cm of recap_commit] (recap_test) {run tests};
+            \node[action,below=3cm of recap_commit] (recap_release) {};
+            \node at (recap_release) {publish\\release};
+            \node[process,below=1cm of recap_release] (recap_deploy) {deploy to \acs{pypi}};
+
+            \draw[arrow] (chesscog_commit) -- (chesscog_build);
+            \draw[arrow] (chesscog_commit) -- (chesscog_test);
+            \draw[arrow] (chesscog_release) -- (chesscog_pr);
+            \draw[arrow] (chesscog_pr) -- (chesscogapp_merge);
+            \draw[arrow] (chesscogapp_commit) -- (chesscogapp_build);
+            \draw[arrow] (chesscogapp_commit) -- (chesscogapp_test);
+            \draw[arrow] (chesscogapp_merge) -- (chesscogapp_build);
+            \draw[arrow] (chesscogapp_merge) -- (chesscogapp_test);
+            \draw (chesscogapp_build) |- (chesscogapp_success_dummy);
+            \draw (chesscogapp_test) |- (chesscogapp_success_dummy);
+            \draw[arrow] (chesscogapp_success_dummy) -- (chesscogapp_success);
+            \draw[arrow] (chesscogapp_success) -- (chesscogapp_deploy) node[pos=0,below right] {yes};
+            \draw[arrow] (recap_commit) -- (recap_build);
+            \draw[arrow] (recap_commit) -- (recap_test);
+            \draw[arrow] (recap_release) -- (recap_deploy);
+            
+            \draw[thickarrow] (8,-1) -- +(1,0);
+            \draw[thickarrow] (1,-8.5) -- +(0,2);
+        \end{tikzpicture}
+        }
+    \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency.}
+\end{figure}
+
 \section{Data synthesis}
 \section{Configuration management}
 \gls{pypi}

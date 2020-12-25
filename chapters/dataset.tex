@@ -177,12 +177,66 @@ For each chess position, a random choice is made between two different lighting 
             \right)
         \)
         and the corresponding spotlight is rotated such that it points in that direction.
-        Consequently, there is greater variabililty in the lighting because the spotlights could be pointing at different areas on the board, thus producing different types of shadows.
+        Consequently, there is greater variabililty in the lighting because the spotlights might point at different areas on the board, thus producing different types of shadows.
         \Cref{fig:lighting_spotlights_example} shows an example rendering where the lighting produced by the spotlights is poorer than the camera flash mode.
 \end{enumerate}
 
 \section{Automated labelling}
-\todo{use the chesscog.data\_synthesis.visualisation script}
-\todo{todo: explain how dataset was split into train/val/test}
+Apart from eliminating the need to manually set up a large number of positions on the chessboard and photographing them, the use of a 3D model for synthetic data generation exhibits another major advantage: we can compute the required labels for the data without human intervention.
+In fact, manually labelling the data is usually the most time-consuming part of the entire process.
+
+With each render, we export a file in \gls{json} format alongside the image file containing the following information:
+\begin{itemize}
+    \item the pixel coordinates of the chessboard's four corner points on the rendered image;
+    \item the \gls{fen} description of the pieces on the board;
+    \item the colour of the current player (white/black);
+    \item pixel coordinates of each piece's bounding box on the rendered image;
+    \item the position and angle of the camera (in the 3D world coordinate system); and
+    \item the lighting mode as well as position, angle, and focus point of each light.
+\end{itemize}
+The coordinates of the chessboard's corners can be computed because we know the coordinates of the relevant meshes in the 3D world coordinate system, and we know the world-to-camera-view matrix used to render the image.
+It is just a matter of performing some linear algebra to compute the corresponding 2D image coordinates.
+For computing the bounding boxes of the pieces, we simply project all vertices of the corresponding meshes onto the view plane and find the minimum and maximum points in the $x$ and $y$ directions.
+\Cref{fig:data_synthesis_visualisation} provides a visualisation of the automatically generated labels for one sample.
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \includegraphics[width=\paperwidth]{3828_data_synthesis}
+    }
+    \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
+    \label{fig:data_synthesis_visualisation}
+\end{figure}
+Note that although we will not use the bounding bounding boxes in this project, they are useful if someone should use the dataset to train an object recognition model for inferring chess positions instead of our classification-based approach.
+In this project, we will mainly rely on the board's corner coordinates as well as the \gls{fen} description for training.
+Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
+
+\section{Splitting the dataset}
+In order to facilitate a fair evaluation of our chess recognition algorithm once it is completed, we immediately set aside 7\% of the dataset as the so-called \emph{test} set.
+We will not use this data until the very end when it is time to assess the performance of our chess recognition pipeline, so we can prevent \emph{data leakage}: since we want to evaluate how our system performs on unseen data, we should not be allowed to use it during training.
+A much smaller portion of the data (3\%) will be used for \emph{validation} purposes.
+This subset will not directly be used for training, but for hyperparameter tuning or assessing whether a model overfits to the training data.
+Finally, the remaining 90\% constitutes the training set.
+\Cref{fig:dataset_split} shows the proportions of the splits, including the actual number of samples in each subset.
+The aforementioned splits are performed only once on the shuffled dataset and the associated \gls{json} and image files are moved into three different folders to ensure that the same split is used each time.
+
+\begin{figure}
+    \begin{tikzpicture}
+        \draw (0,0) rectangle (\textwidth,1);
+        \draw (0,0) rectangle (.9\textwidth,1) node[midway] {train};
+        \draw (.9\textwidth,0) rectangle (.93\textwidth,1) node[midway,rotate=-90] {val};
+        \draw (.93\textwidth,0) rectangle (\textwidth,1) node[midway] {test};
+        \draw [decorate,decoration={brace,amplitude=10pt}]
+            (0,1.2) -- +(\textwidth,0)
+            node [black,midway,above,yshift=10pt] {4,888 samples};
+        \draw [decorate,decoration={brace,amplitude=10pt}]
+            (.9\textwidth,-.2) -- (0,-.2)
+            node [black,midway,below,yshift=-10pt,align=center] {90\%\\(4,400 samples)};
+        \node[pin={[pin edge={black},align=center]-143:3\%\\(146 s.)}] at (.925\textwidth,-.2) {};
+        \draw [decorate,decoration={brace,amplitude=10pt}]
+            (\textwidth,-.2) -- (.93\textwidth,-.2)
+            node [black,midway,below,yshift=-10pt,align=center] {7\%\\(342 s.)};
+    \end{tikzpicture}
+    \caption{Visual representation of the dataset split.}
+    \label{fig:dataset_split}
+\end{figure}
 
 \end{document}

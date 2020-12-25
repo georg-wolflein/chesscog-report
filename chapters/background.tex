@@ -3,7 +3,7 @@
 
 \begin{document}
 
-\chapquote{To become good at anything you have to know how to apply basic principles. To become great at it, you have to know when to violate those principles.}{Garry Kasparov}
+\chapquote{To become good at anything, you have to know how to apply basic principles. To become great at it, you have to know when to violate those principles.}{Garry Kasparov}
 \chapter{Background}
 This chapter will introduce some of the basic concepts involved in \glspl{ann}, \glspl{cnn}, and transfer learning as they relate to this project.
 Readers familiar with this subject matter may skip this chapter and resume at \cref{chap:data_synthesis}.
@@ -21,7 +21,7 @@ As such, it can be defined a mathematical function of the form $f:\mathbb{R}^n\r
     \label{eq:reg_model}
     f(\vx) = \hat{y} = y + \epsilon
 \end{equation}
-that models the relationship between a $n$-dimensional feature vector $\vx \in \mathbb{R}^n$ of independent (\emph{input}) variables and the dependent (\emph{output}) variable $y \in \mathbb{R}$. 
+that models the relationship between an $n$-dimensional feature vector $\vx \in \mathbb{R}^n$ of independent (\emph{input}) variables and the dependent (\emph{output}) variable $y \in \mathbb{R}$. 
 Given a particular $\vx$, the model will produce a \emph{prediction} for $y$ which we shall denote $\hat{y}$.
 Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e. the difference between the predicted and observed output.
 
@@ -237,7 +237,7 @@ Unlike $g_\text{step}$, the range of these these activation functions is the rea
 
 Rectified units do not suffer from the so-called \emph{vanishing gradient effect} \cite{glorot2011}.
 This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal (see \cref{fig:activation_functions_sigmoid}), and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
-As a result, the \gls{relu} activation function (or variants thereof) are the most popular choice nowadays.
+As a result, the \gls{relu} activation function (or variants thereof) is the most popular choice nowadays.
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
 \subsection{Feedforward neural networks}
@@ -324,7 +324,7 @@ A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \gl
     \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_L)(\vx).
 \end{equation}
 
-Each \gls{slp} inside the \gls{mlp} is constitutes a logical module which we call a \emph{layer}.
+Each \gls{slp} inside the \gls{mlp} constitutes a logical module which we call a \emph{layer}.
 Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, we will use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
 Further, the notation $b_j^{(l)}$ refers to the $j$\textsuperscript{th} unit's bias in layer $l$, and $w_{i,j}^{(l)}$ is the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$.
 This notation follows \textcite{goodfellow2016} and is customary in describing neural networks
@@ -543,9 +543,9 @@ However, such details are unfortunately outwith the scope of this report.
 \section{\Glsentrylongpl{cnn}}
 \label{sec:cnns}
 Let us examine how \glspl{ann} can be applied to a simple image classification problem.
-Consider an input image of $512 \times 512$ pixels with three colour channels (\gls{rgb}).
+Consider an input image of $256 \times 256$ pixels with three colour channels (\gls{rgb}).
 If we flatten this image to a single vector, that vector will contain $3 \cdot 2^{16}$ values.
-We could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined set of classes.
+We could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined classes.
 If the first layer has half as many units as the input, the weight matrix $\mW_1$ will be of size $(3 \cdot 2^{16}) \times (3 \cdot 2^{15})$, meaning that it will hold $9 \cdot 2^{31}$ values.
 This means that the first layer alone will already have over two billion parameters.
 Networks with this many parameters are infeasible to train because the number of parameters exceeds the memory capacity and computational ability of modern hardware.
@@ -557,10 +557,10 @@ Originally, the concept of \glspl{cnn} evolved from the so-called \emph{neocogni
 In \citeyear{lecun1998}, \citeauthor{lecun1998} proposed the famous \emph{LeNet-5} architecture that is considered to be the first \gls{cnn} \cite{lecun1998}. 
 The main concepts developed in the seminal work of \citeauthor{lecun1998} carry through to today.
 
-David Hubel and Torsten Wiesel\footnote{Hubel and Wiesel recieved the Nobel Prize in Physiology or Medicine in 1981 for their work in understanding information processing in the visual system.} found by conducting experiments on animals that biological neurons in the visual cortex respond to patterns in specific areas of the visual field, known as \emph{receptive fields} \cite{hubel1959}.
+By conducting experiments on animals, David Hubel and Torsten Wiesel\footnote{Hubel and Wiesel received the Nobel Prize in Physiology or Medicine in 1981 for their work in understanding information processing in the visual system.} found that biological neurons in the visual cortex respond to patterns in specific areas of the visual field, known as \emph{receptive fields} \cite{hubel1959}.
 Moreover, different neurons may respond to different patterns even if their receptive fields overlap.
-Hubel and Wiesel demonstrated this by showing that some neurons activate only for horizontal lines while others active for vertical lines.
-They also showed that some neurons with larger receptive fields respond to more compex patterns that are combinations of such lower-level patterns.
+Hubel and Wiesel demonstrated this by showing that some neurons activate only for horizontal lines while others become active for vertical lines.
+They also showed that some neurons with larger receptive fields respond to more complex patterns that are combinations of such lower-level patterns.
 
 \Glspl{cnn} follow the same intuition: neurons at the beginning of the network learn to recognise very simple, low-level patterns, while neurons deeper in the network compose these patterns to perceive more complex features.
 They are comprised of \emph{convolutional} and \emph{pooling} layers, which we shall describe below.
@@ -776,7 +776,7 @@ In practice, a convolutional layer will stack multiple such operations on top of
 These matrices, after adding the bias and applying the activation function $g$, will constitute the input channels for the subsequent layer.
 Each output channel will have its own bias $b$, so we require a bias vector $\vb$ to denote all of the biases.
 
-The astute reader might wonder how we obtain the values for each of the filters so that they are correspond to useful features in the image that will ultimately allow a series of fully-connected feedforward layers following the convolutional layers to perform a classification prediction at the end of the network.
+The astute reader might wonder how we obtain the values for each of the filters so that they correspond to useful features in the image that will ultimately allow a series of fully-connected feedforward layers following the convolutional layers to perform a classification prediction at the end of the network.
 As in \glspl{mlp}, the answer is to use backpropagation and gradient descent.
 Each of the values in the filter matrices is a trainable parameter and the biases are of course trainable, too.
 It is possible to calculate the gradients of these trainable parameters with respect to the loss function, so we can use an optimisation algorithm such as the popular \emph{Adam} optimizer \cite{kingma2017} to update the parameters as discussed at the end of \cref{sec:mlp_training}.
@@ -788,7 +788,7 @@ There are a number of hyperparameters associated with convolutional layers that 
     \item the stride $s$, indicating how many pixels we move the sliding window each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
     \item the desired number of output channels $c_\text{out}$.
 \end{itemize}
-Of course, the activation function $g$ is also be regarded as a hyperparameter, but it has no effect on the size of the layer's output.
+Of course, the activation function $g$ may also be regarded as a hyperparameter, but it has no effect on the size of the layer's output.
 Let us consider a convolutional layer with input of spatial size $h_\text{in} \times w_\text{in}$ with $c_\text{in}$ channels.
 By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, we can derive the equations
 \begin{equation}
@@ -797,7 +797,7 @@ By examining how the spatial output dimensions correspond to the input size and 
     w_\text{out} = \left\lfloor \frac{w_\text{in} + 2p - k }{s} \right\rfloor + 1
 \end{equation}
 relating the input spatial dimensions to the output spatial dimensions of a convolutional layer.
-It is important to know this when designing a \gls{cnn} architecture in order to keep track how the spatial size shrinks with each convolutional layer.
+It is important to know this when designing a \gls{cnn} architecture in order to monitor how the spatial size shrinks with each convolutional layer.
 
 Having said that, we can finally provide evidence for the claim at the beginning of section \cref{sec:cnns} that \glspl{cnn} require significantly fewer trainable parameters than \glspl{mlp}.
 Notice that the number of trainable parameters is simply the number of elements in each filter $\mF$ multiplied by the number of filters, plus the number of biases.
@@ -882,7 +882,7 @@ It is an important tool that we employ in two different settings throught this p
 Training a deep \gls{cnn} from scratch (starting from randomly initialised weights) can take several days even on modern \glspl{gpu}. 
 Furthermore, to achieve good performance, we require very large labelled datasets.
 Obtaining the required compute capability and quantity of data is often infeasible, and so it is very common to initialise the weights based on an already trained network.
-This makes sense because as discussed in \cref{sec:cnns}, \glspl{cnn} learn patterns at the beginning of the network that are to a similar level of abstraction for different datasets.
+This makes sense because as discussed in \cref{sec:cnns}, \glspl{cnn} learn patterns at the beginning of the network that are of a similar level of abstraction for different datasets.
 Understanding these feature representations is still a very active area of research; in fact, a recent paper shows that when training the same deep neural network architecture on different datasets, the learned features are very similar at the beginning of the network until a depth of around two thirds \cite{kornblith2019}.
 In practice, this means that it is only in the last third of the network that it specialises on the task at hand, and before that it learns only very general features.
 

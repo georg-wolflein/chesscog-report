@@ -24,15 +24,15 @@ Furthermore, these approaches experience severe shortcomings in terms of their i
 \paragraph{Single-image chess recognition}
 A number of techniques have been developed to address the issue of chess recognition from a single image. 
 Unlike move recording software or chess robots, the squares' occupancy and colour alone provide insufficient information to determine the position. 
-These techniques must instead implement a classification algorithm for each piece type (pawn, knight, bishop, queen, and king) of each colour which poses a significantly more difficult problem, attracting research mainly in the last five years.
-From a bird's-eye view, the pieces are nearly indestinguishable, hence the photo is usually taken at an acute angle to the board.
+These techniques must instead implement a classification algorithm for each piece type (pawn, knight, bishop, rook, queen, and king) of each colour which poses a significantly more difficult problem, attracting research mainly in the last five years.
+From a bird's-eye view, the pieces are nearly indistinguishable, hence the photo is usually taken at an acute angle to the board.
 \textcite{ding2016} proposes a piece classifier that uses one-versus-rest \glspl{svm} trained on \gls{sift} and \gls{hog} feature descriptors, achieving an accuracy of 85\%. 
 Conversely, \textcite{danner2015} as well as \textcite{xie2018} claim that \gls{sift} and \gls{hog} provide inadequate features for the problem of piece classification due to the similarity in texture between chess pieces, and instead focus on the pieces' outlines.
 As such, \textcite{danner2015} use Fourier descriptors calculated based on the pieces' contours, but this requires a manually-created database of piece silhouettes.
 Furthermore, they modify the board colours to red and green instead of black and white, in order distinguish the pieces from the board more easily\footnote{Similar board modifications have also been proposed as part of chess robots \cite{banerjee2012} and chess move trackers \cite{wang2013}, but any such modification imposes an unreasonable constraint on normal chess games.}.
 On the other hand, \textcite{xie2018} perform contour-based template matching with an interesting caveat: the camera angle is calculated based on the perspective transformation of the chessboard, and then depending on the angle, different templates are utilised for matching the chess pieces.
 As part of the same work, \citeauthor{xie2018} develop another approach that instead utilises \glspl{cnn}, but find that their original template-matching technique achieves superior results in terms of speed and accuracy in low-resolution images.
-However, the reader should note that their \glspl{cnn} are trained on only 40 images per class and deep learning methods tend to excel when trained on larger datasets.
+However, the reader should note that their \glspl{cnn} are trained on only 40 images per class, but deep learning methods tend to excel when trained on larger datasets \cite{halevy2009}.
 
 \paragraph{Chessboard detection}
 A prerequisite to any chess recognition system is the ability to detect the location of the chessboard and each of the 64 squares. 
@@ -43,7 +43,7 @@ Most approaches for automatic chess grid detection utilise either the Harris cor
 In general, corner-based algorithms are unable to accurately detect grid corners when they are occluded by pieces, thus line-based detection algorithms appear to be the favoured solution.
 Such algorithms often take advantage of the geometric nature of the chessboard which allows to compute a perspective transformation of the grid lines that best matches the detected lines \cite{tam2008,hack2014,xie2018}.
 However, lines found in the background of the photo can often cause failure modes.
-A recent chess grid detection algorithm that is highly successful even on populated boards is descibed by \citeauthor{xie2018a} in \cite{xie2018a}. 
+A recent chess grid detection algorithm that is highly successful even on populated boards is described by \citeauthor{xie2018a} in \cite{xie2018a}. 
 They apply several clustering algorithms on the lines detected via a Hough transform in order to find the horizontal and vertical grid lines belonging to the chessboard, and use this algorithm as a preprocessing step in their template-matching piece classification technique \cite{xie2018} described above. 
 
 \paragraph{Chess recognition using \glspl{cnn}}
@@ -53,7 +53,7 @@ Ever since \citeauthor{xie2018} pioneered the use of \glspl{cnn} in the domain o
     Their approach achieved a per-class accuracy over 90\% except for the ``king'' class, was trained on \gls{cad} models, and evaluated on real three-dimensional images (point clouds) of a chessboard.
 },
 a few more techniques have been developed that employ \glspl{cnn} at various stages in the recognition pipeline.
-\textcite{czyzewski2020} achieve an accuracy of 95\% on chessboard detection from non-vertical camera angles by designing an iterative algorithm that gereates heatmaps over the input image representing the likelihood of each pixel being part of the chessboard. 
+\textcite{czyzewski2020} achieve an accuracy of 95\% on chessboard detection from non-vertical camera angles by designing an iterative algorithm that generates heatmaps over the input image representing the likelihood of each pixel being part of the chessboard. 
 They then employ a \gls{cnn} to refine the corner points that were found using the heatmap, outperforming the results obtained by \textcite{goncalves2005}.
 Furthermore, they compare a \gls{cnn}-based piece classification algorithm to the SVM-based solution proposed by \textcite{ding2016} and find no notable amelioration, but manage to obtain major improvements by implementing a probabilistic reasoning system that uses the open source Stockfish chess engine \cite{romstad2020} as well as chess statistics \cite{acher2016}.
 Although reasoning techniques were already employed for refining the predictions of chess recognition systems before \cite{neufeld2010,danner2015}, \citeauthor{czyzewski2020} demonstrate the potential of combining information obtained from a chess engine with large-scale chess statistics.  

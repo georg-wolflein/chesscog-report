@@ -2,11 +2,11 @@
 
 \begin{document}
 
-\chapquote{I don't look at computers as opponents. For me it is much more interesting to beat humans.}{Magnus Carlsen}
+\chapquote{I don't look at computers as opponents. For me, it is much more interesting to beat humans.}{Magnus Carlsen}
 \chapter{Data synthesis}
 \label{chap:data_synthesis}
 
-Studies in human cognition by \textcite{bilalic2010} and \textcite{zhou2018} compared skilled chess players with novices in terms of their ability to remember a chess position for a short amount time confirmed that highly skilled players outperform novices at this task.
+Studies in human cognition by \textcite{bilalic2010} and \textcite{zhou2018} compared skilled chess players with novices in terms of their ability to remember a chess position for a short amount of time and confirmed that highly skilled players outperform novices at this task.
 Perhaps more interestingly, both studies find that skilled players remember \emph{random} positions (where pieces are positioned on random squares, not necessarily obeying the rules of chess) significantly less accurately than positions from actual chess games. 
 Thus it stands to reason that in general, highly skilled chess players exhibit a more developed pattern recognition ability for chess positions than novices, but this ability is specific to positions that conform to the rules of chess and are likely to occur in actual games.
 
@@ -16,7 +16,7 @@ In doing so, we automatically ensure that the chess positions are legal and sens
 \section{Chess positions}
 \label{sec:data_chess_positions}
 The positions are generated from a publicly available dataset of 2,851 games played by current World Chess Champion Magnus Carlsen \cite{64squares2020}.
-Each move in each game is included in our dataset with a probability of 2\%, and duplicate positions are discarded.
+We randomly select 2\% of all positions (i.e. configurations of chess pieces) from all games to be included in our dataset, although duplicate positions are discarded.
 A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
 
 \section{Three-dimensional renders}
@@ -102,14 +102,14 @@ An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\p
     \label{fig:camera_angle}
 \end{figure}
 This range is chosen because human players would typically choose a camera angle between 45 and 60 degrees to ensure maximum visibility of the pieces.
-The two remaining components ($y$ and $z$) of the camera's location is then obtained using a simple trigonometric calculation such that the distance from the camera to the origin is $11$ units, a length that allows the camera to capture the entire board.
+The two remaining components ($y$ and $z$) of the camera's location are then obtained using a simple trigonometric calculation such that the distance from the camera to the origin is $11$ units, a length that allows the camera to capture the entire board.
 
 \paragraph{Lighting}
 For each chess position, a random choice is made between two different lighting scenarios, each having equal probability of being employed.
 \begin{enumerate}
     \item The first lighting mode tries to emulate a \emph{camera flash}.
         To do so, a spotlight is set up with the same location and orientation as the camera. 
-        As a result, the scene is light up quite well with no large shadows, as it can be seen in \cref{fig:lighting_flash_example}.
+        As a result, the scene is lit up quite well with no large shadows, as it can be seen in \cref{fig:lighting_flash_example}.
         \begin{figure}
             \centering
             \begin{subfigure}[b]{0.47\textwidth}
@@ -205,7 +205,7 @@ For computing the bounding boxes of the pieces, we simply project all vertices o
     \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
     \label{fig:data_synthesis_visualisation}
 \end{figure}
-Note that although we will not use the bounding bounding boxes in this project, they are useful if someone should use the dataset to train an object recognition model for inferring chess positions instead of our classification-based approach.
+Note that although we will not use the bounding boxes in this project, they are useful if someone should use the dataset to train an object recognition model for inferring chess positions instead of our classification-based approach.
 In this project, we will mainly rely on the board's corner coordinates as well as the \gls{fen} description for training.
 Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
 

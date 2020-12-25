@@ -4,6 +4,7 @@
 \chapquote{Life is a kind of chess, in which we have often points to gain, and competitors or adversaries to contend with.}{Benjamin Franklin}
 \chapter{Implementation}
 \todo{why Python/PyTorch?}
+explain why chap brief
 \section{Approach}
 The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \texttt{https://github.com/georgw777/\{repo\}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
 \begin{itemize}
@@ -105,17 +106,52 @@ Explain the use of:
             \draw[thickarrow] (8,-1) -- +(1,0);
             \draw[thickarrow] (1,-8.5) -- +(0,2);
         \end{tikzpicture}
-        }
+    }
     \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency.}
     \label{fig:cicd}
 \end{figure}
 
-% \begin{figure}
-%     \begin{tikzpicture}
-%         \draw[dashed] (0,0) node[below,right,anchor=north west] {\texttt{chesscog} repository} rectangle (8,-6.5);
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{tikzpicture}
+            \draw[dashed] (0,0) node[below,right,anchor=north west] {client} rectangle +(8,-11);
+            \draw (1,-1) node[below,right,anchor=north west,align=left] {web app displayed in browser} rectangle +(6,-9);
+            \draw (2,-2) rectangle +(4,-2) node[midway,align=center] {button to perform\\inference with\\uploaded image};
+            
+            \begin{scope}[shift={(9,0)}]
+                \draw[dashed] (0,0) node[below,right,anchor=north west] {web server (\texttt{chesscog-app})} rectangle +(8,-15.5);
+                \draw (1,-1) node[below,right,anchor=north west,align=left] {nginx process} rectangle +(6,-4.5);
+                \draw[dotted,thick] (2,-2) rectangle +(4,-1) node[midway] {requests to \texttt{/api/\dots}};
+                \draw[dotted,thick] (2,-3.5) rectangle +(4,-1) node[midway] {all other requests};
+                \draw (1,-6.5) rectangle +(6,-1) node[midway] {bundled React app (frontend)};
+                \draw[<->] (4,-4.5) -- +(0,-2) node[right,pos=.75] {serve static \acs{html} files};
+                \draw (1,-8.5) node[below,right,anchor=north west,align=left] {inference \acs{api}} rectangle +(6,-6);
+                \draw (2,-9.5) node[below,right,anchor=north west,align=left] {\texttt{chesscog} package} rectangle +(4,-2);
+                \draw[dotted,thick] (3,-10.5) rectangle +(3,-1) node[midway] {\texttt{recap} package};
+                \draw (2,-12.5) rectangle +(4,-1) node[midway] {Flask server};
+                \draw[<->] (2.5,-11.5) -- +(0,-1);
+                \draw[<->] (6,-2.5) edge[bend left=60] (6,-13);
+                \node[right,fill=white] at (7,-4) {forward};
+            \end{scope}
 
-%     \end{tikzpicture}
-% \end{figure}
+            \draw[->] (6,-3) -- +(5,.75) node[midway,above,sloped,fill=white] {\acs{http} POST \texttt{/api/predict}};
+            \draw[->] (11,-2.75) -- (6,-7) node[midway,above,sloped,fill=white] {response};
+            \draw[->] (7,-7.75) -- (11,-3.75) node[midway,above,sloped,fill=white] {\acs{http} GET \texttt{/}};
+            \draw[->] (11,-4.25) -- (7,-8.25) node[midway,below,sloped,fill=white] {response};
+
+            \begin{scope}[shift={(2,-9)}]
+                \foreach \y in {0,1,...,3}{
+                    \foreach \x in {0,1,...,3}{
+                        \edef\temp{\noexpand\fill[pattern=crosshatch, pattern color=black] (\x,\y) rectangle (.5+\x,.5+\y) rectangle (1+\x,1+\y);}
+                        \temp
+                    };
+                };
+                \draw (0,0) rectangle (4,4);
+            \end{scope}
+        \end{tikzpicture}
+    }
+    \caption{Schematic overview of the infrastructure pertaining to the app.}
+\end{figure}
 
 \section{Data synthesis}
 \section{Configuration management}

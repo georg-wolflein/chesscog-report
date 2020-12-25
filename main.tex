@@ -30,7 +30,8 @@
 \usepackage[inline]{enumitem}
 \usepackage[style=ieee,mincitenames=1,maxcitenames=2]{biblatex}
 \usepackage{todonotes}
-\usepackage[toc,acronym,shortcuts]{glossaries}
+\usepackage[toc,acronym,shortcuts,nopostdot]{glossaries}
+\usepackage{glossary-mcols}
 \usepackage{cleveref}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -135,6 +136,7 @@
 \author{Georg Wölflein}
 \title{MSci Project}
 
+\setglossarystyle{mcolindex}
 \makeglossaries
 \input{common/acronyms.tex}
 \input{common/math_commands.tex}

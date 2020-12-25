@@ -3,7 +3,17 @@
 \begin{document}
 \chapquote{Life is a kind of chess, in which we have often points to gain, and competitors or adversaries to contend with.}{Benjamin Franklin}
 \chapter{Implementation}
-\section{Overview}
+\todo{why Python/PyTorch?}
+\section{Approach}
+The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \texttt{https://github.com/georgw777/\{repo\}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
+\begin{itemize}
+    \item \texttt{chesscog}: Python implementation of all core components of the chess recognition system: data synthesis (\cref{chap:data_synthesis}), the recogition pipeline including training and evaluation (\cref{chap:chess_recognition}), and the transfer learning approach to adapt to new chess sets (\cref{chap:adapting});
+    \item \texttt{chesscog-app}: a proof-of-concept web app to showcase the chess inference engine; and
+    \item \texttt{recap}\footnote{\emph{Recap} is an acronym for REproducible Configurations for Any Project, and is available as a Python package on \acs{pypi} at \url{http://pypi.org/project/recap}.}: a Python package for managing configurations and files associated with machine learning experiments.
+\end{itemize}
+Originally, \texttt{recap} was part of \texttt{chesscog}; however, later it was refactored into its own repository and published on the \gls{pypi} because other people requested to use this configuration system, too.
+Separating the codebases of the core implementation (\texttt{chesscog}) and the web app (\texttt{chesscog-app}) 
+
 
 Explain the use of:
 \begin{itemize}
@@ -97,7 +107,15 @@ Explain the use of:
         \end{tikzpicture}
         }
     \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency.}
+    \label{fig:cicd}
 \end{figure}
+
+% \begin{figure}
+%     \begin{tikzpicture}
+%         \draw[dashed] (0,0) node[below,right,anchor=north west] {\texttt{chesscog} repository} rectangle (8,-6.5);
+
+%     \end{tikzpicture}
+% \end{figure}
 
 \section{Data synthesis}
 \section{Configuration management}

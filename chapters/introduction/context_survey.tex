@@ -1,6 +1,7 @@
 \section{Context survey}
+This context survey will examine not only past approaches to chess recognition, but also current implementation tools that will be useful for designing such a system.
 
-
+\subsection{Chess recognition}
 Determining the game state of a chess board, also known as \emph{chess recognition}, is a problem in computer vision whereby an algorithm is tasked with recovering the configuration of pieces from an image of a chessboard.
 Early work on chess recognition in the 1990s focused on extracting typeset games from printed material \cite{baird1990}. 
 In recent years, the problem of parsing two-dimensional chess images has effectively been solved using conventional machine learning techniques \cite{khater2012} and deep learning \cite{sameer2020,roy2020}.
@@ -68,3 +69,26 @@ Using synthesised data in the training set is an efficient means of creating siz
 However, a more promising method seems to be the use of three-dimensional models.
 \textcite{wei2017} synthesise point cloud data for their volumetric \gls{cnn} directly from three-dimensional chess models and \textcite{hou} use renderings of three-dimensional models as input. 
 Yet \textcite{wei2017}'s approach works only if the chessboard was captured with a depth camera and \textcite{hou} presents a chessboard recognition system using a simple \gls{ann} that is not convolutional and hence achieves an accuracy of only 72\%.
+
+\subsection{Implementation tools}
+% This project will adopt Python as the main programming language.
+In both acedemia and industry, Python is the de facto standard programming language for machine learning. 
+A 2019 analysis conducted on the world-leading software development platform \href{https://www.github.com/}{GitHub} found that Python is the most popular language for open source machine learning repositories \cite{elliott2019}.
+Python is a simple yet versatile language that natively supports different programming paradigms (imperative, functional, object-oriented, and more).
+It is often called an interpreted language\footnote{There is nuance associated with this statement, but Python certainly exhibits more traits of an interpreted than a compiled language.} because it is dynamically typed and performs automatic memory management (garbage collection) which generally facilitates shorter code than compiled languages such as C or Java, but also means that pure-Python implementations of data-intensive algorithms will usually not be as efficient.
+One of the most fundamental packages, \href{https://numpy.org/}{NumPy}, implements very efficient array manipulation operations that, although specified in Python, are carried out at a lower level for performance.
+
+NumPy is just one piece of Python's rich ecosystem of packages that are maintained by open-source contributers in the scientific and engineering community.
+The two main frameworks for machine learning are \href{https://www.tensorflow.org/}{TensorFlow} by Google and \href{https://www.pytorch.org/}{PyTorch} by Facebook. 
+At their core, both frameworks facilitate the computation of mathematical operations on tensors\footnote{Tensors are essentially a generalisation of scalars, vectors, and matrices. They can be thought of as representing a multi-dimensional array.}, offering support for hardware acceleration via \glspl{gpu} and providing parallelisation strategies for distributed computing which is especially potent in the context of machine learning where many operations fit the \textit{single instruction, multple data} (SIMD) pattern.
+A TensorFlow program is specified as a directed \textit{computational graph} where nodes represent operations and edges represent their inputs and outputs (data tensors) \cite{tensorflow2015whitepaper}.
+In the new TensorFlow 2, this graph does not need to be explicitly constructed in the code anymore but is created on the fly which is known as \textit{eager execution}, thereby providing the user with a simpler interface similar to NumPy.
+The slightly younger PyTorch framework provided dynamic computation graphs and a NumPy-like interface from the outset at its initial release in 2016, and more recently added support for static computational graphs.
+Hence the newest versions of both frameworks provide similar programming interfaces and computational capabilities.
+They also facilitate the automatic computation of gradients which is useful for training neural networks. 
+In the research community, PyTorch recently overtook TensorFlow in terms of popularity; at every top machine learning conference since 2019, the majority of submissions with code were implemented in PyTorch \cite{he2019}.
+
+One should not overlook the concept of interactive notebooks made possible by Python's interpreted nature -- that is, mixing rich text (markdown), Python code, and its output. 
+Not only does this allow the programmer to make changes to the code without having to rerun the program, but it also provides a means of presenting Python code in a more engaging way than just comments.
+Any type of Python output, including data visualisations, can be presented in such notebooks which makes it attractive for machine learning.
+These notebooks can be created using the \href{https://jupyter.org/}{Jupyter} package or even run online with services such as \href{https://colab.research.google.com/}{Google Colab}. 

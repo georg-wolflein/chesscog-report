@@ -951,7 +951,7 @@ This might aid the classifier's decision in difficult situations where a chess p
 Six \gls{cnn} architectures are devised for the occupancy classification task, of which two accept $100\times 100$ pixel input images and the remaining four require the images to be of size $50\times 50$ pixels.
 They differ in the number of convolution layers, pooling layers, and fully connected layers.
 When referring to these models, we shall use a 4-tuple consisting of the input side length and the three aforementioned criteria.
-\Cref{fig:occupancy_convnet} depicts the architecture of \gls{cnn}$(100, 3, 3, 3)$ which achieves the greatest validation accuracy of these six models.
+\Cref{fig:occupancy_convnet} depicts the architecture of \acs{cnn} $(100, 3, 3, 3)$ which achieves the greatest validation accuracy of these six models.
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{occupancy_convnet}
@@ -1021,7 +1021,7 @@ Due to the fact that the difference between training and validation accuracy is 
 Apart from training custom \gls{cnn} architectures as described in the previous section, we examine whether fine-tuning pre-trained models on our dataset can achieve even better performances.
 \Cref{sec:background_transfer_learning} explains the motivation for employing transfer learning and the general methodology of initialising the network with the pre-trained weights, then training just the classification head and finally training the whole network.
 We replace the final layer of the pre-trained model's classification head with a fully-connected layer that has two output units so the network can classify `empty' and `occupied' squares.
-Due to the abundance of data in the training set, it suffices to train the classification head for only one epoch (one pass over the dataset), followed by training the whole network for two epochs\footnote{The number of steps is significantly greater than the number of epochs because each epoch is split into multiple batches.}.
+Due to the abundance of data in the training set, it suffices to train the classification head for only one epoch (one pass over the dataset) with a learning rate $\alpha=10^{-3}$, followed by training the whole network for two epochs\footnote{The number of steps is significantly greater than the number of epochs because each epoch is split into multiple batches.} with $\alpha=10^{-4}$.
 As underlying models, we compare the popular \gls{cnn} architectures
 VGG \cite{simonyan2015},
 ResNet \cite{he2016}, and
@@ -1229,55 +1229,16 @@ This may help the classifier understand what piece is being referred to in sampl
     \label{fig:white_queens}
 \end{figure}
 
-\subsection{Training \glspl{cnn}}
-Similar to \cref{sec:occupancy_classification}, we train several models on 
-\todo{talk about change in number of epochs etc}
-additional cnn: inception
+\subsection{\glsentryshort{cnn} models}
+Similar to \cref{sec:occupancy_classification}, we train several \glspl{cnn} for the piece classification task.
+However, since the problem is not binary anymore, the final layer of our \glspl{cnn} will have 12 instead of two output units.
+For the pre-trained models, we follow the same two-stage training regime, but double the number of epochs at each stage, so that the classification head is trained for two epochs followed by the whole network for four epochs.
+Furthermore, we introduce one more architecture, InceptionV3 \cite{szegedy2016}, that is a bit more complicated to train due to its use of batch normalisation and multiple losses.
+The exact details are, however, beyond the scope of this report.
+All other configurations are as described in \cref{sec:occupancy_classification}.
 
-\begin{figure}
-    \makebox[\textwidth][c]{
-        \begin{subfigure}{.45\textwidth}
-            \begin{tikzpicture}
-                \begin{axis}[
-                    no markers,
-                    xlabel={step},
-                    ylabel={cross-entropy loss},
-                    title={Loss},
-                    scale only axis,
-                    width=.9\textwidth,
-                    legend style={at={(0.98,0.98)},anchor=north east}
-                ]
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Loss.csv};
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Loss.csv};
-                    \legend{training,validation}
-                \end{axis}
-            \end{tikzpicture}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}{.45\textwidth}
-            \begin{tikzpicture}
-                \begin{axis}[
-                    no markers,
-                    xlabel={step},
-                    ylabel={accuracy},
-                    title={Accuracy},
-                    scale only axis,
-                    width=.9\textwidth,
-                    ylabel near ticks,
-                    yticklabel pos=right,
-                    legend style={at={(0.98,0.02)},anchor=south east}
-                ]
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Accuracy.csv};
-                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Accuracy.csv};
-                    \legend{training,validation}
-                \end{axis}
-            \end{tikzpicture}
-        \end{subfigure}
-    }
-    \caption[Loss and accuracy during training on both the training and validation sets for the InceptionV3 model.]{Loss and accuracy during training on both the training and validation sets for the InceptionV3 model. The best validation accuracy is 100.00\%.}
-    \label{fig:pieces_inception_loss_accuracy}
-\end{figure}
-
+In total, we train six models, two of which are `vanilla' \glspl{cnn} (the best two from \cref{sec:occupancy_classification} are selected for this task), and the rest are deeper models trained by means of transfer learning.
+The results in \cref{tbl:piece_classifier_performance} indicate a more significant difference between the hand-crafted \glspl{cnn} and the deeper models (around three percentage points) than it was the case for the occupancy classifier.
 \begin{table}
     \centering
     \makebox[\textwidth][c]{
@@ -1327,9 +1288,60 @@ additional cnn: inception
     \caption[Performance of all piece classifiers on the validation set.]{
         Performance of all piece classifiers on the validation set.
     }
+    \label{tbl:piece_classifier_performance}
 \end{table}
+The InceptionV3 model achieves the best performance with a validation accuracy of 100\%, i.e. there were no misclassifications in the validation set.
+Therefore, we will use that model for the chess recognition pipeline.
+\Cref{fig:pieces_inception_loss_accuracy} shows the the development of loss and accuracy during training. 
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={cross-entropy loss},
+                    title={Loss},
+                    scale only axis,
+                    width=.9\textwidth,
+                    legend style={at={(0.98,0.98)},anchor=north east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Loss.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Loss.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{.45\textwidth}
+            \begin{tikzpicture}
+                \begin{axis}[
+                    no markers,
+                    xlabel={step},
+                    ylabel={accuracy},
+                    title={Accuracy},
+                    scale only axis,
+                    width=.9\textwidth,
+                    ylabel near ticks,
+                    yticklabel pos=right,
+                    legend style={at={(0.98,0.02)},anchor=south east}
+                ]
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_train-tag-Accuracy.csv};
+                    \addplot table [x=Step, y=Value, col sep=comma] {data/run-piece_classifier_InceptionV3_val-tag-Accuracy.csv};
+                    \legend{training,validation}
+                \end{axis}
+            \end{tikzpicture}
+        \end{subfigure}
+    }
+    \caption[Loss and accuracy during training on both the training and validation sets for the InceptionV3 model.]{Loss and accuracy during training on both the training and validation sets for the InceptionV3 model. The best validation accuracy is 100.00\%.}
+    \label{fig:pieces_inception_loss_accuracy}
+\end{figure}
+Similar to the ResNet occupancy classifier in \cref{fig:occupancy_resnet_loss_accuracy}, we witness an abrupt drop in loss and simultaneous increase in accuracy when all remaining layers are unfrozen.
+This occurs earlier in the training of the piece classifier because the size of the dataset is smaller\footnote{The piece classification consists of only occupied squares whereas the occupancy classification dataset comprises all squares.}.
+\Cref{fig:pieces_inception_loss_accuracy} also exhibits a higher degree of small fluctuations around the loss and accuracy curves which can be attributed to the increased difficulty of this task where we must classify a dozen different piece types.
 
-\section{Preparing the results}
+\section{Producing a prediction}
 \label{sec:preparing_results}
+
 
 \end{document}

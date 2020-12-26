@@ -69,7 +69,7 @@ These results are summarised in \cref{tbl:transfer_learning_results_without_fine
         per-square piece classification accuracy             & 85.16\%  & 85.52\% \\
         \bottomrule
     \end{tabular}
-    \caption[Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning.]{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning. In this case, the training set is not used for training because the model is not fine-tuned. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
+    \caption[Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning.]{Performance of the chess recognition pipeline from \cref{chap:chess_recognition} on the transfer learning dataset without fine-tuning. In this case, the training set is not used for training because the model is not fine-tuned.}
     \label{tbl:transfer_learning_results_without_finetuning}
 \end{table}
 This regime is unable to completely identify any of the positions; on average, it misclassifies 9.33 out of 64 squares per board.

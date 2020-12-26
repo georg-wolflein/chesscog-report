@@ -1337,11 +1337,42 @@ Therefore, we will use that model for the chess recognition pipeline.
     \label{fig:pieces_inception_loss_accuracy}
 \end{figure}
 Similar to the ResNet occupancy classifier in \cref{fig:occupancy_resnet_loss_accuracy}, we witness an abrupt drop in loss and simultaneous increase in accuracy when all remaining layers are unfrozen.
-This occurs earlier in the training of the piece classifier because the size of the dataset is smaller\footnote{The piece classification consists of only occupied squares whereas the occupancy classification dataset comprises all squares.}.
+This occurs earlier in the training of the piece classifier because the size of the dataset is smaller\footnote{The dataset for piece classification consists of only occupied squares whereas the occupancy classification dataset comprises all squares.}.
 \Cref{fig:pieces_inception_loss_accuracy} also exhibits a higher degree of small fluctuations around the loss and accuracy curves which can be attributed to the increased difficulty of this task where we must classify a dozen different piece types.
 
 \section{Producing a prediction}
 \label{sec:preparing_results}
+\Cref{sec:board_localisation,sec:occupancy_classification,sec:piece_classification} describe the three components of the chess recognition pipeline.
+Assembling these parts facilitates an end-to-end chess recognition system that takes an input image and ultimately produces a \gls{fen} prediction.
+First, we localise the board (\cref{sec:board_localisation}) and obtain the pixel coordinates of the four chessboard corners.
+Then, we warp the input image to fit the chessboard on a regular grid.
+We crop each of the squares and feed them to the occupancy classifier (\cref{sec:occupancy_classification}).
+The output is a probability for the occupancy of each square.
+We retain only the squares with an occupancy probability over 50\% and cut out the corresponding squares in the same manner as the piece classification dataset was created in \cref{sec:piece_classification}.
+After that, each of the occupied samples is supplied to the piece classifier in order to obtain a probability distribution over the piece types.
+In each instance, we simply use the class with the highest probability.
+Finally, we create an internal representation of the chessboard based on the results of the two classifiers in order to produce a \gls{fen} description of the position on the board.
 
+\Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set will be evaluated in \cref{chap:evalution}).
+\begin{table}
+    \centering
+    \begin{tabular}{lrr}
+        \toprule
+        metric & training set & test set \\
+        \midrule
+        mean number of incorrect squares per board           & 0.27    & 0.27 \\
+        percentage of boards predicted with no mistakes      & 94.77\% & 97.95\%   \\
+        percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%   \\
+        per-board corner detection accuracy                  & 99.59\% & 100.00\% \\
+        per-square occupancy classification accuracy         & 99.81\% & 99.97\% \\
+        per-square piece classification accuracy             & 99.99\% & 99.99\% \\
+        \bottomrule
+    \end{tabular}
+    \caption[Performance of the chess recognition pipeline on the training and validation sets.]{Performance of the chess recognition pipeline on the training and validation sets. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
+    \label{tbl:chess_recognition_trainval_results}
+\end{table}
+On average, the pipeline misclassifies only 0.27 squares per board.
+Overall, 98\% of the chessboards in the validation set are predicted without mistakes, and 2\% of the samples had only one incorrect square.
+The accuracies of the two classifiers as well as the corner dectector is above 99\%.
 
 \end{document}

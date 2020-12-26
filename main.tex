@@ -6,6 +6,7 @@
 %\usepackage{microtype} % get rid of some frame busts automatically
 \usepackage[font=small]{caption}
 \usepackage{csquotes}
+\usepackage{footnote}
 \usepackage{fancyhdr}
 \usepackage[british]{babel}
 \usepackage{amsmath}
@@ -114,6 +115,7 @@
 
 \captionsetup[subfigure]{labelformat=simple}
 \renewcommand\thesubfigure{(\alph{subfigure})}
+\makesavenoteenv{tabular}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \def\normal{\mathcal{N}}

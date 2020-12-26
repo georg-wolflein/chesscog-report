@@ -2,14 +2,40 @@
 \begin{document}
 \chapter*{Notation}
 
-This report will follow notation conventions established in the deep learning community, in particular those described in \textcite{goodfellow2016}.
+This report follows typical notation conventions established in the deep learning community, particularly those in line with \textcite{goodfellow2016}.
 
-% random vars
-% $\normal \left(\mu, \sigma^2 \right)$ normal distribution
+\bigskip
+\noindent
+\begin{tabular}{cl}
+    $\displaystyle a$ & a scalar (integer or real)\\
+    $\displaystyle \va$ & a vector\\
+    $\displaystyle \mA$ & a matrix\\
+    $\displaystyle \sA$ & a set\\
+    $\displaystyle \ra$ & a scalar random variable\\
+    $\displaystyle \rva$ & a vector random variable\\
+    $\displaystyle \mA^\top$ & transpose of matrix $\mA$\\
+    $\displaystyle \mI_n$ & $n \times n$ identity matrix\\
+    $\displaystyle \mI$ & identity matrix (dimensionality implied by context)\\
+    $\displaystyle \mA \odot \mB$ & pointwise (Hadamard) product\\
+    $\displaystyle \mA * \mB$ & convolution\footnote{Strictly speaking, we use $*$ to denote cross-correlation, as explained in \cref{sec:convolutional_layers}.}\\
+    $\displaystyle \normal(\mu,\sigma^2)$ & normal distribution\\
+    $\displaystyle \ra \sim P$ & random variable $\ra$ follows distribution $P$\\
+    $\displaystyle f(\cdot)$ & scalar-valued function\\
+    $\displaystyle \vf(\cdot)$ & vector-valued function\\
+    $\displaystyle f \circ g$ & composition of the functions $f$ and $g$\\
+    $\displaystyle \abs{\cdot}$ & absolute value\\
+    $\displaystyle \abs{\sA}$ & cardinality of set $\sA$\\
+    $\displaystyle \norm{\cdot}_1$ & $\ell_1$ norm (Manhatten distance)\\
+    $\displaystyle \norm{\cdot}_2$ & $\ell_2$ norm (Euclidean distance)\\
+    $\displaystyle \R$ & the set of real numbers\\
+    $\displaystyle \mathbb{Z}$ & the set of integers\\
+    $\displaystyle \frac{\partial y}{\partial x}$ & derivative of $y$ with respect to $x$\\
+    $\displaystyle \frac{\partial \vf}{\partial \vx}$ & Jacobian vector $\mJ\in \R^n$ of $f:\R^n\to\R$\\
+    $\displaystyle b_j^{(l)}$ & the $j$\textsuperscript{th} unit's bias in layer $l$\\
+    $\displaystyle w_{i,j}^{(l)}$ & the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$\\
+    $\displaystyle \mW^{(l)}$ & the weight matrix of layer $l$\\
+    $\displaystyle \vb^{(l)}$ & the bias vector of layer $l$
+\end{tabular}
 
-% \odot: pointwise
-% \mI_n: nxn identity matrix
-
-\dots\todo{list symbols, etc.}
 
 \end{document}

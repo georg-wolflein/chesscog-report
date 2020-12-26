@@ -411,7 +411,7 @@ Backpropagation with gradient descent is an iterative algorithm for training neu
 The main idea is as follows:
 \begin{enumerate}
     \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vp$ (weights and biases) as
-        $\vec{\Delta p} = \frac{\delta L}{\delta \vp}\left(\vp\right)$.
+        $\vec{\Delta p} = \frac{\partial L}{\partial \vp}\left(\vp\right)$.
     \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ for some learning rate $\alpha \in \R$.
     \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
 \end{enumerate}
@@ -484,10 +484,10 @@ The trainable parameters in our network are $\vw$ and $b$, so we will differenti
 We obtain the partial derivative of the loss with respect to the bias as
 \begin{align}
     \label{eq:backprop_dL_db}
-    \frac{\delta L}{\delta b}
+    \frac{\partial L}{\partial b}
     &= \sum_{i=1}^m{
         \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        \frac{\delta}{\delta b} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \frac{\partial}{\partial b} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
     } \nonumber \\
     &= \sum_{i=1}^m{
         \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
@@ -497,10 +497,10 @@ We obtain the partial derivative of the loss with respect to the bias as
 and similarly we can differentiate with respect to the weights
 \begin{align}
     \label{eq:backprop_dL_dw}
-    \frac{\delta L}{\delta \vw}
+    \frac{\partial L}{\partial \vw}
     &= \sum_{i=1}^m{
         \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        \frac{\delta}{\delta \vw} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \frac{\partial}{\partial \vw} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
     } \nonumber \\
     &= \sum_{i=1}^m{
         \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
@@ -515,23 +515,23 @@ The size of this step is governed by the learning rate $\alpha \in \R$.
 Mathematically, this is expressed as
 \begin{align}
     \label{eq:backprop_update_weights}
-    \vw &\gets \vw - \alpha \frac{\delta L}{\delta \vw}(\vw),\\
+    \vw &\gets \vw - \alpha \frac{\partial L}{\partial \vw}(\vw),\\
     \label{eq:backprop_update_bias}
-    b &\gets b - \alpha \frac{\delta L}{\delta b}(b).
+    b &\gets b - \alpha \frac{\partial L}{\partial b}(b).
 \end{align}
 
 \subsubsection{\Glsentrylong{mlp}}
 \label{sec:mlp_training}
 To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e. each layer's weights and biases).
-We must compute $\frac{\delta L}{\delta \mW_l}$ and $\frac{\delta L}{\delta \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader.
+We must compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader.
 The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
 
 Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once we have the gradients, we update the weights and biases by applying the rule
 \begin{align}
     \label{eq:backprop_mlp_update_weights}
-    \mW_l &\gets \mW_l - \alpha \frac{\delta L}{\delta \mW_l}(\mW_l),\\
+    \mW_l &\gets \mW_l - \alpha \frac{\partial L}{\partial \mW_l}(\mW_l),\\
     \label{eq:backprop_mlp_update_biases}
-    \vb_l &\gets \vb_l - \alpha \frac{\delta L}{\delta \vb_l}(\vb_l).
+    \vb_l &\gets \vb_l - \alpha \frac{\partial L}{\partial \vb_l}(\vb_l).
 \end{align}
 
 A major limitation of gradient descent as we describe it here is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
@@ -566,6 +566,7 @@ They also showed that some neurons with larger receptive fields respond to more 
 They are comprised of \emph{convolutional} and \emph{pooling} layers, which we shall describe below.
 
 \subsection{Convolutional layers}
+\label{sec:convolutional_layers}
 Convolutional layers are the most important component in a \gls{cnn}.
 However, the term \emph{convolution} is actually used as a misnomer to mean \emph{cross-correlation} in the context of \glspl{cnn}.
 Both terms refer to a mathematical operation where we slide a matrix (known as \emph{filter} or \emph{kernel}) over the input image and compute the sum of products at each location.

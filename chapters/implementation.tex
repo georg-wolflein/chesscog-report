@@ -128,9 +128,27 @@ This is especially important for the \texttt{recap} package which is listed on \
 
 \section{Configuration management (\texttt{recap})}
 A core principle underlying the implementation of the chess recognition system is that of reproducibility.
-All experimental results 
+All experimental results and metrics that are claimed in this report should be independently verifiable.
+To this end, a Python package was developed that serves the purposes of 
+\begin{enumerate*}[label=(\roman*)]
+    \item persisting hyperparameters and other configuration settings of any experiment, algorithm, or system that is configurable; and
+    \item providing a convenient interface for accessing these configurations as well as a unified means of specifying and managing paths in the project.
+\end{enumerate*}
+This package is made available on \gls{pypi} because ensuring reproducibility is a common issue in machine learning research.
 
-\gls{pypi}
+The configurations themselves are specified in \gls{yaml} format and a core feature of \texttt{recap} is the ability to inherit from other configuration files to override settings.
+A common use for such a configuration file is to specify how to train a \gls{cnn} including the architecture and hyperparameters such as the learning rate, number of epochs, etc.
+Within \texttt{chesscog}, configuration files are mainly used to specify the parameters of the corner detection system (including its sub-algorithms such as Canny edge detection and Hough transform) and the training of the two \gls{cnn} classifiers.
+Furthermore, \gls{yaml} files were automatically generated in the grid search explained in \cref{sec:determine_optimal_params}.
+The functionality of inheriting from parent configurations was useful in \cref{sec:transfer_learning_finetuning} where some hyperparameters (the number of epochs) and settings (the path to the dataset) were altered for training the \glspl{cnn} for the new dataset, but the remaining configuration stayed the same.
+Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
+
+Another core feature of the configuration system is a custom way of specifying paths.
+Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we will still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
+First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} will be equivalent to \texttt{/path/to/dataset/images/train}.
+These \glspl{uri} can be used in the configuration files as well as the code itself; 
+\texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
 
 \section{The chess recognition system (\texttt{chesscog})}
 first jupyter notebooks but then Python files to allow automated testing, distribution as a package, reuse

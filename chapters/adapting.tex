@@ -217,6 +217,7 @@ For each of these factors, we choose the degree of alteration from four separate
 The augmentation pipeline is applied to each image for each batch during training, meaning that different augmentations are used each time even though the underlying images might be the same.
 
 \subsection{Fine-tuning}
+\label{sec:transfer_learning_finetuning}
 To train the networks, we follow a two-stage approach as motivated in \cref{sec:background_transfer_learning} and already employed in \cref{sec:occupancy_classification,sec:piece_classification}.
 First, we train only the classification head with a learning rate of 0.001, and then we decrease the learning rate by a factor of ten and train all layers.
 In the case of the occupancy classifier, we perform 100 iterations over the entire training set at both stages, essentially following the same regime as \cref{sec:occupancy_classification}.

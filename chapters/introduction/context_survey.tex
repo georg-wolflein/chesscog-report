@@ -71,6 +71,7 @@ However, a more promising method seems to be the use of three-dimensional models
 Yet \textcite{wei2017}'s approach works only if the chessboard was captured with a depth camera and \textcite{hou} presents a chessboard recognition system using a simple \gls{ann} that is not convolutional and hence achieves an accuracy of only 72\%.
 
 \subsection{Implementation tools}
+\label{sec:implementation_tools}
 % This project will adopt Python as the main programming language.
 In both acedemia and industry, Python is the de facto standard programming language for machine learning. 
 A 2019 analysis conducted on the world-leading software development platform \href{https://www.github.com/}{GitHub} found that Python is the most popular language for open source machine learning repositories \cite{elliott2019}.
@@ -83,7 +84,7 @@ The two main frameworks for machine learning are \href{https://www.tensorflow.or
 At their core, both frameworks facilitate the computation of mathematical operations on tensors\footnote{Tensors are essentially a generalisation of scalars, vectors, and matrices. They can be thought of as representing a multi-dimensional array.}, offering support for hardware acceleration via \glspl{gpu} and providing parallelisation strategies for distributed computing which is especially potent in the context of machine learning where many operations fit the \textit{single instruction, multple data} (SIMD) pattern.
 A TensorFlow program is specified as a directed \textit{computational graph} where nodes represent operations and edges represent their inputs and outputs (data tensors) \cite{tensorflow2015whitepaper}.
 In the new TensorFlow 2, this graph does not need to be explicitly constructed in the code anymore but is created on the fly which is known as \textit{eager execution}, thereby providing the user with a simpler interface similar to NumPy.
-The slightly younger PyTorch framework provided dynamic computation graphs and a NumPy-like interface from the outset at its initial release in 2016, and more recently added support for static computational graphs.
+The slightly younger PyTorch framework \cite{pytorch2019} provided dynamic computation graphs and a NumPy-like interface from the outset at its initial release in 2016, and more recently added support for static computational graphs.
 Hence the newest versions of both frameworks provide similar programming interfaces and computational capabilities.
 They also facilitate the automatic computation of gradients which is useful for training neural networks. 
 In the research community, PyTorch recently overtook TensorFlow in terms of popularity; at every top machine learning conference since 2019, the majority of submissions with code were implemented in PyTorch \cite{he2019}.

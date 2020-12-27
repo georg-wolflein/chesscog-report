@@ -3,27 +3,30 @@
 \begin{document}
 \chapquote{Life is a kind of chess, in which we have often points to gain, and competitors or adversaries to contend with.}{Benjamin Franklin}
 \chapter{Implementation}
-\todo{why Python/PyTorch?}
-explain why chap brief
-GPU training
-\section{Approach}
+\Cref{chap:data_synthesis,chap:chess_recognition,chap:adapting} explain the design of the chess recognition system in great detail.
+This chapter will highlight and justify the main implementation decisions in a brief manner, as permitted by the scope of this report.
+For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings.
+
+The context survey of implementation tools in \cref{sec:implementation_tools} justifies the use of Python as the main language of implementation.
+We adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-accelerated neural network training and inference due to its prevalence in the research community, and execute such tasks on a Ubuntu 20.04.1 lab machine with a 6GB NVIDIA GeForce GTX 1060 \gls{gpu}.
+For many traditional computer vision methods employed in \cref{sec:board_localisation} such as Canny edge detection and Hough transform, we draw on the popular OpenCV library \cite{opencv2000} which provides efficient implementations of standard computer vision algorithms.
+
+\paragraph{Repositories}
 The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \texttt{https://github.com/georgw777/\{repo\}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
 \begin{itemize}
-    \item \texttt{chesscog}: Python implementation of all core components of the chess recognition system: data synthesis (\cref{chap:data_synthesis}), the recogition pipeline including training and evaluation (\cref{chap:chess_recognition}), and the transfer learning approach to adapt to new chess sets (\cref{chap:adapting});
+    \item \texttt{recap}\footnote{\emph{Recap} is an acronym for REproducible Configurations for Any Project, and is published as a Python package on \acs{pypi} at \url{http://pypi.org/project/recap}.}: a Python package for managing configurations and files associated with machine learning experiments.
+    \item \texttt{chesscog}\footnote{The name \texttt{chesscog} is derived from its purpose: `chess recognition'.}: Python implementation of all core components of the chess recognition system: data synthesis (\cref{chap:data_synthesis}), the recogition pipeline including training and evaluation (\cref{chap:chess_recognition}), and the transfer learning approach to adapt to new chess sets (\cref{chap:adapting});
     \item \texttt{chesscog-app}: a proof-of-concept web app to showcase the chess inference engine; and
-    \item \texttt{recap}\footnote{\emph{Recap} is an acronym for REproducible Configurations for Any Project, and is available as a Python package on \acs{pypi} at \url{http://pypi.org/project/recap}.}: a Python package for managing configurations and files associated with machine learning experiments.
-\end{itemize}
-Originally, \texttt{recap} was part of \texttt{chesscog}; however, later it was refactored into its own repository and published on the \gls{pypi} because other people requested to use this configuration system, too.
-Separating the codebases of the core implementation (\texttt{chesscog}) and the web app (\texttt{chesscog-app}) 
-
-
-Explain the use of:
-\begin{itemize}
-    \item Repositories
-    \item CI/CD pipelines
-    \item Testing
 \end{itemize}
 
+Originally, \texttt{recap} was part of \texttt{chesscog}; however, it was later refactored into its own repository and published on the \gls{pypi} because other people requested to use this configuration system, too.
+Separating the codebases of the core implementation (\texttt{chesscog}) and the web app (\texttt{chesscog-app}) ensures a clear separation of concerns and facilitates easier testing of both components in isolation.
+
+\paragraph{Continuous integration and delivery}
+All three repositories contain unit tests that are executed on every commit via \gls{ci} pipelines implemented with \emph{GitHub Actions}.
+Running automated builds and tests that frequently enables bugs and incompatibilities to be identified quickly.
+This is especially useful due to the fact that the chess recognition system was developed in parallel with the web app.
+\Cref{fig:cicd} provides an overview of the automated pipelines and their interaction between the repositories.
 \begin{figure}
     \makebox[\textwidth][c]{
         \begin{tikzpicture}[
@@ -111,6 +114,39 @@ Explain the use of:
     \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency.}
     \label{fig:cicd}
 \end{figure}
+Whenever a release is published in the \texttt{chesscog} repository, it notifies the \texttt{chesscog-app} repository which opens a \gls{pr} where the version of the \texttt{chesscog} dependency is updated.
+As with a commit, this causes an automatic build and execution of the tests.
+If the developer is satisfied with the \gls{pr}, it can be merged with one click on the GitHub web interface.
+
+The \texttt{chesscog-app} repository has a \gls{cd} pipeline that on every push to the \texttt{master} branch (provided that it passes the build and tests) will build a self-contained Docker image of the app and push that to the web server, thereby updating the hosted web app.
+Furthermore, every release in the \texttt{recap} repository activates a \gls{cd} pipeline that publishes the new version of the package on \gls{pypi}.
+Both \gls{cd} pipelines are depicted in \cref{fig:cicd} as well.
+
+The pipelines perform so-called \emph{matrix builds} which means that the build and test stages are executed for all supported Python versions in parallel\footnote{In the case of the web app which uses Node.js in addition to Python, the matrix builds apply to the supported Node.js versions as well.}.
+This is especially important for the \texttt{recap} package which is listed on \gls{pypi} as supporting Python version $\geq 3.6$, so the matrix builds target versions 3.6, 3.7, and 3.8.
+
+
+\section{Configuration management (\texttt{recap})}
+A core principle underlying the implementation of the chess recognition system is that of reproducibility.
+All experimental results 
+
+\gls{pypi}
+
+\section{The chess recognition system (\texttt{chesscog})}
+first jupyter notebooks but then Python files to allow automated testing, distribution as a package, reuse
+
+
+
+
+\subsection{Data synthesis}
+\subsection{Board localisation}
+\subsection{Training the classifiers}
+\subsection{Transfer learning}
+\section{Web app (\texttt{chesscog-app})}
+react js node
+
+heroku
+cname
 
 \begin{figure}
     \makebox[\textwidth][c]{
@@ -153,15 +189,6 @@ Explain the use of:
     }
     \caption{Schematic overview of the infrastructure pertaining to the app.}
 \end{figure}
-
-\section{Data synthesis}
-\section{Configuration management}
-\gls{pypi}
-
-\section{Board localisation}
-\section{Training the classifiers}
-\section{Transfer learning}
-\section{Web app}
 
 
 \end{document}

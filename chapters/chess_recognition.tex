@@ -33,7 +33,7 @@
         \node[process,below=.5cm of input] (localisation) {chessboard localisation\\(\cref{sec:board_localisation})};
         \node[process,below of=localisation] (occupancy) {occupancy classification\\(\cref{sec:occupancy_classification})};
         \node[process,below of=occupancy] (piece) {piece classification\\(\cref{sec:piece_classification})};
-        \node[process,below of=piece] (probabilities) {post-processing\\(\cref{sec:preparing_results})};
+        \node[process,below of=piece] (probabilities) {process probabilities\\(\cref{sec:preparing_results})};
         \node[io,below=.5cm of probabilities] (output) {\acs{fen} output};
 
         \draw[arrow] (input) -- (localisation);

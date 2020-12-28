@@ -20,6 +20,7 @@ We randomly select 2\% of all positions (i.e. configurations of chess pieces) fr
 A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
 
 \section{Three-dimensional renders}
+\label{sec:3d_renders}
 In order to obtain realistic images of these chess positions, we employ a three-dimensional model of a chess set on a wooden table. 
 Chess pieces are placed on the board squares according the given \gls{fen} description. 
 Different camera angles and lighting setups are chosen in a random process in order to maximise diversity in the dataset.
@@ -182,6 +183,7 @@ For each chess position, a random choice is made between two different lighting 
 \end{enumerate}
 
 \section{Automated labelling}
+\label{sec:automated_labelling}
 Apart from eliminating the need to manually set up a large number of positions on the chessboard and photographing them, the use of a 3D model for synthetic data generation exhibits another major advantage: we can compute the required labels for the data without human intervention.
 In fact, manually labelling the data is usually the most time-consuming part of the entire process.
 

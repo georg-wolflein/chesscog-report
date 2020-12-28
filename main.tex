@@ -1,5 +1,6 @@
 \documentclass[a4paper,oneside]{book}
 \usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
 \usepackage{xcolor}
 \usepackage{quotchap}
 \usepackage{breakcites} % don't let citations break out of the text frame
@@ -8,7 +9,6 @@
 \usepackage{csquotes}
 \usepackage{footnote}
 \usepackage{fancyhdr}
-\usepackage[british]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{xfrac}
@@ -131,7 +131,7 @@
 
 \addbibresource{\subfix{bibliography.bib}}
 % \AtEveryBibitem{\clearfield{month}}
-\AtEveryBibitem{\clearfield{day}}
+% \AtEveryBibitem{\clearfield{day}}
 
 \graphicspath{ {./images/} }
 
@@ -166,15 +166,12 @@
 \mainmatter
 \subfile{chapters/introduction}
 \subfile{chapters/background}
-\part{Design}
 \subfile{chapters/dataset}
 \subfile{chapters/chess_recognition}
 \subfile{chapters/adapting}
-\part{Implementation}
 \subfile{chapters/implementation}
-\chapquote{Chess is the struggle against the error.}{Johannes Zukertort}
 
-\part{Conclusion}
+\chapquote{Chess is the struggle against the error.}{Johannes Zukertort}
 \chapter{Evaluation}
 \label{chap:evaluation}
 eval on test set

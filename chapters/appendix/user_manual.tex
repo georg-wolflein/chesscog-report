@@ -2,20 +2,42 @@
 
 \begin{document}
 
-\chapter{User manual: chesscog}
+\chapter{User manual: \texttt{recap} package}
+\label{chap:user_man_recap}
+\section{Implementation}
+\label{sec:user_man_recap_implementation}
+Another core feature of the configuration system is a custom way of specifying paths.
+Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we will still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
+First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} will be equivalent to \texttt{/path/to/dataset/images/train}.
+These \glspl{uri} can be used in the configuration files as well as the code itself; 
+\texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
+
+\todo{}
+
+\section{Documentation}
+\label{sec:recap_documentation}
+\todo{}
+
+\chapter{User manual: \texttt{chesscog}}
 \label{chap:user_man_chesscog}
 
+\section{Documentation}
+\label{sec:chesscog_documentation}
+\todo{}
+
 \section{Data synthesis}
+\label{sec:user_man_chesscog_data_synthesis}
 \begin{verbatim}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m ensurepip
 ./python3.7m -m pip install --upgrade pip
 ./python3.7m -m pip install python-chess
 \end{verbatim}
+\todo{download dataset}
 
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}
-\chapter{User manual: recap package}
-\label{chap:user_man_recap}
+
 
 \end{document}

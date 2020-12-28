@@ -5,7 +5,7 @@
 \chapter{Implementation}
 \Cref{chap:data_synthesis,chap:chess_recognition,chap:adapting} explain the design of the chess recognition system in great detail.
 This chapter will highlight and justify the main implementation decisions in a brief manner, as permitted by the scope of this report.
-For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings.
+For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings and interactive documentation is available, too.
 
 The context survey of implementation tools in \cref{sec:implementation_tools} justifies the use of Python as the main language of implementation.
 We adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-accelerated neural network training and inference due to its prevalence in the research community, and execute such tasks on a Ubuntu 20.04.1 lab machine with a 6GB NVIDIA GeForce GTX 1060 \gls{gpu}.
@@ -21,6 +21,11 @@ The implementation of this project took place in three main repositories, all of
 
 Originally, \texttt{recap} was part of \texttt{chesscog}; however, it was later refactored into its own repository and published on the \gls{pypi} because other people requested to use this configuration system, too.
 Separating the codebases of the core implementation (\texttt{chesscog}) and the web app (\texttt{chesscog-app}) ensures a clear separation of concerns and facilitates easier testing of both components in isolation.
+
+The quality of a Python package is quite obviously predicated in part on the quality of its documentation.
+Therefore, classes and methods in the \texttt{recap} package and \texttt{chesscog} project are documented using not only type annotations in line with the \gls{pep}\footnote{\glsentrylongpl{pep} are design documents containing best practices for developing Python code.} 484 and 526 standards, but also docstrings according to \gls{pep} 257.
+This enables the automatic generation of comprehensive documentation which is supplied alongside the project submission as explained in \cref{sec:recap_documentation,sec:chesscog_documentation}.
+
 
 \paragraph{Continuous integration and delivery}
 All three repositories contain unit tests that are executed on every commit via \gls{ci} pipelines implemented with \emph{GitHub Actions}.
@@ -111,7 +116,7 @@ This is especially useful due to the fact that the chess recognition system was 
             \draw[thickarrow] (1,-8.5) -- +(0,2);
         \end{tikzpicture}
     }
-    \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency.}
+    \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency. The current status of each pipeline is available at \texttt{https://github.com/georgw777/\{repo\}/actions} where \texttt{\{repo\}} is to be substituted with the repository’s name.}
     \label{fig:cicd}
 \end{figure}
 Whenever a release is published in the \texttt{chesscog} repository, it notifies the \texttt{chesscog-app} repository which opens a \gls{pr} where the version of the \texttt{chesscog} dependency is updated.
@@ -125,16 +130,16 @@ Both \gls{cd} pipelines are depicted in \cref{fig:cicd} as well.
 The pipelines perform so-called \emph{matrix builds} which means that the build and test stages are executed for all supported Python versions in parallel\footnote{In the case of the web app which uses Node.js in addition to Python, the matrix builds apply to the supported Node.js versions as well.}.
 This is especially important for the \texttt{recap} package which is listed on \gls{pypi} as supporting Python version $\geq 3.6$, so the matrix builds target versions 3.6, 3.7, and 3.8.
 
-
 \section{Configuration management (\texttt{recap})}
 A core principle underlying the implementation of the chess recognition system is that of reproducibility.
 All experimental results and metrics that are claimed in this report should be independently verifiable.
 To this end, a Python package was developed that serves the purposes of 
 \begin{enumerate*}[label=(\roman*)]
-    \item persisting hyperparameters and other configuration settings of any experiment, algorithm, or system that is configurable; and
-    \item providing a convenient interface for accessing these configurations as well as a unified means of specifying and managing paths in the project.
+    \item persisting hyperparameters and other configuration settings of any experiment, algorithm, or system that is configurable;
+    \item providing a convenient interface for accessing these configurations; and
+    \item facilitate a unified means of specifying and managing paths throughout the project.
 \end{enumerate*}
-This package is made available on \gls{pypi} because ensuring reproducibility is a common issue in machine learning research.
+This package is made available on \gls{pypi} because ensuring the reproducibility of experiments is a common issue in machine learning research.
 
 The configurations themselves are specified in \gls{yaml} format and a core feature of \texttt{recap} is the ability to inherit from other configuration files to override settings.
 A common use for such a configuration file is to specify how to train a \gls{cnn} including the architecture and hyperparameters such as the learning rate, number of epochs, etc.
@@ -142,30 +147,37 @@ Within \texttt{chesscog}, configuration files are mainly used to specify the par
 Furthermore, \gls{yaml} files were automatically generated in the grid search explained in \cref{sec:determine_optimal_params}.
 The functionality of inheriting from parent configurations was useful in \cref{sec:transfer_learning_finetuning} where some hyperparameters (the number of epochs) and settings (the path to the dataset) were altered for training the \glspl{cnn} for the new dataset, but the remaining configuration stayed the same.
 Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
-
-Another core feature of the configuration system is a custom way of specifying paths.
-Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we will still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
-First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
-Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} will be equivalent to \texttt{/path/to/dataset/images/train}.
-These \glspl{uri} can be used in the configuration files as well as the code itself; 
-\texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
-
-\section{The chess recognition system (\texttt{chesscog})}
-first jupyter notebooks but then Python files to allow automated testing, distribution as a package, reuse
+More details follow in \cref{sec:user_man_recap_implementation}.
 
 
+\section{Chess recognition system (\texttt{chesscog})}
+The chess recognition system was implemented incrementally in small parts. 
+Development usually started off in an interactive Python notebook for rapid prototyping and once a working sub-algorithm was implemented, the notebook was refactored to one or more Python files.
+Keeping the code in Python files instead of notebooks is a prerequisite for the automated unit tests and is furthermore necessary to avoid code duplication because many parts of the chess recognition system are used in both the training and inference stages.
+This also allowed the code to be structured in the form of a Python package so it can be installed directly from the current version of the repository's \texttt{master} branch via \texttt{pip}\footnote{\texttt{pip} is the Python package installer.}.
+Many of the Python files simultaneously act as scripts with a simple \gls{cli}.
+Their usage is explained in the user manual in \cref{chap:user_man_chesscog}.
+The \texttt{chesscog} repository also provides a \texttt{Dockerfile} (alongside a Docker Compose configuration) to build a container to perform \gls{gpu}-accelerated neural network training on the dedicated lab machine and inspect progress using the Tensorboard tool.
 
+The 3D chess set used to synthesise the dataset was modelled using the Blender software \cite{blender}.
+Blender provides a Python interface which was used to automate the placement of the chess pieces on the board as well as the lighting and camera as described in see \cref{sec:3d_renders}.
+Apart from rendering the scenes, that same Python script was responsible for generating the associated labels as outlined in \cref{sec:automated_labelling}.
+\Cref{sec:user_man_chesscog_data_synthesis} provides instructions for running this script.
+The synthesised dataset itself is provided online for download\footnote{The dataset ($\approx$7GB) is available for download at \url{https://tinyurl.com/chesscog-dataset} or by executing the Python script for downloading it as instructed in \cref{sec:user_man_chesscog_data_synthesis}.}.
 
-\subsection{Data synthesis}
-\subsection{Board localisation}
-\subsection{Training the classifiers}
-\subsection{Transfer learning}
+In the spirit of reproducibility, we provide the trained models' weights and relevant configuration files (created using \texttt{recap}) for download as well\footnote{The files are quite large, so they are available for download rather than supplying them in the project submission or Git repository.}.
+For instructions, refer to \cref{chap:user_man_chesscog}.
+
 \section{Web app (\texttt{chesscog-app})}
-react js node
-
-heroku
-cname
-
+The web app consists of two parts:
+\begin{enumerate*}[label=(\roman*)]
+    \item the frontend \gls{ui}, written in TypeScript using the popular React framework; and
+    \item a simple \gls{rest} \gls{api} for performing the chess position inference via the \texttt{chesscog} package.
+\end{enumerate*}
+React apps are typically run using Node, but since all the code client-side, we bundle the app to a set of static \gls{html} files that are served using \texttt{nginx}.
+The backend \gls{api} was developed using the \texttt{fastapi} Python library which implements the \gls{asgi}.
+It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \texttt{/api/predict}, which upon receiving a \gls{http} POST request with an input image, will run the chess recognition pipeline and return the predicted \gls{fen} position alongside some other information in \gls{json} format.
+\Cref{fig:webapp_overview} provides an overview of the web app's main components and their communication.
 \begin{figure}
     \makebox[\textwidth][c]{
         \begin{tikzpicture}
@@ -183,7 +195,7 @@ cname
                 \draw (1,-8.5) node[below,right,anchor=north west,align=left] {inference \acs{api}} rectangle +(6,-6);
                 \draw (2,-9.5) node[below,right,anchor=north west,align=left] {\texttt{chesscog} package} rectangle +(4,-2);
                 \draw[dotted,thick] (3,-10.5) rectangle +(3,-1) node[midway] {\texttt{recap} package};
-                \draw (2,-12.5) rectangle +(4,-1) node[midway] {Flask server};
+                \draw (2,-12.5) rectangle +(4,-1) node[midway] {\texttt{fastapi} app (\acs{asgi})};
                 \draw[<->] (2.5,-11.5) -- +(0,-1);
                 \draw[<->] (6,-2.5) edge[bend left=60] (6,-13);
                 \node[right,fill=white] at (7,-4) {forward};
@@ -205,8 +217,16 @@ cname
             \end{scope}
         \end{tikzpicture}
     }
-    \caption{Schematic overview of the infrastructure pertaining to the app.}
+    \caption{Schematic overview of the infrastructure pertaining to the web app.}
+    \label{fig:webapp_overview}
 \end{figure}
+The architecure is quite basic and is not optimised for scale because its purpose is merely to provide a proof of concept.
 
+The web app is hosted with a free plan on the Heroku cloud platform.
+As such, the server has no \gls{gpu} and thus the inference of \glspl{cnn} takes much longer than on the lab machine (\cref{chap:evaluation} provides a benchmark for inference speeds on a \gls{gpu}).
+A \gls{cd} pipeline deploys the app by building a Docker image of the system described in \cref{fig:webapp_overview} and pushing it to Heroku which makes it available at \url{https://chesscog.herokuapp.com}.
+The \gls{dns} provider for the \texttt{www.chesscog.com} domain has a \gls{cname} record that points to \texttt{chesscog.herokuapp.com}\footnote{Technically, the \gls{cname} record points at a Heroku \gls{dns} server that forwards to \texttt{chesscog.herokuapp.com}.}, so the website is accessible at \texttt{https://www.chesscog.com}.
+A \gls{tls} certificate is installed for the web app to ensure that it supports \gls{https} in addition to \gls{http}.
+\Cref{chap:user_man_chesscogapp} provides more information about the web app.
 
 \end{document}

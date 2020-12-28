@@ -5,7 +5,7 @@
 \chapter{Implementation}
 \Cref{chap:data_synthesis,chap:chess_recognition,chap:adapting} explain the design of the chess recognition system in great detail.
 This chapter will highlight and justify the main implementation decisions in a brief manner, as permitted by the scope of this report.
-For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings and interactive documentation is available, too.
+For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings and online documentation is available, too.
 
 The context survey of implementation tools in \cref{sec:implementation_tools} justifies the use of Python as the main language of implementation.
 We adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-accelerated neural network training and inference due to its prevalence in the research community, and execute such tasks on a Ubuntu 20.04.1 lab machine with a 6GB NVIDIA GeForce GTX 1060 \gls{gpu}.
@@ -94,7 +94,8 @@ This is especially useful due to the fact that the chess recognition system was 
             \node[process,below right=1cm and 0cm of recap_commit] (recap_test) {run tests};
             \node[action,below=3cm of recap_commit] (recap_release) {};
             \node at (recap_release) {publish\\release};
-            \node[process,below=1cm of recap_release] (recap_deploy) {deploy to \acs{pypi}};
+            \node[process,below left=1cm and 0cm of recap_release] (recap_deploy) {deploy to \acs{pypi}};
+            \node[process,below right=1cm and 0cm of recap_release] (recap_docs) {publish documentation};
 
             \draw[arrow] (chesscog_commit) -- (chesscog_build);
             \draw[arrow] (chesscog_commit) -- (chesscog_test);
@@ -111,6 +112,7 @@ This is especially useful due to the fact that the chess recognition system was 
             \draw[arrow] (recap_commit) -- (recap_build);
             \draw[arrow] (recap_commit) -- (recap_test);
             \draw[arrow] (recap_release) -- (recap_deploy);
+            \draw[arrow] (recap_release) -- (recap_docs);
             
             \draw[thickarrow] (8,-1) -- +(1,0);
             \draw[thickarrow] (1,-8.5) -- +(0,2);
@@ -147,8 +149,7 @@ Within \texttt{chesscog}, configuration files are mainly used to specify the par
 Furthermore, \gls{yaml} files were automatically generated in the grid search explained in \cref{sec:determine_optimal_params}.
 The functionality of inheriting from parent configurations was useful in \cref{sec:transfer_learning_finetuning} where some hyperparameters (the number of epochs) and settings (the path to the dataset) were altered for training the \glspl{cnn} for the new dataset, but the remaining configuration stayed the same.
 Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
-More details follow in \cref{sec:user_man_recap_implementation}.
-
+More details follow in \cref{sec:user_man_recap_implementation}, and comprehensive documentation\footnote{The documentation is automatically published to \url{https://recap.readthedocs.io} via a \gls{cd} pipeline as indicated in \cref{fig:cicd}.} of the \texttt{recap} library is available at \url{https://recap.readthedocs.io}.
 
 \section{Chess recognition system (\texttt{chesscog})}
 The chess recognition system was implemented incrementally in small parts. 
@@ -228,5 +229,10 @@ A \gls{cd} pipeline deploys the app by building a Docker image of the system des
 The \gls{dns} provider for the \texttt{www.chesscog.com} domain has a \gls{cname} record that points to \texttt{chesscog.herokuapp.com}\footnote{Technically, the \gls{cname} record points at a Heroku \gls{dns} server that forwards to \texttt{chesscog.herokuapp.com}.}, so the website is accessible at \texttt{https://www.chesscog.com}.
 A \gls{tls} certificate is installed for the web app to ensure that it supports \gls{https} in addition to \gls{http}.
 \Cref{chap:user_man_chesscogapp} provides more information about the web app.
+
+\ifSubfilesClassLoaded{%
+\printglossary[type=\acronymtype]%
+\printbibliography%
+}{}%
 
 \end{document}

@@ -37,7 +37,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{subfiles}
-
+\listfiles
 % BEGIN: left-align quotchap
 \makeatletter
 \renewcommand*{\sectfont}{\bfseries}% make it bold
@@ -103,12 +103,12 @@
   \setcounter{casectr}{0}%
 }{\end{changemargin}}
 
-\AtEndDocument{%
-  \ifSubfilesClassLoaded{%
-    \printglossary[type=\acronymtype]%
-    \printbibliography%
-  }{}%
-}
+% \AtEndDocument{%
+%   \ifSubfilesClassLoaded{%
+%     \printglossary[type=\acronymtype]%
+%     \printbibliography%
+%   }{}%
+% }
 
 \usetikzlibrary{patterns,calc,angles,quotes,shapes.geometric,arrows,arrows.meta,decorations.markings}
 \pgfplotsset{width=7cm,compat=1.17}
@@ -116,6 +116,7 @@
 \captionsetup[subfigure]{labelformat=simple}
 \renewcommand\thesubfigure{(\alph{subfigure})}
 \makesavenoteenv{tabular}
+\makesavenoteenv{figure}
 
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}
 \def\normal{\mathcal{N}}
@@ -131,12 +132,12 @@
 
 \addbibresource{\subfix{bibliography.bib}}
 % \AtEveryBibitem{\clearfield{month}}
-% \AtEveryBibitem{\clearfield{day}}
+\AtEveryBibitem{\clearfield{day}}
 
 \graphicspath{ {./images/} }
 
 \author{Georg Wölflein}
-\title{MSci Project}
+\title{MSci Dissertation}
 
 \setglossarystyle{mcolindex}
 \makeglossaries

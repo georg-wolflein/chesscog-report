@@ -97,6 +97,30 @@ Lastly, we see that the occupancy classifier needs just a fraction of the time r
 This can be explained in the more complex architecture of the InceptionV3 network as opposed to the ResNet model and the greater input size which results in the number of parameter being twice as high in the piece classifier.
 
 \section{Achievement of objectives}
+All initial objectives described in the \gls{doer} document as well as the additional tertiary objective introduced in \cref{sec:objectives} have been successfully achieved in this project.
+The following paragraphs provide evidence for the achievement of each objective in the order that they were specified in \cref{sec:objectives}.
+
+\paragraph{Primary objectives}
+The context survey of chess recognition systems in \cref{sec:context_survey_chess_recognition} is the outcome of objective \ref{obj:11} and is used to identify the limitations of current chess recognition systems to improve on them.
+Next, the corner detection algorithm for localising chessboards (objective \ref{obj:12}) as detailed in \cref{sec:board_localisation} achieves an accuracy of 99.42\%, clearly highlighting its robustness.
+Objective \ref{obj:13} concerns itself with the development of an algorithm for recognising chess pieces.
+This is achieved in a two-stage process of occupancy classification (\cref{sec:occupancy_classification}) followed by piece classification (\cref{sec:piece_classification}) using \glspl{cnn}.
+As a result, \cref{sec:preparing_results} explains how the entire pipeline is assembled, as required by objective \ref{obj:14}.
+In accordance with the last primary objective \ref{obj:15}, the developed algorithms are each evaluated in isolation in \cref{chap:chess_recognition}, and then as a whole (\cref{sec:preparing_results} evaluates it on the validation set and at the beginning of this chapter, this is compared to the test set performance).
+
+\paragraph{Secondary objectives}
+\Cref{chap:data_synthesis} details the process of data synthesis, where the process of generating a large dataset of 4,800 labelled samples was automated using a 3D model in Blender, thus achieving objective \ref{obj:21}.
+In line with objective \ref{obj:22}, \cref{sec:preparing_results} explains how the probability distribution over the squares is utilised to assemble an internal representation of the chess position which is then converted to \gls{fen} format.
+The web \gls{api} for executing the inference pipeline as required by objective \ref{obj:23} is explained in \cref{sec:implementation_chessogapp} and available online at \url{https://www.chesscog.com/api/docs}.
+
+\paragraph{Tertiary objectives}
+Evidence for fulfilling objective \ref{obj:31} (implementing a proof-of-concept web app for chess position inference) lies in the fact that it is hosted online at \url{https://www.chesscog.com} and is explained in \cref{sec:implementation_chesscogapp,fig:webapp_overview}.
+The \gls{fen} string is used to provide a link for opening the position in the board analysis tool on the popular chess website Lichess upon performing an inference.
+Finally, the achievement of objective \ref{obj:32} is highlighted in \cref{chap:adapting}, where a process is devised for adapting the chess recognition system to new chess sets, using only two pictures of the board for training.
+The success of this approach is reflected by the impressive results in \cref{tbl:transfer_learning_results}: based on just these two images, the system was able to correctly identify 88.89\% of the positions in the held-out test set, and all other positions had just one mistake.
+
+Although not a formal objective, a deliberate emphasis was put on ensuring that the results claimed in this report are reproducible which even led to publishing a Python package (\texttt{recap}) on \gls{pypi} as a byproduct.
+The datasets and trained models are made available for download, and all necessary code for training, inference, and evaluation is published on GitHub and supplied alongside the project submission.
 
 \section{Critical appraisal}
 

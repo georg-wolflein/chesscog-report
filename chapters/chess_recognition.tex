@@ -1356,19 +1356,20 @@ Finally, we create an internal representation of the chessboard based on the res
 
 \Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set will be evaluated in \cref{chap:evalution}).
 \begin{table}
-    \centering
-    \begin{tabular}{lrr}
-        \toprule
-        metric & training set & test set \\
-        \midrule
-        mean number of incorrect squares per board           & 0.27    & 0.27 \\
-        percentage of boards predicted with no mistakes      & 94.77\% & 97.95\%   \\
-        percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%   \\
-        per-board corner detection accuracy                  & 99.59\% & 100.00\% \\
-        per-square occupancy classification accuracy         & 99.81\% & 99.97\% \\
-        per-square piece classification accuracy             & 99.99\% & 99.99\% \\
-        \bottomrule
-    \end{tabular}
+    \makebox[\textwidth][c]{
+        \begin{tabular}{lrr}
+            \toprule
+            metric & training set & validation set \\
+            \midrule
+            mean number of incorrect squares per board           & 0.27    & 0.27 \\
+            percentage of boards predicted with no mistakes      & 94.77\% & 97.95\%   \\
+            percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%   \\
+            per-board corner detection accuracy                  & 99.59\% & 100.00\% \\
+            per-square occupancy classification accuracy         & 99.81\% & 99.97\% \\
+            per-square piece classification accuracy             & 99.99\% & 99.99\% \\
+            \bottomrule
+        \end{tabular}
+    }
     \caption[Performance of the chess recognition pipeline on the training and validation sets.]{Performance of the chess recognition pipeline on the training and validation sets. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
     \label{tbl:chess_recognition_trainval_results}
 \end{table}

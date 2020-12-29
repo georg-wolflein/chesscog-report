@@ -37,7 +37,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{subfiles}
-\listfiles
+
 % BEGIN: left-align quotchap
 \makeatletter
 \renewcommand*{\sectfont}{\bfseries}% make it bold
@@ -61,6 +61,11 @@
   \nobreak\chapterheadendvskip}}
 \makeatother
 % END: left-align quotchap
+
+\newcommand{\wordcount}{%
+    %\immediate\write18{texcount -sum -merge -template={word} main.tex > wc.txt}%
+    \input{wc.txt}%
+}
 
 \newcommand{\chapquote}[2]{%
   \begin{savequote}[45mm]
@@ -150,9 +155,29 @@
 
 \allowdisplaybreaks
 
+%TC:wordtype text number ignore
+%TC:macro \gls [ignore]
+%TC:macro \Gls [ignore]
+%TC:macro \glspl [ignore]
+%TC:macro \Glspl [ignore]
+%TC:macro \acr [ignore]
+%TC:macro \glsentrylong [ignore]
+%TC:macro \Glsentrylong [ignore]
+%TC:macro \glsentryshort [ignore]
+%TC:macro \Glsentryshort [ignore]
+%TC:macro \chapquote [ignore,ignore]
+%TC:macro \chapter [ignore]
+%TC:macro \section [ignore]
+%TC:macro \subsection [ignore]
+%TC:macro \subsubsection [ignore]
+%TC:macro \paragraph [ignore]
+%TC:envir enumerate [] ignore
+%TC:envir itemize [] ignore
+%TC:envir algorithm [] ignore
+%TC:envir caselist [] ignore
+
 \begin{document}
 
-%TC:wordtype text number ignore
 %TC:ignore
 \frontmatter
 \input{common/title_page.tex}

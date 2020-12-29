@@ -149,7 +149,16 @@ Within \texttt{chesscog}, configuration files are mainly used to specify the par
 Furthermore, \gls{yaml} files were automatically generated in the grid search explained in \cref{sec:determine_optimal_params}.
 The functionality of inheriting from parent configurations was useful in \cref{sec:transfer_learning_finetuning} where some hyperparameters (the number of epochs) and settings (the path to the dataset) were altered for training the \glspl{cnn} for the new dataset, but the remaining configuration stayed the same.
 Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
-More details follow in \cref{sec:user_man_recap_implementation}, and comprehensive documentation\footnote{The documentation is automatically published to \url{https://recap.readthedocs.io} via a \gls{cd} pipeline as indicated in \cref{fig:cicd}.} of the \texttt{recap} library is available at \url{https://recap.readthedocs.io}.
+
+Another core feature of the configuration system is a custom way of specifying paths.
+Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we will still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
+First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} will be equivalent to \texttt{/path/to/dataset/images/train}.
+These \glspl{uri} can be used in the configuration files as well as the code itself; 
+\texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
+
+A comprehensive documentation of the \texttt{recap} library is available at \url{https://recap.readthedocs.io}.
+This documentation is automatically published via a \gls{cd} pipeline as indicated in \cref{fig:cicd}.
 
 \section{Chess recognition system (\texttt{chesscog})}
 The chess recognition system was implemented incrementally in small parts. 

@@ -212,6 +212,7 @@ In this project, we will mainly rely on the board's corner coordinates as well a
 Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
 
 \section{Splitting the dataset}
+\label{sec:split_dataset}
 In order to facilitate a fair evaluation of our chess recognition algorithm once it is completed, we immediately set aside 7\% of the dataset as the so-called \emph{test} set.
 We will not use this data until the very end when it is time to assess the performance of our chess recognition pipeline, so we can prevent \emph{data leakage}: since we want to evaluate how our system performs on unseen data, we should not be allowed to use it during training.
 A much smaller portion of the data (3\%) will be used for \emph{validation} purposes.

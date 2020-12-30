@@ -1361,7 +1361,7 @@ Finally, we create an internal representation of the chessboard based on the res
             \toprule
             metric & training set & validation set \\
             \midrule
-            mean number of incorrect squares per board           & 0.27    & 0.27 \\
+            mean number of incorrect squares per board           & 0.27    & 0.03 \\
             percentage of boards predicted with no mistakes      & 94.77\% & 97.95\%   \\
             percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%   \\
             per-board corner detection accuracy                  & 99.59\% & 100.00\% \\
@@ -1373,7 +1373,7 @@ Finally, we create an internal representation of the chessboard based on the res
     \caption[Performance of the chess recognition pipeline on the training and validation sets.]{Performance of the chess recognition pipeline on the training and validation sets. The accuracies of the piece and occupancy classifiers are reported on a per-square basis, and in computing the accuracy of the piece classifier, we consider only the squares that were marked as `occupied' by the occupancy classifier. This is because the piece classifier is used only on the occupied squares.}
     \label{tbl:chess_recognition_trainval_results}
 \end{table}
-On average, the pipeline misclassifies only 0.27 squares per board.
+On average, the pipeline misclassifies only 0.03 squares per board.
 Overall, 98\% of the chessboards in the validation set are predicted without mistakes, and 2\% of the samples had only one incorrect square.
 The accuracies of the two classifiers as well as the corner dectector is above 99\%.
 

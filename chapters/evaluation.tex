@@ -15,10 +15,10 @@ Now we can evaluate the chess recognition system on the held-out test set becaus
             \toprule
             metric & train & val & test \\
             \midrule
-            mean number of incorrect squares per board           & 0.27    & 0.27     & 0.24 \\
+            mean number of incorrect squares per board           & 0.27    & 0.03     & 0.15 \\
             percentage of boards predicted with no mistakes      & 94.77\% & 97.95\%  & 93.86\% \\
-            percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%  & 99.42\% \\
-            per-board corner detection accuracy                  & 99.59\% & 100.00\% & 99.42\% \\
+            percentage of boards predicted with $\leq 1$ mistake & 99.14\% & 99.32\%  & 99.71\% \\
+            per-board corner detection accuracy                  & 99.59\% & 100.00\% & 99.71\% \\
             per-square occupancy classification accuracy         & 99.81\% & 99.97\%  & 99.92\% \\
             per-square piece classification accuracy             & 99.99\% & 99.99\%  & 99.99\% \\
             \bottomrule
@@ -28,10 +28,62 @@ Now we can evaluate the chess recognition system on the held-out test set becaus
     \label{tbl:chess_recognition_trainvaltest_results}
 \end{table}
 There is no indication of overfitting because there are only slight differences in the results of the train and test sets.
-The end-to-end per-board accuracy of our system on the unseen test set is 93.86\%, and if we allow just one mistake on the board, that accuracy increases to 99.42\%.
-Comparing the overall accuracy to the training set, we see a decrease in almost one percentage point. 
-It appears that the reason for the slightly worse performance on the test set is the marginally lower accuracy of the board localisation algorithm (99.59\% on the training set vs. 99.42\% on the test set).
-The two \glspl{cnn} actually perform on par or even better on the test set than the training set.
+The two \glspl{cnn} perform on par or even better on the test set than the training set, and likewise does the corner detection algorithm.
+However, these differences -- albeit suprising -- are negligible due to their insignificant magnitudes; in fact, the performance of on the validation set is even higher than on the test set.
+
+The end-to-end per-board accuracy of our system on the unseen test set is 93.86\%, and if we allow just one mistake on the board, that accuracy increases to 99.71\%.
+Comparing that first accuracy figure to the training set, we see a decrease of almost one percentage point. 
+This might seem peculiar because the three main stages each performed better or on par with the scores of the training set.
+However, if one takes into account that when permitting one mistake per board, the accuracy on the test set is actually higher than that of the training set, it becomes apparent that the the system had more incidences with two or more misclassified squares in the training set than the test set.
+Furthermore, we find that the average number of misclassified squares is lies at 0.15 on the test set as compared to 0.27 on the training set.
+
+The confusion matrix in \cref{tbl:confusion_matrix_test_set} facilitates a more detailed analysis of the mistakes.
+\begin{table}
+    \makebox[\textwidth][c]{
+        \renewcommand{\arraystretch}{2.5}
+        \begin{tabular}{c|c|*{13}{>{\centering\arraybackslash} m{.75cm}}|}
+            \multicolumn{2}{c}{} & \multicolumn{13}{c}{predicted} \\
+            \cline{3-15}
+            \multicolumn{1}{c}{} 
+            &
+            & \raisebox{-.2cm}{\WhitePawnOnWhite} 
+            & \raisebox{-.2cm}{\WhiteKnightOnWhite} 
+            & \raisebox{-.2cm}{\WhiteBishopOnWhite} 
+            & \raisebox{-.2cm}{\WhiteRookOnWhite} 
+            & \raisebox{-.2cm}{\WhiteQueenOnWhite} 
+            & \raisebox{-.2cm}{\WhiteKingOnWhite} 
+            & \raisebox{-.2cm}{\BlackPawnOnWhite} 
+            & \raisebox{-.2cm}{\BlackKnightOnWhite} 
+            & \raisebox{-.2cm}{\BlackBishopOnWhite} 
+            & \raisebox{-.2cm}{\BlackRookOnWhite} 
+            & \raisebox{-.2cm}{\BlackQueenOnWhite} 
+            & \raisebox{-.2cm}{\BlackKingOnWhite} 
+            & \raisebox{-.2cm}{\phantom{\WhitePawnOnWhite}} \\
+            \cline{2-15}
+            \multirow{13}{*}{\rotatebox[origin=c]{90}{actual}}
+            & \raisebox{-.2cm}{\WhitePawnOnWhite}                &  1894 &     0 &     0 &     1 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     1 \\
+            & \raisebox{-.2cm}{\WhiteKnightOnWhite}              &     0 &   334 &     2 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\WhiteBishopOnWhite}              &     0 &     0 &   392 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\WhiteRookOnWhite}                &     0 &     0 &     0 &   520 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\WhiteQueenOnWhite}               &     0 &     0 &     0 &     0 &   229 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     1 \\
+            & \raisebox{-.2cm}{\WhiteKingOnWhite}                &     0 &     0 &     0 &     0 &     0 &   341 &     0 &     0 &     0 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\BlackPawnOnWhite}                &     0 &     0 &     0 &     0 &     0 &     0 &  1878 &     0 &     0 &     0 &     0 &     0 &     2 \\
+            & \raisebox{-.2cm}{\BlackKnightOnWhite}              &     0 &     0 &     0 &     0 &     0 &     0 &     0 &   355 &     0 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\BlackBishopOnWhite}              &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &   378 &     0 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\BlackRookOnWhite}                &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &   511 &     0 &     0 &     0 \\
+            & \raisebox{-.2cm}{\BlackQueenOnWhite}               &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &   229 &     0 &     0 \\
+            & \raisebox{-.2cm}{\BlackKingOnWhite}                &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &     0 &   341 &     0 \\
+            & \raisebox{-.2cm}{\phantom{\WhitePawnOnWhite}}      &     3 &     0 &     0 &     0 &     0 &     0 &     9 &     1 &     0 &     0 &     0 &     0 & 14402 \\
+            \cline{2-15}
+        \end{tabular}
+        \renewcommand{\arraystretch}{1}
+    }
+    \caption[Confusion matrix of the per-square predictions on the test set.]{Confusion matrix of the per-square predictions on the test set. The final row/column represents empty squares. }
+    \label{tbl:confusion_matrix_test_set}
+\end{table}
+The last row and column, representing the class `empty square', contain the greatest number of incorrect samples which is a result of the worse performance of the occupancy classifier compared to the piece classifier.
+However, we must also take into account that the occupancy classifier has a more difficult task in this regard, since it must determine whether a square is empty even when it is occuluded by a piece in front of it.
+The piece classifier which had an accuracy of 99.99\% makes only three errors: in two cases it confuses a knight with a bishop, and in one case a pawn with a rook.
 
 The empirical results on the test set clearly demonstrate that the chess recognition system is highly accurate.
 However, for such a system to be practically effective, it must also be able to perform an inference in a reasonable amount of time.

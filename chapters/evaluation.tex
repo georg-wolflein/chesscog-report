@@ -78,7 +78,7 @@ The confusion matrix in \cref{tbl:confusion_matrix_test_set} facilitates a more 
         \end{tabular}
         \renewcommand{\arraystretch}{1}
     }
-    \caption[Confusion matrix of the per-square predictions on the test set.]{Confusion matrix of the per-square predictions on the test set. The final row/column represents empty squares. }
+    \caption[Confusion matrix of the per-square predictions on the test set.]{Confusion matrix of the per-square predictions on the test set. The final row/column represents empty squares. Note that the results from chessboards whose corners were not detected correctly are ignored here.}
     \label{tbl:confusion_matrix_test_set}
 \end{table}
 The last row and column, representing the class `empty square', contain the greatest number of incorrect samples which is a result of the worse performance of the occupancy classifier compared to the piece classifier.
@@ -175,10 +175,41 @@ Although not a formal objective, a deliberate emphasis was put on ensuring that 
 The datasets and trained models are made available for download, and all necessary code for training, inference, and evaluation is published on GitHub and supplied alongside the project submission.
 
 \section{Critical appraisal}
+\Cref{sec:context_survey_chess_recognition} surveys the state of the art in computer vision based approaches to chess recognition. 
+Vision systems for chess robots or those designed for recording chess moves are inadequate for performing game state inference on a single image because these systems commonly rely on the difference between two images in order to determine the last move.
+In the realm of single-image chess recognition systems (the type of system we aim to develop in this project), the context survey shows that systems exclusively employing traditional computer vision techniques are simply no match for approaches that effectively take advantage of deep learning.
+However, systems with a poor piece classification performance might excel in their algorithm for board localisation.
+Therefore, we will evaluate and compare our system to existing approaches across several different dimensions.
+The context survey identifies the work of \textcite{mehta2020} as the current state of the art because it achieves the highest overall accuracy score and is one of the few works employing \glspl{cnn}, so in evaluating this project, a particular focus is put in the comparison to their system.
 
-% \ifSubfilesClassLoaded{%
-% \printglossary[type=\acronymtype]%
-% \printbibliography%
-% }{}%
+\paragraph{Datasets}
+Many papers point out the lack of adequate datasets for chess recognition \cite{czyzewski2020,ding2016,mehta2020}.
+Even though \citeauthor{czyzewski2018} published a dataset \cite{czyzewski2018} of difficult chessboard corners used to train their system \cite{czyzewski2020}, large labelled datasets containing images of chess positions on a chessboard are not available as of now.
+Yet it is well known that approaches based on deep learning tend to excel when supplied with large quantities of relevant data \cite{halevy2009}.
+Most chess recognition systems to date use a dataset of chess photos the authors took themselves and had to annotate manually.
+\Textcite{mehta2020}, whose dataset constitutes the largest in size, use a dataset of 2,622 occupied and vacant chessboard squares.
+The dataset put forth in this project contains 4,888 samples of chess \emph{boards}, which means that there are 312,832 samples of chess \emph{squares}.
+Manually creating a dataset of this size would have been infeasible; instead, we used a 3D model to render and automatically label the images.
+For the benefit of future research in chess recognition systems and because our rendered dataset is two orders of magnitude larger than existing ones, we provide it publicly for download\footnote{As mentioned in \cref{chap:implementation}, the dataset is available at \url{https://tinyurl.com/chesscog-dataset}.}.
+
+Nonetheless, the reader should note that the use of 3D models for data synthesis in the domain of chess recognition is not completely new:
+\textcite{hou} use 3D chess set renderings to train their neural network, too, but their system uses just a simple non-convolutional \gls{ann} with only 1,000 squares for training and achieves an accuracy of only 72\%.
+\textcite{wei2017} synthesise point cloud data for their volumetric \gls{cnn} directly from 3D chess models their approach works only if the chessboard was captured with a depth camera.
+
+\paragraph{Board localisation}
+\paragraph{Piece classification}
+Our approach to piece classification is a two-step process:
+\cite{mehta2020} reports accuracy only on a per-square basis
+\footnote{
+    \Cref{tbl:chess_recognition_trainvaltest_results} does not explicitly report the per-square accuracy of the whole system.
+    However, the mean number of incorrect squares per board was 0.15, so the per-square accuracy is $1-\sfrac{0.15}{64}=99.72\%$.
+}
+
+\paragraph{Adapting to different chess sets}
+
+\ifSubfilesClassLoaded{%
+\printglossary[type=\acronymtype]%
+\printbibliography%
+}{}%
 
 \end{document}

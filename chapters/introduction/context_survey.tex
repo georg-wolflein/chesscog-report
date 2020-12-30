@@ -59,8 +59,8 @@ They then employ a \gls{cnn} to refine the corner points that were found using t
 Furthermore, they compare a \gls{cnn}-based piece classification algorithm to the SVM-based solution proposed by \textcite{ding2016} and find no notable amelioration, but manage to obtain major improvements by implementing a probabilistic reasoning system that uses the open source Stockfish chess engine \cite{romstad2020} as well as chess statistics \cite{acher2016}.
 Although reasoning techniques were already employed for refining the predictions of chess recognition systems before \cite{neufeld2010,danner2015}, \citeauthor{czyzewski2020} demonstrate the potential of combining information obtained from a chess engine with large-scale chess statistics.  
 Very recently, \textcite{mehta2020} implemented an augmented reality app using the popular \emph{AlexNet} \gls{cnn} architecture introduced by \textcite{krizhevsky2017}, achieving promising results.
-Despite using an overhead camera perspective and not performing any techniques to ensure probable and legal chess positions, \citeauthor{mehta2020} achieve an end-to-end accuracy of 93\% for the entire chessboard detection and piece classification pipeline, which -- to the best of our knowledge -- constitutes the current state of the art.
-However, it is unclear whether this accuracy is reported on the training set or a possible held-out test set.
+Despite using an overhead camera perspective and not performing any techniques to ensure probable and legal chess positions, \citeauthor{mehta2020} achieve a per-square accuracy of 93.45\% for the entire chessboard detection and piece classification pipeline, which -- to the best of our knowledge -- constitutes the current state of the art.
+% However, it is unclear whether this accuracy is reported on the training set or a possible held-out test set.
 
 \paragraph{Datasets}
 The lack of adequate datasets for chess recognition has been recognised by many \cite{czyzewski2020,ding2016,mehta2020}.

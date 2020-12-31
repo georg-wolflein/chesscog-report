@@ -153,7 +153,7 @@ Canny edge detection is a multi-stage algorithm that first reduces noise in the 
     \label{fig:hesse_normal_form}
 \end{figure}
 Next, we perform the so-called Hough transform \cite{hough1962,duda1972} in order to detect lines that are formed by the edges.
-To this end, we will represent lines in Hesse normal form, meaning that that they are parameterised by the angle $\theta$ that their normal vector makes to the $x$-axis, and the distance $\rho$ to the origin.
+To this end, we will represent lines in Hesse normal form, meaning that they are parameterised by the angle $\theta$ that their normal vector forms with the $x$-axis, and the distance $\rho$ to the origin.
 \Cref{fig:hesse_normal_form} explains this geometrically and gives rise to the equation of a line in Hesse normal form,
 \begin{equation}
     \label{eq:hesse_normal_form}
@@ -213,7 +213,7 @@ We can take multiple points in image space and plot their sinusoids.
 Then, each intersection in $(\rho, \theta)$ space will represent a line passing through the corresponding points, as illustrated in \cref{fig:hough_points}.
 
 For a given threshold $t$, the Hough transform essentially plots the sinusoids for all edge points in the input image (which we obtained using the Canny edge detection algorithm) and outputs intersection points in $(\rho,\theta)$ space that are on at least $t$ different sinusoids.
-Consequently, the lines identified by the Hough transform are corroborated by at least $t$ edge points in the image.
+Consequently, the lines identified by the Hough transform are supported by at least $t$ edge points in the image.
 
 \subsubsection{Clustering}
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
@@ -745,12 +745,12 @@ We thus distinguish between three cases based on the $x$-values which we shall o
                 \end{tikzpicture}
                 \caption{result of Canny edge detection on the horizontal gradient image}
             \end{subfigure}
-            \caption[Horizontal gradient intensities calculated on the warped image in order to detect vertical lines.]{Horizontal gradient intensities calculated on the warped image in order to detect vertical lines. The red dots correspond to the intersection points in $\sI$. Here, $x_\text{max}-x_\text{min}=7$ because there are eight columns of points instead of nine. This is because the rightmost vertical line was not detected.}
+            \caption[Horizontal gradient intensities calculated on the warped image in order to detect vertical lines.]{Horizontal gradient intensities calculated on the warped image in order to detect vertical lines. The red dots overlaid on each image correspond to the intersection points in $\sI$. Here, $x_\text{max}-x_\text{min}=7$ because there are eight columns of points instead of nine. This is because the rightmost vertical line was not detected. Note that the algorithm also failed to detect the topmost horizontal line, but the horizontal lines will be handled later (using vertical gradients).}
             \label{fig:warped_image_gradients}
         \end{figure}
         \Cref{fig:warped_image_gradients} shows the results of these operations on the running example.
 
-        On that image we shall sum the pixel internsities on the vertical lines at $x=x_\text{min}-1$ and $x=x_\text{max}+1$ (with a small tolerance to the left and to the right).
+        On that image we shall sum the pixel intensities on the vertical lines at $x=x_\text{min}-1$ and $x=x_\text{max}+1$ (with a small tolerance to the left and to the right).
         Then, if the sum of pixel intensities was greater at $x=x_\text{min}-1$ than $x=x_\text{max}+1$, we will update $x_\text{min} \gets x_\text{min}-1$, or otherwise $x_\text{max} \gets x_\text{max}+1$.
         We repeat this process until $x_\text{max}-x_\text{min}=8$.
     \end{case}
@@ -871,7 +871,7 @@ The most important parameters are summarised below:
     \item low and high Canny edge detection thresholds for the horizontal and vertical gradient images, as well as the relative width of the horizontal and vertical lines from \cref{sec:infer_missing_lines}.
 \end{itemize}
 The optimal parameter values are decided by performing a grid search using sensible presets.
-A corner is classified as being detected accurately if the prediction is within ten pixels of the groundtruth label, which given the fact that the width of the image is 1,200 pixels ensures that the predictions must be very close to the groundtruth.
+A corner is classified as being detected accurately if the prediction is within ten pixels of the ground truth label, which given the fact that the width of the image is 1,200 pixels ensures that the predictions must be very close to the ground truth.
 If at least one corner is detected inaccurately, that particular sample is determined to be inaccurate.
 We perform the grid search only on a small subset of the training set because the number of different parameter sets to be tested is in the order of a thousand.
 The set of parameters achieving the best performance on this subset of the training set is retained as the final configuration.
@@ -898,12 +898,12 @@ Empirical experiments showed that performing piece classification directly after
         \caption{cropped sample}
         \label{fig:occupancy_classification_fp_cropped}
     \end{subfigure}
-    \caption[An example illustraing why an immediate piece classification approach is inclined to reporting false positives.]{An example illustraing why an immediate piece classification approach is inclined to reporting false positives. Consider the square marked in green in the original image \subref{fig:occupancy_classification_fp_original}. The bounding box for piece classification (marked in red) must be quite tall because the square might contain a tall piece such as a queen or king (the box must be at least as tall as the the queen in the adjacent square on the left). The resulting sample, depicted in \subref{fig:occupancy_classification_fp_cropped}, contains almost the entire rook of the square behind. Thus, a piece classifier might classify this square as containing a rook instead of being empty.}
+    \caption[An example illustrating why an immediate piece classification approach is prone to reporting false positives.]{An example illustraing why an immediate piece classification approach is prone to reporting false positives. Consider the square marked in green in the original image \subref{fig:occupancy_classification_fp_original}. The bounding box for piece classification (marked in red) must be quite tall because the square might contain a tall piece such as a queen or king (the box must be at least as tall as the queen in the adjacent square on the left). The resulting sample, depicted in \subref{fig:occupancy_classification_fp_cropped}, contains almost the entire rook of the square behind. Thus, a piece classifier might classify this square as containing a rook instead of being empty.}
     \label{fig:occupancy_classification_fp}
 \end{figure}
 One common scenario where the trained classifier failed is illustrated in \cref{fig:occupancy_classification_fp}.
 Notice that squares further away from the camera must be cropped with increasingly taller bounding boxes.
-If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was inclined to report a false positive.
+If a particular square is empty but its bounding box includes the piece from the adjacent square as in \cref{fig:occupancy_classification_fp_cropped}, the trained classifier was prone to report a false positive.
 
 To solve this problem, a binary classifier is trained on cropped squares to decide whether they are empty or not.
 Before cutting out the squares from the original image, the input image is warped to a two-dimensional overhead view by means of the projective transformation outlined in \cref{sec:find_homography}.
@@ -939,7 +939,7 @@ This ensures that all squares are of equal size and that the corners form right 
         \caption{all 24 occupied samples}
         \label{fig:occupancy_classification_samples_occupied}
     \end{subfigure}
-    \caption[The process of obtaining samples for occupancy classification from a chessboard image.]{The process of obtaining samples for occupancy classification from a chessboard image. First, the original image \subref{fig:occupancy_classification_samples_original} is warped to a two-dimensional overhead view, \subref{fig:occupancy_classification_samples_warped}. Then, all squares are cropped (with a 50\% increase in width and height to include contextual information). Finally, the cropped squares are annoted using the \gls{fen} groundtruth as either empty \subref{fig:occupancy_classification_samples_empty} or occupied \subref{fig:occupancy_classification_samples_occupied}.}
+    \caption[The process of obtaining samples for occupancy classification from a chessboard image.]{The process of obtaining samples for occupancy classification from a chessboard image. First, the original image \subref{fig:occupancy_classification_samples_original} is warped to a two-dimensional overhead view, \subref{fig:occupancy_classification_samples_warped}. Then, all squares are cropped (with a 50\% increase in width and height to include contextual information). Finally, the cropped squares are annoted using the \gls{fen} ground truth as either empty \subref{fig:occupancy_classification_samples_empty} or occupied \subref{fig:occupancy_classification_samples_occupied}.}
     \label{fig:occupancy_classification_samples}
 \end{figure}
 
@@ -1239,7 +1239,7 @@ The exact details are, however, beyond the scope of this report.
 All other configurations are as described in \cref{sec:occupancy_classification}.
 
 In total, we train six models, two of which are `vanilla' \glspl{cnn} (the best two from \cref{sec:occupancy_classification} are selected for this task), and the rest are deeper models trained by means of transfer learning.
-The results in \cref{tbl:piece_classifier_performance} indicate a more significant difference between the hand-crafted \glspl{cnn} and the deeper models (around three percentage points) than it was the case for the occupancy classifier.
+The results in \cref{tbl:piece_classifier_performance} indicate a more significant difference between the hand-crafted \glspl{cnn} and the deeper models (around three percentage points) than was the case for the occupancy classifier.
 \begin{table}
     \centering
     \makebox[\textwidth][c]{
@@ -1293,7 +1293,7 @@ The results in \cref{tbl:piece_classifier_performance} indicate a more significa
 \end{table}
 The InceptionV3 model achieves the best performance with a validation accuracy of 100\%, i.e. there were no misclassifications in the validation set.
 Therefore, we will use that model for the chess recognition pipeline.
-\Cref{fig:pieces_inception_loss_accuracy} shows the the development of loss and accuracy during training. 
+\Cref{fig:pieces_inception_loss_accuracy} shows the development of loss and accuracy during training. 
 \begin{figure}
     \makebox[\textwidth][c]{
         \begin{subfigure}{.45\textwidth}
@@ -1354,7 +1354,7 @@ After that, each of the occupied samples is supplied to the piece classifier in 
 In each instance, we simply use the class with the highest probability.
 Finally, we create an internal representation of the chessboard based on the results of the two classifiers in order to produce a \gls{fen} description of the position on the board.
 
-\Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set will be evaluated in \cref{chap:evalution}).
+\Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set will be evaluated in \cref{chap:evaluation}).
 \begin{table}
     \makebox[\textwidth][c]{
         \begin{tabular}{lrr}

@@ -29,12 +29,12 @@ Now we can evaluate the chess recognition system on the held-out test set becaus
 \end{table}
 There is no indication of overfitting because there are only slight differences in the results of the train and test sets.
 The two \glspl{cnn} perform on par or even better on the test set than the training set, and likewise does the corner detection algorithm.
-However, these differences -- albeit suprising -- are negligible due to their insignificant magnitudes; in fact, the performance of on the validation set is even higher than on the test set.
+However, these differences -- albeit suprising -- are negligible due to their insignificant magnitudes; in fact, the performance on the validation set is even higher than on the test set.
 
 The end-to-end per-board accuracy of our system on the unseen test set is 93.86\%, and if we allow just one mistake on the board, that accuracy increases to 99.71\%.
 Comparing that first accuracy figure to the training set, we see a decrease of almost one percentage point. 
 This might seem peculiar because the three main stages each performed better or on par with the scores of the training set.
-However, if one takes into account that when permitting one mistake per board, the accuracy on the test set is actually higher than that of the training set, it becomes apparent that the the system had more incidences with two or more misclassified squares in the training set than the test set which is confirmed in \cref{fig:mistakes_frequency}.
+However, if one takes into account that when permitting one mistake per board, the accuracy on the test set is actually higher than that of the training set, it becomes apparent that the system had more incidences with two or more misclassified squares in the training set than the test set which is confirmed in \cref{fig:mistakes_frequency}.
 \begin{figure}
     \makebox[\textwidth][c]{
         \begin{tikzpicture}
@@ -94,7 +94,7 @@ However, if one takes into account that when permitting one mistake per board, t
     \caption[Frequency of the number of mistakes per board on the training and test sets.]{Frequency of the number of mistakes per board on the training and test sets as a percentage of the total number of chessboards in the respective dataset. The frequency for zero mistakes is not displayed (94.77\% on the training set and 93.86\% on the test set as per \cref{tbl:chess_recognition_trainvaltest_results}) as that would make the $y$-axis too large. On the training set, 0.86\% of the boards were predicted with two or more errors, whereas on the test set that figure is 0.29\%. Incidences with more than three mistakes are usually due to the chessboard corner points being detected incorrectly.}
     \label{fig:mistakes_frequency}
 \end{figure}
-Furthermore, we find that the average number of misclassified squares is lies at 0.15 on the test set as compared to 0.27 on the training set.
+Furthermore, we find that the average number of misclassified squares per board lies at 0.15 on the test set as compared to 0.27 on the training set.
 The confusion matrix in \cref{tbl:confusion_matrix_test_set} facilitates a more detailed analysis of the mistakes.
 \begin{table}
     \makebox[\textwidth][c]{
@@ -204,12 +204,12 @@ Therefore, execution time of the occupancy and piece classifiers is significantl
 Overall, the mean inference time is less than half a second on the \gls{gpu} and just over two seconds on the \gls{cpu}, although the latter measurement exhibits a significantly greater variance.
 We conclude that the speed is sufficient for the intended practical purpose, and that the \gls{gpu}-accelerated pipeline would even be suited for real-time inference at 2-3 frames per second on just one \gls{gpu}.
 Lastly, we see that the occupancy classifier needs just a fraction of the time required by the piece classifier.
-This can be explained in the more complex architecture of the InceptionV3 network as opposed to the ResNet model and the greater input size which results in the number of parameter being twice as high in the piece classifier.
+This can be explained in the more complex architecture of the InceptionV3 network as opposed to the ResNet model and the greater input size which results in the number of parameters being twice as high in the piece classifier.
 
 \section{Achievement of objectives}
 \label{sec:achievement_of_objectives}
 All initial objectives described in the \gls{doer} document as well as the additional tertiary objective introduced in \cref{sec:objectives} have been successfully achieved in this project.
-The following paragraphs provide evidence for the achievement of each objective in the order that they were specified in \cref{sec:objectives}.
+The following paragraphs provide evidence of the achievement of each objective in the order that they were specified in \cref{sec:objectives}.
 
 \paragraph{Primary objectives}
 The context survey of chess recognition systems in \cref{sec:context_survey_chess_recognition} is the outcome of objective \ref{obj:11} and is used to identify the limitations of current chess recognition systems to improve on them.
@@ -222,15 +222,15 @@ In accordance with the last primary objective \ref{obj:15}, the developed algori
 \paragraph{Secondary objectives}
 \Cref{chap:data_synthesis} details the process of data synthesis, where the process of generating a large dataset of 4,800 labelled samples was automated using a 3D model in Blender, thus achieving objective \ref{obj:21}.
 In line with objective \ref{obj:22}, \cref{sec:preparing_results} explains how the probability distribution over the squares is utilised to assemble an internal representation of the chess position which is then converted to \gls{fen} format.
-The web \gls{api} for executing the inference pipeline as required by objective \ref{obj:23} is explained in \cref{sec:implementation_chessogapp} and available online at \url{https://www.chesscog.com/api/docs}.
+The web \gls{api} for executing the inference pipeline as required by objective \ref{obj:23} is explained in \cref{sec:implementation_chesscogapp} and available online at \url{https://www.chesscog.com/api/docs}.
 
 \paragraph{Tertiary objectives}
-Evidence for fulfilling objective \ref{obj:31} (implementing a proof-of-concept web app for chess position inference) lies in the fact that it is hosted online at \url{https://www.chesscog.com} and is explained in \cref{sec:implementation_chesscogapp,fig:webapp_overview}.
+Evidence of fulfilling objective \ref{obj:31} (implementing a proof-of-concept web app for chess position inference) lies in the fact that it is hosted online at \url{https://www.chesscog.com} and is explained in \cref{sec:implementation_chesscogapp,fig:webapp_overview}.
 The \gls{fen} string is used to provide a link for opening the position in the board analysis tool on the popular chess website Lichess upon performing an inference.
 Finally, the achievement of objective \ref{obj:32} is highlighted in \cref{chap:adapting}, where a process is devised for adapting the chess recognition system to new chess sets, using only two pictures of the board for training.
 The success of this approach is reflected by the impressive results in \cref{tbl:transfer_learning_results}: based on just these two images, the system was able to correctly identify 88.89\% of the positions in the held-out test set, and all other positions had just one mistake.
 
-Although not a formal objective, a deliberate emphasis was put on ensuring that the results claimed in this report are reproducible which even led to publishing a Python package (\texttt{recap}) on \gls{pypi} as a byproduct.
+Although not a formal objective, a deliberate emphasis was put on ensuring that the results claimed in this report are reproducible which led to publishing a Python package (\texttt{recap}) on \gls{pypi} as a byproduct.
 The datasets and trained models are made available for download, and all necessary code for training, inference, and evaluation is published on GitHub and supplied alongside the project submission.
 
 \section{Critical appraisal}
@@ -253,15 +253,15 @@ For the benefit of future research in chess recognition systems and because our 
 
 Nonetheless, the reader should note that the use of 3D models for data synthesis in the domain of chess recognition is not completely new:
 \textcite{hou} use 3D chess set renderings to train their neural network, too, but their system uses just a simple non-convolutional \gls{ann} with only 1,000 squares for training and achieves an accuracy of only 72\%.
-\textcite{wei2017} synthesise point cloud data for their volumetric \gls{cnn} directly from 3D chess models their approach works only if the chessboard was captured with a depth camera.
+\textcite{wei2017} synthesise point cloud data for their volumetric \gls{cnn} directly from 3D chess models, but their approach works only if the chessboard was captured with a depth camera.
 
 \paragraph{Board localisation}
 Most chess robots circumvent the problem of board localisation by requiring manual calibration beforehand \cite{goncalves2005,sokic2008,khan2014}.
-In fact, even some single-image approaches prompt the user to manually select the four corner points \cite{danner2015}, but that level of human intervention is not accaptable for the type of automatic chess recognition system this project aims to develop.
+In fact, even some single-image approaches prompt the user to manually select the four corner points \cite{danner2015}, but that level of human intervention is not acceptable for the type of automatic chess recognition system this project aims to develop.
 
 Some approaches to automatic chess grid detection utilise the Harris corner detector \cite{banerjee2012,hack2014}, but such algorithms fail when corners are occluded by pieces.
 The most successful algorithms are based on line detection using the Hough transform \cite{tam2008,neufeld2010,danner2015,chen2016,kanchibail2016,xie2018a,chen2019} because that is more robust to occlusions.
-As such, first step of our algorithm (\cref{sec:find_intersection_points}) is based on that idea: we detect lines by performing a Hough transform and then use a clustering algorithm to eliminate similar lines.
+As such, the first step of our algorithm (\cref{sec:find_intersection_points}) is based on that idea: we detect lines by performing a Hough transform and then use a clustering algorithm to eliminate similar lines.
 Then, we compute a perspective transformation of the grid lines that best matches the detected lines using a \gls{ransac}-based method.
 Other techniques rely on the geometric nature of the chessboard as well \cite{tam2008,hack2014,danner2015,xie2018}, but rely on clustering algorithms instead of \gls{ransac}-based methods to eliminate outliers for computing the homography.
 Although \textcite{hack2014} do employ a \gls{ransac}-like algorithm, they use it just for distinguishing between horizontal and vertical lines, and directly for fitting the homography as explained in \cref{sec:find_optimal_homography}.
@@ -292,14 +292,14 @@ Still, we outperform their system by six percentage points, achieving an end-to-
     \Cref{tbl:chess_recognition_trainvaltest_results} does not explicitly report the per-square accuracy of the whole system.
     However, the mean number of incorrect squares per board was 0.15, so the per-square accuracy is $1-\sfrac{0.15}{64}=99.72\%$.
 }.
-The system proposed by \Textcite{czyzewski2020} is the next best system after \cite{mehta2020}, achieving an accuracy of 95\% for chessboard localisation and 95\% for piece classification which culminates at an overall per-square accuracy of 91\%.
-However, it should be noted that since none of the currently available chess inference systems are published with the datasets used to obtain the reported performances, our analysis is limited to comparing accuracy scors, even though these were obtained on different datasets.
+The system proposed by \Textcite{czyzewski2020} is the next best system after \cite{mehta2020}, achieving an accuracy of 95\% for chessboard localisation and 95\% for piece classification which culminates in an overall per-square accuracy of 91\%.
+However, it should be noted that since none of the currently available chess inference systems are published with the datasets used to obtain the reported performances, our analysis is limited to comparing accuracy scores, even though these were obtained on different datasets.
 
 \paragraph{Adapting to different chess sets}
-The transfer learning approach in \cref{chap:adapting} for adapting to previously unseen chess sets based on just two input images of the starting position with no manual labels is a novel contribution.
+The few-shot transfer learning approach in \cref{chap:adapting} for adapting to previously unseen chess sets based on just two input images of the starting position with no manual labels is a novel contribution.
 This is made possible by the large dataset which enabled the training of two robust \glspl{cnn} that could then be fine-tuned to a different chess set.
-Few shot learning approaches for \glspl{cnn} have not yet been studies with regard to chess recognition, so we cannot compare our approach to existing ones.
-However, we achieve a per-piece accuracy of 99.83\% on test set of the new chess set\footnote{
+Few-shot learning approaches for \glspl{cnn} have not yet been studies with regard to chess recognition, so we cannot compare our approach to existing ones.
+However, we achieve a per-piece accuracy of 99.83\% on a test set of the new chess set\footnote{
     Similar to \cref{ft:per_piece}, this is calculated as $1-\sfrac{0.11}{64}=99.83\%$ based on the results in \cref{tbl:transfer_learning_results}.
 }, which is nonetheless significantly higher than \textcite{mehta2020}'s performance where they did not have to adapt to a new chess set.
 Furthermore, all code for training the networks, performing inference, and running the experiments is publicly available on GitHub to ensure our results are reproducible.

@@ -17,7 +17,7 @@ Using the least amount of data necessary will make the system considerably more 
 A significant advantage of the chess recognition system as it is developed in \cref{chap:chess_recognition} is the fact that we employ conventional computer vision techniques such as edge and line detection in order to localise the board.
 This means that we are able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
 On the other hand, had we employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
-The fact that we can reliably find the corner points of any chess board but may not be able to correctly identify the position on the board gives rise to a system where we could employ transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
+The fact that we can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a system where we could employ transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
 if the user wants to employ our system to infer a position on their own chess board, we will instruct them to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
 \begin{figure}[h]
     \centering
@@ -81,7 +81,7 @@ Our ability to fine-tune the models to this new dataset is mainly constrained by
 Since we only have two input images, the occupancy classifier will have 128 samples for training (each board has 64 squares).
 The piece classifier will only have 64 samples because there are 32 pieces on the board at the starting position.
 While the \gls{cnn} for occupancy detection is a binary classifier, the piece classifier must undertake the more challenging task of distinguishing between a dozen different piece types.
-Furthermore, the data is not balanced between the classes: for example, there are 16 training samples for black pawns, but only two for the black king.
+Furthermore, the data is not balanced between the classes: for example, there are 16 training samples for black pawns, but only two for the black king, and some pieces are more difficult to detect than others (pawns usually look the same from all directions whereas knights do not).
 Given this premise, it is clear that we should employ data augmentations at training time in order to increase the variability of the data and reduce the risk of overfitting.
 
 \subsection{Data augmentation}
@@ -97,7 +97,7 @@ Of all augmentations, we observe the most significant performance gains in the s
 In \cref{sec:piece_classification}, we explain that the piece images are transformed (by performing a horizontal flip where appropriate) in a manner such that the bottom left part of the sample always depicts the square on which the piece stands, as can be seen in \cref{fig:white_queens}.
 Consequently, we must carefully design our use of the shear transform to retain this property in broad terms.
 
-A shear transform is a linear map that dispaces pixels from the original image. 
+A shear transform is a linear map that displaces pixels from the original image. 
 In our case, the magnitude of displacement will be proportional to the $y$-axis, but each pixel will remain on its row.
 Mathematically, a shear is a function $\vs : \R^2 \to \R^2$ that maps a 2D coordinate to another.
 We define it as
@@ -106,7 +106,7 @@ We define it as
         x + \lambda y \\ y
     \end{bmatrix}
 \end{equation}
-for some $\lambda \in \R$ affecting severety of the distortion.
+for some $\lambda \in \R$ affecting severity of the distortion.
 For $\lambda=0$, there is no distortion.
 \begin{figure}
     \centering
@@ -202,7 +202,7 @@ A popular means of image augmentation is inducing colour perturbations.
 We achieve this by jointly varying brightness, contrast, hue, and saturation.
 For each of these factors, we choose the degree of alteration from four separate uniform distributions over intervals that are sensibly selected such that the alteration does not appear too drastic upon visual inspection.
 
-\Cref{fig:augmentations} shows five augmentations of the same input image, drawing attention to the random parameter selection which creates the indended variability in the training images.
+\Cref{fig:augmentations} shows five augmentations of the same input image, drawing attention to the random parameter selection which creates the intended variability in the training images.
 \begin{figure}
     \centering
     \includegraphics[width=1.9cm]{augmentation_orig}
@@ -301,10 +301,10 @@ In fact, the loss is already below 0.001 at the beginning of training which can 
         \caption{piece classifier}
         \label{fig:transfer_learning_loss_accuracy_pieces}
     \end{subfigure}
-    \caption[Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset.]{Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset. Due to the limited availability of data, the validation set is simply the training set without augmentations. Both fine-tuned models achieves an accuracy of 100\% on the training data.}
+    \caption[Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset.]{Loss and accuracy in fine-tuning the occupancy and piece classifiers on the new dataset. Due to the limited availability of data, the validation set is simply the training set without augmentations. Both fine-tuned models achieve an accuracy of 100\% on the training data.}
     \label{fig:transfer_learning_loss_accuracy}
 \end{figure}
-Thus the ocupancy classifier achieves an accuracy of 100\% quite quickly during training, even before all layers are unfrozen halfway though the training.
+Thus the ocupancy classifier achieves an accuracy of 100\% quite quickly during training, even before all layers are unfrozen halfway through the training.
 
 On the other hand, the piece classifier starts with a loss value just under 2, and only converges during the second training stage which starts around step\footnote{Recall that the number of steps is different to the number of iterations over the dataset, due to the fact that the dataset consists of multiple batches.} 300, as depicted in \cref{fig:transfer_learning_loss_accuracy_pieces}.
 Nonetheless, the convergence of the loss is relatively smooth.

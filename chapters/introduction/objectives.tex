@@ -1,0 +1,31 @@
+\section{Objectives}
+\label{sec:objectives}
+As mentioned in the introduction, the main aim of this project is developing an end-to-end chess recognition system that takes as input an image of a chessboard with pieces on it and outputs the game state (the chess position).
+To this end, the \gls{doer} document lists five primary objectives that should define the success of this project:
+\begin{enumerate}[label={A\arabic*.},ref={A\arabic*}]
+    \item \label{obj:11} Perform a literature review of available methods for parsing chess positions from photos.
+    \item \label{obj:12} Develop an algorithm for detecting the corners of the chessboard as well as the squares.
+    \item \label{obj:13} Develop an algorithm for recognising the chess pieces.
+    \item \label{obj:14} Develop an algorithm that uses the outputs from (2) and (3) in order to compute a probability distribution over each piece in each square.
+    \item \label{obj:15} Evaluate the performance of the developed algorithms.
+\end{enumerate}
+
+Next, there are three secondary objectives that provide meaningful extensions to the project:
+\begin{enumerate}[label={B\arabic*.},ref={B\arabic*}]
+    \item \label{obj:21} Create a large labelled dataset of synthesised chessboard images using 3D models.
+    \item \label{obj:22} Implement an algorithm that takes as input the raw probability distribution of each piece in each square and outputs a likely \gls{fen} description.
+    \item \label{obj:23} Implement a simple web API that performs the inference pipeline for an input image, returning the \gls{fen} description. 
+\end{enumerate}
+
+Finally, the \gls{doer} lists one tertiary objective. 
+However, during the course of this project, an additional tertiary objective (\ref{obj:32}) was introduced as it became clear that employing a transfer learning approach to adapt to new chess sets would make the system significantly more useful:
+\begin{enumerate}[label={C\arabic*.},ref={C\arabic*}]
+    \item \label{obj:31} Develop a web app that allows the user to upload an image of the chess board to obtain the \gls{fen} description.
+    \item \label{obj:32} Employ transfer learning to demonstrate how the system can adapt to new chess sets.
+\end{enumerate}
+
+This project fully achieves all of the objectives listed above, as is evaluated in detail in \cref{sec:achievement_of_objectives}.
+\Cref{chap:data_synthesis} explains the process used to synthesise a large dataset of chess images using a 3D model of a chess set.
+The design of the chess inference system is explained in \cref{chap:chess_recognition}, and \cref{chap:adapting} extends this approach to facilitate adapting to new (previously unseen) chess sets.
+\Cref{chap:implementation} discusses the implementation at a high level which is evaluated in \cref{chap:evaluation} not only with regard to the aforementioned objectives, but also compares the system to the existing approaches identified in the context survey.
+Finally, \cref{chap:conclusion} concludes the report and provides an outlook for future work.

@@ -18,52 +18,19 @@ The main goal of this project is to develop a system that is able to map a photo
 
 
 \input{chapters/introduction/context_survey}
-% \input{chapters/introduction/objectives}
-
-\section{Objectives}
-\label{sec:objectives}
-\todo{explain extent of achieving them}
-\subsection{Primary}
-\begin{enumerate}[label={A\arabic*.},ref={A\arabic*}]
-    \item \label{obj:11} Perform a literature review of available methods for parsing chess positions from photos.
-    \item \label{obj:12} Develop an algorithm for detecting the corners of the chessboard as well as the squares.
-    \item \label{obj:13} Develop an algorithm for recognising the chess pieces.
-    \item \label{obj:14} Develop an algorithm that uses the outputs from (2) and (3) in order to compute a probability distribution over each piece in each square.
-    \item \label{obj:15} Evaluate the performance of the developed algorithms.
-\end{enumerate}
-
-\subsection{Secondary}
-\begin{enumerate}[label={B\arabic*.},ref={B\arabic*}]
-    \item \label{obj:21} Create a large labelled dataset of synthesised chessboard images using 3D models.
-    \item \label{obj:22} Implement an algorithm that takes as input the raw probability distribution of each piece in each square and outputs a likely \gls{fen} description.
-    \item \label{obj:23} Implement a simple web API that performs the inference pipeline for an input image, returning the \gls{fen} description. 
-\end{enumerate}
-\subsection{Tertiary}
-\begin{enumerate}[label={C\arabic*.},ref={C\arabic*}]
-    \item \label{obj:31} Develop a web app that allows the user to upload an image of the chess board to obtain the \gls{fen} description.
-    \item \label{obj:32} Employ transfer learning to demonstrate how the system can adapt to new chess sets.
-\end{enumerate}
-
-Note: final tertiary objective was not an objective in the outstet; was added during the project, as it became clear that employing a transfer learning approach would make the system significantly more useful.
-
-
-% \input{chapters/introduction/software_engineering}
+\input{chapters/introduction/objectives}
+\input{chapters/introduction/software_engineering}
 
 \section{Software engineering process}
-\todo{todo}
-% A very agile approach was adopted due to the primarily research-oriented character of the project.
-% Regular supervisor meetings were held where progress was discussed, and tasks were set for the next week.
-% This ensured that changes could be made quickly depending on the outcomes of different approaches that were tested throughout the project.
+The development of this project is characterised by very agile approach due to its primarily research-oriented nature.
+Regular supervisor meetings were held where progress was discussed, and tasks were set for the next week.
+This ensured that changes could be made quickly depending on the outcomes of different approaches that were tested throughout the project.
 
 
-% % first jupyter notebooks then python code for reproducibility
+% first jupyter notebooks then python code for reproducibility
 
-% Important statistics and results were persisted in data files\footnote{The data files are available in the \texttt{chesscog/results} folder.} so they could be used for analysis and plotting later.
+Important statistics and results were persisted in data files\footnote{The data files are available in the \texttt{chesscog/results} folder.} so they could be used for analysis and plotting later.
 
-% All code related to this project (including this report's \LaTeX{} markup itself) was maintained using the version control system Git in a single repository hosted on GitHub\footnote{The repository can be found at \href{https://github.com/georgw777/neural-surfing}{\texttt{https://github.com/georgw777/neural-surfing}}.}.
-% This approach was undertaken for the reason of avoiding file and code duplication: the data files produced using the interactive notebooks could be used directly to generate the plots for the weekly notes as well as this report.
-% Due to the fact that there was only one developer, all commits were made to the \texttt{master} branch; adopting a more sophisticated model utilising feature branches or pull requests would cause more overhead than benefit in the single-developer scenario.
-% Furthermore, no continuous integration system with automated testing was employed because that, too, would be excessive for a research project of this scale. 
 
 \input{chapters/introduction/ethics}
 

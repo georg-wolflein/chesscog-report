@@ -270,13 +270,38 @@ Our system outperforms this by more than four percentage points, achieving 99.71
 
 \paragraph{Piece classification}
 Our approach to piece classification is a two-step process:
-\cite{mehta2020} reports accuracy only on a per-square basis
-\footnote{
+first, an AlexNet \cite{krizhevsky2017} \gls{cnn} predicts the occupancy of each square, and then an InceptionV3 \cite{szegedy2016} model classifies the pieces on the occupied squares. 
+Both \glspl{cnn} were initialised with pre-trained weights used for training on the ImageNet dataset \cite{deng2009}, and then fine-tuned to our dataset using transfer learning.
+\Textcite{mehta2020} employ transfer learning from ImageNet weights with the AlexNet architecture as well, but follow a single-stage process where the \gls{cnn} is tasked with predicting all 13 classes (a dozen piece types and the empy square).
+Their piece classifier achieves an accuracy of 93.45\%, whereas our two-stage approach has an accuracy of 99.91\% on the test set\footnote{
+    To obtain the overall accuracy of the piece classifier, we multiply the occupancy classification accuracy with the piece classification accuracy from \cref{tbl:chess_recognition_trainvaltest_results}.
+}, an improvement of more than six percentage points.
+The only other \gls{cnn}-based chess inference system, that of \textcite{xie2018}, also uses transfer learning with various \gls{cnn} architectures and achieves the best performance with GoogLeNet \cite{szegedy2015}, the predecessor to InceptionV3 \cite{szegedy2016}.
+As such, \citeauthor{xie2018} achieve a classification accuracy of 98.14\%, but they use only six classes (pawn, knight, bishop, rook, queen, king), meaning that their system is unable to distinguish between the colours of the pieces and cannot identify empty squares.
+In this regard, \citeauthor{xie2018}'s approach can only be compared to the second stage of our piece classification algorithm which achieves 99.99\% accuracy (while also being able to differentiate between black and white pieces).
+The remaining chess recognition systems do not employ deep neural networks for piece classification and thus achieve worse results.
+
+\paragraph{Overall performance}
+\Textcite{mehta2020} report their overall accuracy to be 93.45\% on a per-square basis.
+This figure is identical to their reported piece classification accuracy, meaning that their board localisation algorithm achieves an accuracy of 100\% (although they do not evaluate that separately).
+Due to the fact that their images are captured from the top down (at a 90° angle), this is quite possible.
+By contrast, the images in our dataset are captured at an angle between 45° and 60° (as explained in \cref{sec:3d_renders}) which increases the difficulty of the chessboard localisation process due to occluded lines, but makes the piece classification problem easier because the pieces look more similar from the top.
+Still, we outperform their system by six percentage points, achieving an end-to-end accuracy of 99.72\% per square\footnote{
+    \label{ft:per_piece}
     \Cref{tbl:chess_recognition_trainvaltest_results} does not explicitly report the per-square accuracy of the whole system.
     However, the mean number of incorrect squares per board was 0.15, so the per-square accuracy is $1-\sfrac{0.15}{64}=99.72\%$.
-}
+}.
+The system proposed by \Textcite{czyzewski2020} is the next best system after \cite{mehta2020}, achieving an accuracy of 95\% for chessboard localisation and 95\% for piece classification which culminates at an overall per-square accuracy of 91\%.
+However, it should be noted that since none of the currently available chess inference systems are published with the datasets used to obtain the reported performances, our analysis is limited to comparing accuracy scors, even though these were obtained on different datasets.
 
 \paragraph{Adapting to different chess sets}
+The transfer learning approach in \cref{chap:adapting} for adapting to previously unseen chess sets based on just two input images of the starting position with no manual labels is a novel contribution.
+This is made possible by the large dataset which enabled the training of two robust \glspl{cnn} that could then be fine-tuned to a different chess set.
+Few shot learning approaches for \glspl{cnn} have not yet been studies with regard to chess recognition, so we cannot compare our approach to existing ones.
+However, we achieve a per-piece accuracy of 99.83\% on test set of the new chess set\footnote{
+    Similar to \cref{ft:per_piece}, this is calculated as $1-\sfrac{0.11}{64}=99.83\%$ based on the results in \cref{tbl:transfer_learning_results}.
+}, which is nonetheless significantly higher than \textcite{mehta2020}'s performance where they did not have to adapt to a new chess set.
+Furthermore, all code for training the networks, performing inference, and running the experiments is publicly available on GitHub to ensure our results are reproducible.
 
 \ifSubfilesClassLoaded{%
 \printglossary[type=\acronymtype]%

@@ -34,9 +34,67 @@ However, these differences -- albeit suprising -- are negligible due to their in
 The end-to-end per-board accuracy of our system on the unseen test set is 93.86\%, and if we allow just one mistake on the board, that accuracy increases to 99.71\%.
 Comparing that first accuracy figure to the training set, we see a decrease of almost one percentage point. 
 This might seem peculiar because the three main stages each performed better or on par with the scores of the training set.
-However, if one takes into account that when permitting one mistake per board, the accuracy on the test set is actually higher than that of the training set, it becomes apparent that the the system had more incidences with two or more misclassified squares in the training set than the test set.
+However, if one takes into account that when permitting one mistake per board, the accuracy on the test set is actually higher than that of the training set, it becomes apparent that the the system had more incidences with two or more misclassified squares in the training set than the test set which is confirmed in \cref{fig:mistakes_frequency}.
+\begin{figure}
+    \makebox[\textwidth][c]{
+        \begin{tikzpicture}
+            \begin{axis}[
+                width=\textwidth,
+                height=6cm,
+                ymin=0, ymax=6,
+                ybar=0pt,
+                bar width=.4,
+                xlabel=number of mistakes per board,
+                ylabel=frequency (\%),
+                xmin=1,
+                xtick={1,5,10,...,50},
+                tick align=inside, 
+                enlarge x limits={abs=.5cm},
+                enlarge y limits={abs=.3cm},
+                legend columns=2,
+                legend style={
+                    column sep=1ex
+                }
+            ]
+                \addplot+[draw=none,fill=blue!70] coordinates {
+                    ( 1, 4.36)
+                    (32, 0.09)
+                    ( 2, 0.09)
+                    (26, 0.07)
+                    (43, 0.07)
+                    (34, 0.05)
+                    (41, 0.05)
+                    (28, 0.05)
+                    (25, 0.05)
+                    ( 3, 0.02)
+                    (12, 0.02)
+                    (16, 0.02)
+                    (24, 0.02)
+                    (15, 0.02)
+                    (36, 0.02)
+                    (40, 0.02)
+                    (13, 0.02)
+                    (46, 0.02)
+                    (29, 0.02)
+                    (23, 0.02)
+                    (37, 0.02)
+                    (50, 0.02)
+                    (18, 0.02)
+                    (22, 0.02)
+                    (33, 0.02)
+                };
+                \addplot+[draw=none,fill=red!70] coordinates {
+                    ( 1, 5.85)
+                    (32, 0.29)
+                };
+                \legend{training set, test set}
+            \end{axis}
+        \end{tikzpicture}
+    }
+    \caption[Frequency of the number of mistakes per board on the training and test sets.]{Frequency of the number of mistakes per board on the training and test sets as a percentage of the total number of chessboards in the respective dataset. The frequency for zero mistakes is not displayed (94.77\% on the training set and 93.86\% on the test set as per \cref{tbl:chess_recognition_trainvaltest_results}) as that would make the $y$-axis too large. On the training set, 0.86\% of the boards were predicted with two or more errors, whereas on the test set that figure is 0.29\%. Incidences with more than three mistakes are usually due to the chessboard corner points being detected incorrectly.}
+    \label{fig:mistakes_frequency}
+\end{figure}
 Furthermore, we find that the average number of misclassified squares is lies at 0.15 on the test set as compared to 0.27 on the training set.
-
 The confusion matrix in \cref{tbl:confusion_matrix_test_set} facilitates a more detailed analysis of the mistakes.
 \begin{table}
     \makebox[\textwidth][c]{
@@ -184,7 +242,7 @@ The context survey identifies the work of \textcite{mehta2020} as the current st
 
 \paragraph{Datasets}
 Many papers point out the lack of adequate datasets for chess recognition \cite{czyzewski2020,ding2016,mehta2020}.
-Even though \citeauthor{czyzewski2018} published a dataset \cite{czyzewski2018} of difficult chessboard corners used to train their system \cite{czyzewski2020}, large labelled datasets containing images of chess positions on a chessboard are not available as of now.
+Even though \citeauthor{czyzewski2018} published a dataset \cite{czyzewski2018} of difficult chessboard corners used to train their system\footnote{The dataset of \citeauthor{czyzewski2018} contains 9,664 black-and-white images of chessboard lattice points that are $21\times 21$ pixels in size and thus not sufficient to train a chess recognition system.} \cite{czyzewski2020}, large labelled datasets containing images of chess positions on a chessboard are not available as of now.
 Yet it is well known that approaches based on deep learning tend to excel when supplied with large quantities of relevant data \cite{halevy2009}.
 Most chess recognition systems to date use a dataset of chess photos the authors took themselves and had to annotate manually.
 \Textcite{mehta2020}, whose dataset constitutes the largest in size, use a dataset of 2,622 occupied and vacant chessboard squares.
@@ -197,6 +255,19 @@ Nonetheless, the reader should note that the use of 3D models for data synthesis
 \textcite{wei2017} synthesise point cloud data for their volumetric \gls{cnn} directly from 3D chess models their approach works only if the chessboard was captured with a depth camera.
 
 \paragraph{Board localisation}
+Most chess robots circumvent the problem of board localisation by requiring manual calibration beforehand \cite{goncalves2005,sokic2008,khan2014}.
+In fact, even some single-image approaches prompt the user to manually select the four corner points \cite{danner2015}, but that level of human intervention is not accaptable for the type of automatic chess recognition system this project aims to develop.
+
+Some approaches to automatic chess grid detection utilise the Harris corner detector \cite{banerjee2012,hack2014}, but such algorithms fail when corners are occluded by pieces.
+The most successful algorithms are based on line detection using the Hough transform \cite{tam2008,neufeld2010,danner2015,chen2016,kanchibail2016,xie2018a,chen2019} because that is more robust to occlusions.
+As such, first step of our algorithm (\cref{sec:find_intersection_points}) is based on that idea: we detect lines by performing a Hough transform and then use a clustering algorithm to eliminate similar lines.
+Then, we compute a perspective transformation of the grid lines that best matches the detected lines using a \gls{ransac}-based method.
+Other techniques rely on the geometric nature of the chessboard as well \cite{tam2008,hack2014,danner2015,xie2018}, but rely on clustering algorithms instead of \gls{ransac}-based methods to eliminate outliers for computing the homography.
+Although \textcite{hack2014} do employ a \gls{ransac}-like algorithm, they use it just for distinguishing between horizontal and vertical lines, and directly for fitting the homography as explained in \cref{sec:find_optimal_homography}.
+Finally, we infer missing lines by computing horizontal and vertical gradients on the transformed image (\cref{sec:infer_missing_lines}), a novel technique that is not employed by the other recognition systems.
+\Textcite{czyzewski2020} achieves the highest reported\footnote{\Citeauthor{mehta2020} do not separately report the board localisation accuracy.} board localisation accuracy of 95\%.
+Our system outperforms this by more than four percentage points, achieving 99.71\% on the test set.
+
 \paragraph{Piece classification}
 Our approach to piece classification is a two-step process:
 \cite{mehta2020} reports accuracy only on a per-square basis

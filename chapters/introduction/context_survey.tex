@@ -35,7 +35,7 @@ On the other hand, \textcite{xie2018} perform contour-based template matching wi
 As part of the same work, \citeauthor{xie2018} develop another approach that instead utilises \glspl{cnn}, but find that their original template-matching technique achieves superior results in terms of speed and accuracy in low-resolution images.
 However, the reader should note that their \glspl{cnn} are trained on only 40 images per class, but deep learning methods tend to excel when trained on larger datasets \cite{halevy2009}.
 
-\paragraph{Chessboard detection}
+\paragraph{Board localisation}
 A prerequisite to any chess recognition system is the ability to detect the location of the chessboard and each of the 64 squares. 
 Once the four corner points have been established, finding the squares is trivial for pictures captured in bird's-eye view, and only a matter of a simple perspective transformation in the case of other camera positions.
 While finding the corner points of a chessboard is frequently used for automatic camera calibration due to the regular nature of the chessboard pattern \cite{delaescalera2010,bennett2014}, techniques designed for this purpose tend to perform poorly when there are pieces on the chessboard that occlude lines or corners.

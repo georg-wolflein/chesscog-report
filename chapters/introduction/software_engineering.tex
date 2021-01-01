@@ -1,1 +1,16 @@
-.
+\section{Software engineering process}
+The development of this project is characterised by a very agile approach due to its primarily research-oriented nature.
+Regular supervisor meetings were held where progress was discussed, and tasks were set for the next week.
+This ensured that changes could be made quickly depending on the outcomes of different approaches that were tested throughout the project.
+
+Even though this project was primarily research-based, good software engineering practices were still followed.
+The code developed throughout this project was managed using Git repositories.
+The general approach to developing a new algorithm was to first implement it in an interactive Python notebook to allow rapid prototyping, and once development arrived at a working version, it was refactored into one or more Python files.
+Keeping the code as Python files instead of interactive notebooks avoids code duplication because many components of the chess recognition system are used both at training and inference time.
+Furthermore, this approach was necessary so that the algorithms could be tested using unit tests.
+The unit tests for a particular repository are run on every commit to that repository via a \gls{ci} pipeline.
+Moreover, since the web demo was developed in parallel to the core chess recognition algorithm, \gls{cd} pipelines were set up for automatically deploying the web app, as well as integrating changes from the core recognition algorithm upon release.
+Specific details follow in \cref{chap:implementation}.
+
+An overarching theme that governed the development of the chess recognition system is that of reproducibility.
+Experimental results were persisted in data files\footnote{The data files are available in the \texttt{chesscog/results} folder.} which can be reproduced using the scripts described in \cref{chap:user_man_chesscog} to independently verify the benchmarks and results claimed throught this report.

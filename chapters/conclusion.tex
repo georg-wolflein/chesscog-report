@@ -5,14 +5,55 @@
 \chapquote{You may learn much more from a game you lose than from a game you win.}{José Capablanca}
 \chapter{Conclusion}
 \label{chap:conclusion}
-% This report presents an end-to-end chess recognition system that outperforms the existing approaches
-% chess ever more popular covid pandemic
+
+People have long been fascinated by the interaction between machines and humans as it relates to chess.
+In the late 18\textsuperscript{th} and early 19\textsuperscript{th} centuries, a chess-playing automaton known as the Mechanical Turk was a popular attraction toured across Europe and the Americas, playing strong games against prominent opponents such as Napoleon Bonaparte and Benjamin Franklin.
+Later, it was discovered that the Mechanical Turk was in fact a hoax that needed to be operated by skilled chess players \cite{standage2003}.
+It was not until 1996 when IBM's Deep Blue famously defeated World Chess Champion Garry Kasparov that a chess algorithm was considered better than human players.
+Nowadays, amateur and professional chess players commonly use chess engines to analyse their positions and improve their game.
+
+Motivated by the problem described in the introduction -- the tedious process of transferring a chess position from the board to the computer, this report presents an end-to-end chess recognition system that outperforms all existing approaches.
+It correctly classifies 99.72\% of the chessboard squares in the test set (as compared to the previous state of the art at 93.45\% \cite{mehta2020}), meaning that 93.86\% of the chess positions were predicted with no mistakes. 
+Furthermore, a means of adapting the chess recognition system is developed in order to fine-tune the system to new chess sets.
+Based on only two photos of a new chess set, it is able to correctly classify 88.89\% of the positions, and the remaining predictions only had on mistake each.
+On a per-square basis, that fine-tuned algorithm reaches an accuracy of 99.83\%, even surpassing the accuracy of the previous state of the art system mentioned above which was trained on a lot more than two images.
+The functionality of the developed system is demonstrated in a web app, and all code used to run experiments is available so that the results can be independently reproduced.
+
 \section{Future work}
+With lockdowns imposed due to the ongoing global COVID-19 pandemic, online chess websites and chess channels witness a surging increase in popularity \cite{dottle2020}.
+This development is significantly amplified by the release of the Netflix miniseries \textit{The Queen's Gambit} which became Netflix's ``biggest scripted limited series ever'' \cite{friedlander2020} just four weeks after its arrival in October 2020 and led to a fivefold increase in daily registrations on the online chess website Chess.com \cite{dottle2020}.
+However, it is not only online chess that is gaining traction; the auction website eBay saw a 273\% increase in searches for the term ``chess sets'' in the 10 days following the show's intial release \cite{young2020}, indicating a renewed interest in over-the-board games.
+Consequently, the outcome of this project becomes even more relevant because the target audience of potential apps employing vision-based chess inference has grown significantly.
 
+A starting point for such an app could be the web app developed for demonstrational purposes as part of this project (\url{https://www.chesscog.com}), although there is still significant work required until it would be ready to roll out to a large number of users.
+First, the infrastructure would need to be upgraded, especially for the backend \gls{api} which performs the chess position inference.
+Instead of running on a \gls{cpu}, the \gls{api} server should be equipped with a \gls{gpu} in order to take advantage of the performance gains as per \cref{fig:chesscog_speed}.
+Furthermore, to scale the system to a higher number of users, there could be multiple backend servers with a load balancer to distribute requests.
 
-% \ifSubfilesClassLoaded{%
-% \printglossary[type=\acronymtype]%
-% \printbibliography%
-% }{}%
+Perhaps a more important issue such an app must solve in order to be useful and successful is how the underlying chess recognition system adapts to the users' own chess sets.
+This could be achieved using the one-shot transfer learning approach outlined in \cref{sec:adapting}, but would be very difficult to scale because the training (which requires a few minutes on the \gls{gpu}) would need to be performed and saved for each new user.
+An alternative and interesting direction of further research could be to investiage online learning approaches where instead of serving a different chess recognition system for each user, there is one global chess recognition system that continually improves based on the data from all users.
+Each time the user uploads an image for inference, the system would produce its prediction and then allow the user to correct the position if it was incorrect.
+The uploaded photos along with the corrected labels could then be used as training data to continually improve the \gls{cnn}.
+This would alleviate the need to have different models for each user, and would produce a chess recognition system trained on many different chess sets.
+However, this may lead to other difficulties such as poor training data because the user assigns incorrect labels, or a worse performance overall because the system because the chess sets are so diverse.
+
+On a more technical note, another direction of further research is to improve the one-shot learning approach by employing new data augmentation strategies.
+One possibility could be to generate an approximation of rotating the pieces around their vertical axis by modelling them as cylinders.
+From a cropped input image containing a chess piece, we could find the projection of the input image's pixels onto the cylinder in a procedure similar to \citeauthor{sung2008}'s cylindrical models of human faces \cite{sung2008}.
+Then, we could rotate the cylinder and project the points back onto the 2D image plane which could be used as an augmented data sample.
+
+Object detection
+Visual transformer: fully end-to-end approach using an attention-based model (visual transformer)
+\cite{wu2020}
+
+Finally, 
+The applications of the chess recognition system span beyond
+move recording from videos of chess tournaments
+
+\ifSubfilesClassLoaded{%
+\printglossary[type=\acronymtype]%
+\printbibliography%
+}{}%
 
 \end{document}

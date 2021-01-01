@@ -296,9 +296,9 @@ The system proposed by \Textcite{czyzewski2020} is the next best system after \c
 However, it should be noted that since none of the currently available chess inference systems are published with the datasets used to obtain the reported performances, our analysis is limited to comparing accuracy scores, even though these were obtained on different datasets.
 
 \paragraph{Adapting to different chess sets}
-The few-shot transfer learning approach in \cref{chap:adapting} for adapting to previously unseen chess sets based on just two input images of the starting position with no manual labels is a novel contribution.
+The one-shot transfer learning approach in \cref{chap:adapting} for adapting to previously unseen chess sets based on just two input images of the starting position with no manual labels is a novel contribution.
 This is made possible by the large dataset which enabled the training of two robust \glspl{cnn} that could then be fine-tuned to a different chess set.
-Few-shot learning approaches for \glspl{cnn} have not yet been studies with regard to chess recognition, so we cannot compare our approach to existing ones.
+One-shot learning approaches for \glspl{cnn} have not yet been studies with regard to chess recognition, so we cannot compare our approach to existing ones.
 However, we achieve a per-piece accuracy of 99.83\% on a test set of the new chess set\footnote{
     Similar to \cref{ft:per_piece}, this is calculated as $1-\sfrac{0.11}{64}=99.83\%$ based on the results in \cref{tbl:transfer_learning_results}.
 }, which is nonetheless significantly higher than \textcite{mehta2020}'s performance where they did not have to adapt to a new chess set.

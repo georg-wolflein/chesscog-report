@@ -63,7 +63,7 @@
 % END: left-align quotchap
 
 \newcommand{\wordcount}{%
-    \immediate\write18{texcount -sum -merge -template={word} main.tex > wc.txt}%
+    \immediate\write18{texcount -sum -merge -template={word} report.tex > wc.txt}%
     \input{wc.txt}%
 }
 

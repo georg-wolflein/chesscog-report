@@ -5,7 +5,7 @@
 \chapter{Implementation}
 \label{chap:implementation}
 \Cref{chap:data_synthesis,chap:chess_recognition,chap:adapting} explain the design of the chess recognition system in great detail.
-This chapter will highlight and justify the main implementation decisions in a brief manner, as permitted by the scope of this report.
+This chapter highlights and justifies the main implementation decisions in a brief manner, as permitted by the scope of this report.
 For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings, and online documentation is available, too.
 
 The context survey of implementation tools in \cref{sec:implementation_tools} justifies the use of Python as the main language of implementation.
@@ -126,7 +126,7 @@ Whenever a release is published in the \texttt{chesscog} repository, it notifies
 As with a commit, this causes an automatic build and execution of the tests.
 If the developer is satisfied with the \gls{pr}, it can be merged with one click on the GitHub web interface.
 
-The \texttt{chesscog-app} repository has a \gls{cd} pipeline that on every push to the \texttt{master} branch (provided that it passes the build and tests) will build a self-contained Docker image of the app and push that to the web server, thereby updating the hosted web app.
+The \texttt{chesscog-app} repository has a \gls{cd} pipeline that on every push to the \texttt{master} branch (provided that it passes the build and tests) builds a self-contained Docker image of the app and pushes that to the web server, thereby updating the hosted web app.
 Furthermore, every release in the \texttt{recap} repository activates a \gls{cd} pipeline that publishes the new version of the package on \gls{pypi}.
 Both \gls{cd} pipelines are depicted in \cref{fig:cicd} as well.
 
@@ -152,9 +152,9 @@ The functionality of inheriting from parent configurations was useful in \cref{s
 Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
 
 Another core feature of the configuration system is a custom way of specifying paths.
-Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we will still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
+Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we shall still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
 First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
-Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} will be equivalent to \texttt{/path/to/dataset/images/train}.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} would be equivalent to \texttt{/path/to/dataset/images/train}.
 These \glspl{uri} can be used in the configuration files as well as the code itself; 
 \texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
 
@@ -188,7 +188,7 @@ The web app consists of two parts:
 \end{enumerate*}
 React apps are typically run using Node, but since all the code is client-side, we bundle the app to a set of static \gls{html} files that are served using \texttt{nginx}.
 The backend \gls{api} was developed using the \texttt{fastapi} Python library which implements the \gls{asgi}.
-It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \texttt{/api/predict}, which upon receiving a \gls{http} POST request with an input image, will run the chess recognition pipeline and return the predicted \gls{fen} position alongside some other information in \gls{json} format.
+It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \texttt{/api/predict}, which upon receiving a \gls{http} POST request with an input image, runs the chess recognition pipeline and returns the predicted \gls{fen} position alongside some other information in \gls{json} format.
 \Cref{fig:webapp_overview} provides an overview of the web app's main components and their communication.
 \begin{figure}
     \makebox[\textwidth][c]{

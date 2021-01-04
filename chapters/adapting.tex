@@ -12,13 +12,13 @@ This is because we violate the assumption that the training and testing data are
 In light of the theory introduced in \cref{sec:background_transfer_learning}, the natural response is to employ transfer learning in order to fine-tune the \glspl{cnn} to this new data distribution.
 Due to the inherent similarities in the data distribution (the fact that they are chess sets and that the source and target tasks are the same), it stands to reason that we could employ a form of \emph{one-shot} transfer learning; 
 that is, using only a small amount of data in order to adapt the \glspl{cnn} to the new distribution.
-Using the least amount of data necessary will make the system considerably more convenient for the user.
+Using the least amount of data necessary makes the system considerably more convenient for the user.
 
 A significant advantage of the chess recognition system as it is developed in \cref{chap:chess_recognition} is the fact that we employ conventional computer vision techniques such as edge and line detection in order to localise the board.
 This means that we are able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
 On the other hand, had we employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
 The fact that we can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a system where we could employ transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
-if the user wants to employ our system to infer a position on their own chess board, we will instruct them to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
+if the user wants to employ our system to infer a position on their own chess board, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
 \begin{figure}[h]
     \centering
     \newgame
@@ -77,9 +77,9 @@ The accuracy of the corner detection algorithm is 100\%, meaning that it can gen
 While the occupancy classification \gls{cnn} is able to adapt quite well to this new dataset as well (achieving an accuracy of 99.88\% on the test set), the underlying reason for the poor performance stems from the piece classifier that achieves only around 85\% accuracy.
 
 \section{Training}
-Our ability to fine-tune the models to this new dataset is mainly constrained by the limited availability of data.
-Since we only have two input images, the occupancy classifier will have 128 samples for training (each board has 64 squares).
-The piece classifier will only have 64 samples because there are 32 pieces on the board at the starting position.
+The ability to fine-tune the models to this new dataset is mainly constrained by the limited availability of data.
+Since we only have two input images, the occupancy classifier must be fine-tuned using only 128 samples (each board has 64 squares).
+Moreover, the piece classifier has only 64 training samples because there are 32 pieces on the board at the starting position.
 While the \gls{cnn} for occupancy detection is a binary classifier, the piece classifier must undertake the more challenging task of distinguishing between a dozen different piece types.
 Furthermore, the data is not balanced between the classes: for example, there are 16 training samples for black pawns, but only two for the black king, and some pieces are more difficult to detect than others (pawns usually look the same from all directions whereas knights do not).
 Given this premise, it is clear that we should employ data augmentations at training time in order to increase the variability of the data and reduce the risk of overfitting.
@@ -90,7 +90,7 @@ Furthermore, the mean number errors per position was decreased from 2.3 squares 
 Of course, these augmentations are only applied while training the networks and not at test time.
 The following sections lay out various data augmentations employed to increase the performance of the piece classifier.
 While the occupancy classifier was fine-tuned as well, augmentations were not used as aggresively in that \gls{cnn}'s training process because its accuracy was already quite high.
-These augmentations had little to no effect on the performance, so in the interest of brevity we will instead focus on the augmentations of the piece classifier.
+These augmentations had little to no effect on the performance, so in the interest of brevity we shall instead focus on the augmentations of the piece classifier.
 
 \subsubsection{Shearing}
 Of all augmentations, we observe the most significant performance gains in the shear transformation, likely due to its similarity to actual perspective distortion.
@@ -98,7 +98,7 @@ In \cref{sec:piece_classification}, we explain that the piece images are transfo
 Consequently, we must carefully design our use of the shear transform to retain this property in broad terms.
 
 A shear transform is a linear map that displaces pixels from the original image. 
-In our case, the magnitude of displacement will be proportional to the $y$-axis, but each pixel will remain on its row.
+In our case, the magnitude of displacement is proportional to the $y$-axis, and each pixel remains on its row.
 Mathematically, a shear is a function $\vs : \R^2 \to \R^2$ that maps a 2D coordinate to another.
 We define it as
 \begin{equation}

@@ -50,16 +50,16 @@ The pipeline, depicted in \cref{fig:chess_recognition_pipeline_overview}, consis
 
 The first step is locating the chessboard in the image.
 More specifically, we are interested in finding the pixel coordinates of the four chessboard corners. 
-Using these corner points, we will warp the image such that the chessboard will form a regular square grid, to eliminate perspective distortion in the sizes of the chess squares.
+Using these corner points, we warp the image such that the chessboard forms a regular square grid, to eliminate perspective distortion in the sizes of the chess squares.
 Next, we train a binary \gls{cnn} classifier to determine individual squares' occupancies.
-Each of the occupied squares will then be input to another \gls{cnn} that is responsible for determining the type of piece. 
+Each of the occupied squares are then be input to another \gls{cnn} that is responsible for determining the type of piece. 
 Finally, we use the output probabilities of the piece classifier to produce a \gls{fen} string representing the position. 
 
 
 \section{Board localisation}
 \label{sec:board_localisation}
-To determine the location of the chessboard's corners, we will rely on its regular geometric nature. 
-Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image will vary due to 3D perspective distortion.
+To determine the location of the chessboard's corners, we shall rely on its regular geometric nature. 
+Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image vary due to 3D perspective distortion.
 
 \subsection{Finding intersection points}
 \label{sec:find_intersection_points}
@@ -405,7 +405,7 @@ The \gls{ransac} algorithm consists of two main steps:
 Applied to our problem, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it infeasible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
 Instead, we randomly choose four points that we believe to form a rectangle on the chessboard.
 This means that we select two horizontal and two vertical lines at random, and choose the four intersection points of these lines as the random sample.
-We know that these four points will form a rectangle in the warped image, so we can map to a rectangle as explained in \cref{sec:homography_matrix} and illustrated in \cref{fig:homography_illustration}.
+We know that these four points form a rectangle in the warped image, so we can map to a rectangle as explained in \cref{sec:homography_matrix} and illustrated in \cref{fig:homography_illustration}.
 
 \begin{algorithm}
     \begin{algorithmic}[1]
@@ -490,11 +490,11 @@ Its output is a bijection $m : \sI \to \sW$ from a set of inlier points $\sI \su
 Notice that the warped points are represented by two-dimensional vectors whose components are whole numbers, meaning that they lie on a grid of whole numbers.
 Each square on the chessboard is represented by a square of unit length on the grid.
 The chessboard itself is represented by a $8 \times 8$ square on that grid.
-However, since the set of inliers will likely not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) we do not yet know the location of that $8 \times 8$ square.
+However, since the set of inliers likely does not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) we do not yet know the location of that $8 \times 8$ square.
 
 Once we have computed the output of \cref{alg:ransac} and obtained the mapping $m$ of points from the original image to points on the grid of the warped image, we can recompute the homography matrix $\mH$ using \cref{eq:homography_matrix_relation_corners} with \emph{all} inliers to obtain a more accurate homography that is based on more than just four points.
 To do so, we take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated with all the intersection points $\sI$ as homogenous coordinate vectors.
-The matrix of warped points $\mP'$ of the same size will be populated by the corresponding points in warped space $\sW$ according to the bijection $m$.
+The matrix of warped points $\mP'$ of the same size is populated by the corresponding points in warped space $\sW$ according to the bijection $m$.
 Using the new $\mP$ and $\mP'$ matrices, \cref{eq:homography_matrix_relation_corners} becomes an overdetermined linear system, so we compute $\mH$ as the least squared error solution instead of the exact solution.
 Finally, we can use the homography matrix to project the pixels of the original image to obtain a warped image as in \cref{fig:homography_warped}. 
 \begin{figure}
@@ -551,7 +551,7 @@ Finally, we can use the homography matrix to project the pixels of the original 
 
 \subsubsection{Optimisations}
 \Cref{alg:ransac} aims to outline the method of determining the inlier points in a manner that is easy to follow.
-In practise, the employed algorithm will be different in order to achieve improved performance.
+In practise, the employed algorithm is different in order to achieve improved performance.
 Implementing these differences in \cref{alg:ransac} would have made it too convoluted to follow, so they shall instead briefly be summarised below:
 \begin{itemize}
     \item The for loop on line \ref{alg:ransac:for_loop_over_all_points} can be vectorised and replaced by matrix operations.
@@ -600,7 +600,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
     \begin{case}{$x_\text{max}-x_\text{min}>8$}
         This case arises when the vertical line $x=x_\text{min}$ is to the left of the left edge of the chessboard and/or the vertical line $x=x_\text{max}$ is right of the right edge of the chessboard.
         In other words, the range of $x$-values covers more than just the chessboard.
-        To remedy this, we will iteratively update $\sW_x$ by applying
+        To remedy this, we iteratively update $\sW_x$ by applying
         \begin{equation*}
             \sW_x \gets \sW_x \setminus \{x_\text{min},x_\text{max}\}
         \end{equation*}
@@ -627,11 +627,11 @@ We thus distinguish between three cases based on the $x$-values which we shall o
     \begin{case}{$x_\text{max}-x_\text{min}<8$}\label{case:infer_borders_greater}%
         This most common scenario arises when the grid that should represent the chessboard in the warped image is smaller than eight units in width.
         \Cref{fig:homography_warped} illustrates this case and makes clear that it arises because either one or both of the outermost vertical lines were not detected on the chessboard. 
-        Determining whether the grid should be expanded towards the left or the right involves futher processing of the image which will be outlined below.
+        Determining whether the grid should be expanded towards the left or the right involves futher processing of the image which shall be outlined below.
         
-        We will calculate the horizontal intensity gradients in the warped image for each pixel in order to determine whether an additional vertical line is more likely to occur one unit to the left or one unit to the right of the currently identified grid.
+        We calculate the horizontal intensity gradients in the warped image for each pixel in order to determine whether an additional vertical line is more likely to occur one unit to the left or one unit to the right of the currently identified grid.
         To do so, we first convert the \gls{rgb} image to grayscale and then apply the horizontal Sobel filter which is a discrete differentiation operator that provides an approximation for the gradient intensity in the horizontal direction.
-        Large horizontal gradient intensities will give rise to vertical lines in the warped image which can be used in order to determine whether the chessboard should be expanded to the left or right.
+        Large horizontal gradient intensities give rise to vertical lines in the warped image which can be used in order to determine whether the chessboard should be expanded to the left or right.
 
         The Sobel filter is widely used in image processing and consists of two kernels that are convolved over the input image, a horizontal and a vertical one.
         Typically, the results of both convolution operations is calculated, and then some elementary trigonometry can be applied in order to determine the gradient directions for each pixel.
@@ -746,13 +746,13 @@ We thus distinguish between three cases based on the $x$-values which we shall o
                 \end{tikzpicture}
                 \caption{result of Canny edge detection on the horizontal gradient image}
             \end{subfigure}
-            \caption[Horizontal gradient intensities calculated on the warped image in order to detect vertical lines.]{Horizontal gradient intensities calculated on the warped image in order to detect vertical lines. The red dots overlaid on each image correspond to the intersection points in $\sI$. Here, $x_\text{max}-x_\text{min}=7$ because there are eight columns of points instead of nine. This is because the rightmost vertical line was not detected. Note that the algorithm also failed to detect the topmost horizontal line, but the horizontal lines will be handled later (using vertical gradients).}
+            \caption[Horizontal gradient intensities calculated on the warped image in order to detect vertical lines.]{Horizontal gradient intensities calculated on the warped image in order to detect vertical lines. The red dots overlaid on each image correspond to the intersection points in $\sI$. Here, $x_\text{max}-x_\text{min}=7$ because there are eight columns of points instead of nine. This is because the rightmost vertical line was not detected. Note that the algorithm also failed to detect the topmost horizontal line, but the horizontal lines are handled later (using vertical gradients).}
             \label{fig:warped_image_gradients}
         \end{figure}
         \Cref{fig:warped_image_gradients} shows the results of these operations on the running example.
 
         On that image we shall sum the pixel intensities on the vertical lines at $x=x_\text{min}-1$ and $x=x_\text{max}+1$ (with a small tolerance to the left and to the right).
-        Then, if the sum of pixel intensities was greater at $x=x_\text{min}-1$ than $x=x_\text{max}+1$, we will update $x_\text{min} \gets x_\text{min}-1$, or otherwise $x_\text{max} \gets x_\text{max}+1$.
+        Then, if the sum of pixel intensities was greater at $x=x_\text{min}-1$ than $x=x_\text{max}+1$, we update $x_\text{min} \gets x_\text{min}-1$, or otherwise $x_\text{max} \gets x_\text{max}+1$.
         We repeat this process until $x_\text{max}-x_\text{min}=8$.
     \end{case}
 \end{caselist}
@@ -1172,7 +1172,7 @@ We select the ResNet model for use in the chess recognition pipeline because it 
 \section{Piece classification}
 \label{sec:piece_classification}
 Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece in each of the occupied squares.
-We require a 12-way classifier that takes as input a cropped image of an occupied square and will output the chess piece on that square. 
+We require a 12-way classifier that takes as input a cropped image of an occupied square and outputs the chess piece on that square. 
 There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are a dozen classes.
 
 We must pay some special attention to how the pieces are cropped. 
@@ -1191,19 +1191,19 @@ This is due to the vanishing point of the normal vectors on the chessboard surfa
 \begin{figure}
     \centering
     \includegraphics[width=.7\textwidth]{3828_normals.png}
-    \caption[The normals of the chessboard surface converge to a single vanishing point which is below the image.]{The normals of the chessboard surface (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. We will assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
+    \caption[The normals of the chessboard surface converge to a single vanishing point which is below the image.]{The normals of the chessboard surface (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. We assume that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
     \label{fig:occupancy_classification_normals}
 \end{figure}
 Hence, we must extend the \gls{roi} horizontally in the appropriate direction.
 
 To obtain the \glspl{roi}, we first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
-At first, each piece's bounding box will correspond to the square it is located on, i.e.\ its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
+At first, each piece's bounding box corresponds to the square it is located on, i.e.\ its width and height are that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
 Depending on the rank $r$, the height is increased by
 \begin{equation*}
     h_\text{inc}(r) = \frac{2r + 5}{7}
 \end{equation*}
 where the unit of measurement corresponds to the warped coordinate system described in \cref{sec:homography_matrix} (each chess square is one square unit).
-This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e.\ $r=1$) will be increased by one square, and pieces in the top row ($r=8$) will have their height increased by three units.
+This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e.\ $r=1$) is increased by one square, and pieces in the top row ($r=8$) have their height increased by three units.
 
 The increase in width is dependent on the file $f$ and given by the piecewise-defined arithmetic progression
 \begin{equation*}
@@ -1213,10 +1213,10 @@ The increase in width is dependent on the file $f$ and given by the piecewise-de
     \end{cases}
 \end{equation*}
 A negative increase in width means that the bounding box is extended to the left, whereas a positive increase means it is widened to the right.
-Thus, pieces on the left half of the board ($1 \leq f \leq 4$) will have their bounding boxes extended to the left, and vice-versa on the right (for $4 < f \leq 8$).
+Thus, pieces on the left half of the board ($1 \leq f \leq 4$) have their bounding boxes extended to the left, and vice-versa on the right (for $4 < f \leq 8$).
 
 Experiments demonstrate that this heuristic generates bounding boxes that are large enough to contain even the tallest pieces in most cases, whilst not being needlessly large.
-As a further preprocessing step, the cropped \glspl{roi} for all pieces on the left side of the board ($1 \leq f \leq 4$) are flipped vertically, such that the square that the piece stands on will always be in the bottom left of the image.
+As a further preprocessing step, the cropped \glspl{roi} for all pieces on the left side of the board ($1 \leq f \leq 4$) are flipped vertically, such that the square that the piece stands on is always in the bottom left of the image.
 This may help the classifier understand what piece is being referred to in samples where the larger bounding box includes adjacent pieces in the image.
 \Cref{fig:white_queens} shows a random selection of the \glspl{roi} corresponding to white queens in order to demonstrate that the bounding boxes are large enough to contain even tall pieces.
 \begin{figure}
@@ -1233,7 +1233,7 @@ This may help the classifier understand what piece is being referred to in sampl
 
 \subsection{\glsentryshort{cnn} models}
 Similar to \cref{sec:occupancy_classification}, we train several \glspl{cnn} for the piece classification task.
-However, since the problem is not binary anymore, the final layer of our \glspl{cnn} will have 12 instead of two output units.
+However, since the problem is not binary anymore, the final layer of our \glspl{cnn} must have 12 instead of two output units.
 For the pre-trained models, we follow the same two-stage training regime, but double the number of epochs at each stage, so that the classification head is trained for two epochs followed by the whole network for four epochs.
 Furthermore, we introduce one more architecture, InceptionV3 \cite{szegedy2016}, that is a bit more complicated to train due to its use of batch normalisation and multiple losses.
 The exact details are, however, beyond the scope of this report.
@@ -1293,7 +1293,7 @@ The results in \cref{tbl:piece_classifier_performance} indicate a more significa
     \label{tbl:piece_classifier_performance}
 \end{table}
 The InceptionV3 model achieves the best performance with a validation accuracy of 100\%, i.e.\ there were no misclassifications in the validation set.
-Therefore, we will use that model for the chess recognition pipeline.
+Therefore, we adopt that model in the chess recognition pipeline.
 \Cref{fig:pieces_inception_loss_accuracy} shows the development of loss and accuracy during training. 
 \begin{figure}
     \makebox[\textwidth][c]{
@@ -1355,7 +1355,7 @@ After that, each of the occupied samples is supplied to the piece classifier in 
 In each instance, we simply use the class with the highest probability.
 Finally, we create an internal representation of the chessboard based on the results of the two classifiers in order to produce a \gls{fen} description of the position on the board.
 
-\Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set will be evaluated in \cref{chap:evaluation}).
+\Cref{tbl:chess_recognition_trainval_results} summarises key performance metrics of the end-to-end chess recognition pipeline evaluated on both the training and validation sets (the test set is evaluated in \cref{chap:evaluation}).
 \begin{table}
     \makebox[\textwidth][c]{
         \begin{tabular}{lrr}

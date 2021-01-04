@@ -65,7 +65,7 @@ Each square on the physical chessboard has the same width and height, even thoug
 \label{sec:find_intersection_points}
 A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid.
 Thus, there are nine horizontal and nine vertical lines.
-In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
+In the first step of the algorithm, we would like to detect the majority of these lines and find their intersection points.
 Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
 
 \subsubsection{Edge detection}
@@ -218,7 +218,7 @@ Consequently, the lines identified by the Hough transform are supported by at le
 
 \subsubsection{Filtering and clustering the lines}
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
-We first split them into horizontal and vertical lines and then eliminate similar lines.
+Therefore, we split them into horizontal and vertical lines and then eliminate similar lines.
 Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
 This is because the camera is often tilted quite severely in the synthetic dataset as a result of the procedure outlined in \cref{sec:data_chess_positions} (and might be the case in real chessboard photos taken by humans, too).
 Instead, we employ agglomerative clustering which is a bottom-up hierarchical clustering algorithm.
@@ -379,7 +379,7 @@ Then, we can use \cref{eq:homography_matrix_relation} to project all other inter
 
 \subsubsection{Finding the optimal homography}
 \label{sec:find_optimal_homography}
-Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), our algorithm must be robust when facing lines identified in the image that do not correspond to squares on the chessboard.
+Although \cref{fig:board_localisation_line_detection_intersections} has no intersection points that are outliers (because all of the identified lines do, in fact, correspond to squares on the chessboard), the algorithm must be robust when facing lines identified in the image that do not correspond to squares on the chessboard.
 \Cref{fig:incorrect_intersection_points} depicts one such example; however, in non-synthetic chessboard images, especially with other objects in the image that exhibit straight lines, there is often an even greater number of outliers. 
 \begin{figure}
     \centering
@@ -390,7 +390,7 @@ Although \cref{fig:board_localisation_line_detection_intersections} has no inter
 
 \Gls{ransac} \cite{fischler1981} is a non-deterministic iterative model fitting algorithm that can robustly estimate a model's parameters in such a manner that is not significantly influenced by outliers.
 It can be applied to a variety of situations where a model must be fit to a dataset containing outliers.
-In our case, the dataset consists of the intersection points (some of which are outliers due to detecting irrelevant lines) and the model is a homography that corresponds to the inlier intersection points.
+For the purposes of this algorithm, the dataset consists of the intersection points (some of which are outliers due to detecting irrelevant lines) and the model is a homography that corresponds to the inlier intersection points.
 The \gls{ransac} algorithm consists of two main steps:
 \begin{enumerate}
     \item \label{enum:ransac_1}
@@ -402,7 +402,7 @@ The \gls{ransac} algorithm consists of two main steps:
         Repeat from step 1 until reaching a specified number of iterations.
 \end{enumerate}
 
-Applied to our problem, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it infeasible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
+Applied to the problem at hand, choosing any four intersection points in step \ref{enum:ransac_1} would be quite unwise because we would not know which points they represent on the chessboard, making it infeasible to map them to the warped image such that the chess squares are snapped to the grid of whole numbers.
 Instead, we randomly choose four points that we believe to form a rectangle on the chessboard.
 This means that we select two horizontal and two vertical lines at random, and choose the four intersection points of these lines as the random sample.
 We know that these four points form a rectangle in the warped image, so we can map to a rectangle as explained in \cref{sec:homography_matrix} and illustrated in \cref{fig:homography_illustration}.
@@ -470,7 +470,7 @@ We know that these four points form a rectangle in the warped image, so we can m
 \end{algorithm}
 The \gls{ransac}-based method of finding the inlier intersection points is described in \Cref{alg:ransac}. 
 To simplify notation in the algorithm, we use the function $h : \R^2 \to \R^3$ to convert Euclidean coordinates to homogenous coordinates and $h^{-1} : \R^3 \to \R^2$ to denote the reverse operation.
-Based on our characterisation of homogenous coordinates from \cref{sec:homography_matrix}, these functions can be defined as
+Based on the characterisation of homogenous coordinates from \cref{sec:homography_matrix}, these functions can be defined as
 \begin{equation*}
     h(x,y) = \begin{bmatrix}
         x\\y\\1

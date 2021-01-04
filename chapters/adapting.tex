@@ -18,7 +18,7 @@ A significant advantage of the chess recognition system as it is developed in \c
 This means that we are able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
 On the other hand, had we employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
 The fact that we can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a system where we could employ transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
-if the user wants to employ our system to infer a position on their own chess board, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
+if the user wants to employ the system to infer a position on their own chess board, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
 \begin{figure}[h]
     \centering
     \newgame
@@ -30,7 +30,7 @@ The angle of the camera to the chessboard should be in the same interval as used
 This chapter will demonstrate how to effectively fine-tune the occupancy and piece classification \glspl{cnn} based on only two input images.
 
 \section{Dataset}
-First, we require a dataset in order to evaluate the effectiveness of our approach.
+First, we require a dataset in order to evaluate the effectiveness of the approach.
 The training set, consisting of the two images obtained in the aforementioned manner is depicted in \cref{fig:transfer_learning_train_data}.
 \begin{figure}
     \centering
@@ -95,10 +95,10 @@ These augmentations had little to no effect on the performance, so in the intere
 \subsubsection{Shearing}
 Of all augmentations, we observe the most significant performance gains in the shear transformation, likely due to its similarity to actual perspective distortion.
 In \cref{sec:piece_classification}, we explain that the piece images are transformed (by performing a horizontal flip where appropriate) in a manner such that the bottom left part of the sample always depicts the square on which the piece stands, as can be seen in \cref{fig:white_queens}.
-Consequently, we must carefully design our use of the shear transform to retain this property in broad terms.
+Consequently, we must carefully design the use of the shear transform to retain this property in broad terms.
 
 A shear transform is a linear map that displaces pixels from the original image. 
-In our case, the magnitude of displacement is proportional to the $y$-axis, and each pixel remains on its row.
+For the purposes of this project, the magnitude of displacement is proportional to the $y$-axis, and each pixel remains on its row.
 Mathematically, a shear is a function $\vs : \R^2 \to \R^2$ that maps a 2D coordinate to another.
 We define it as
 \begin{equation}

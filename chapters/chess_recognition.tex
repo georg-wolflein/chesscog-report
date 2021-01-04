@@ -63,7 +63,8 @@ Each square on the physical chessboard has the same width and height, even thoug
 
 \subsection{Finding intersection points}
 \label{sec:find_intersection_points}
-A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid, thus there are nine horizontal and nine vertical lines.
+A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid.
+Thus, there are nine horizontal and nine vertical lines.
 In the first step of our algorithm, we would like to detect the majority of these lines and find their intersection points.
 Before conducting any futher computation, we resize the image to a width of 1,200 pixels, keeping the aspect ratio.
 
@@ -113,7 +114,7 @@ Before conducting any futher computation, we resize the image to a width of 1,20
     \label{fig:board_localisation_line_detection}
 \end{figure}
 To detect edges in the input image, we convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
-Canny edge detection is a multi-stage algorithm that first reduces noise in the image by applying a Gaussian blur, then calculates pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
+Canny edge detection is a multi-stage algorithm that first reduces noise in the image (by applying a Gaussian blur), then computes pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
 
 \subsubsection{Line detection}
 \begin{figure}
@@ -149,11 +150,11 @@ Canny edge detection is a multi-stage algorithm that first reduces noise in the 
             \markRightAngle[size=8pt](B,A,O);
         \end{axis}
     \end{tikzpicture}
-    \caption[A line in Hesse normal form.]{A line in Hesse normal form is parameterised by the angle $\theta$ to the $x$-axis and distance $\rho$ from the origin. The line is defined by the equation $\rho = x \cos \theta + y \sin \theta$. Equivalently, in slope-intercept form, we have $y = -x \cot \theta + \frac{\rho}{\sin \theta}$ provided that $\cos \theta \neq 0$, i.e. $\theta$ is not a multiple of $\pi$. Notice that the $y$-axis is pointing down because the origin of the coordinate system is the top left of the image.}
+    \caption[A line in Hesse normal form.]{A line in Hesse normal form is parameterised by the angle $\theta$ to the $x$-axis and distance $\rho$ from the origin. The line is defined by the equation $\rho = x \cos \theta + y \sin \theta$. Equivalently, in slope-intercept form, we have $y = -x \cot \theta + \frac{\rho}{\sin \theta}$ provided that $\cos \theta \neq 0$, i.e.\ $\theta$ is not a multiple of $\pi$. Notice that the $y$-axis is pointing down because the origin of the coordinate system is the top left of the image.}
     \label{fig:hesse_normal_form}
 \end{figure}
-Next, we perform the so-called Hough transform \cite{hough1962,duda1972} in order to detect lines that are formed by the edges.
-To this end, we will represent lines in Hesse normal form, meaning that they are parameterised by the angle $\theta$ that their normal vector forms with the $x$-axis, and the distance $\rho$ to the origin.
+Next, we perform the Hough transform \cite{hough1962,duda1972} in order to detect lines that are formed by the edges.
+To this end, we represent lines in Hesse normal form, meaning that they are parameterised by the angle $\theta$ that their normal vector forms with the $x$-axis, and the distance $\rho$ to the origin.
 \Cref{fig:hesse_normal_form} explains this geometrically and gives rise to the equation of a line in Hesse normal form,
 \begin{equation}
     \label{eq:hesse_normal_form}
@@ -208,21 +209,21 @@ Here, each pair of $(\rho, \theta)$ values represents one particular line, and w
     \caption[An example of how lines in image space are represented in $(\rho,\theta)$ space.]{An example of how lines in image space are represented in $(\rho,\theta)$ space. The family of lines passing through a particular point in image space \subref{fig:hough_points_image_space} is represented by a sinusoid in $(\rho,\theta)$ space \subref{fig:hough_points_parameter_space}. The intersection point of the three curves represents the line passing through all three points.}
     \label{fig:hough_points}
 \end{figure}
-Plotting the pairs of $(\rho, \theta)$ values for a particular point in image space will give a sinusoidal curve that represents all lines passing through that point.
+Plotting the pairs of $(\rho, \theta)$ values for a particular point in image space gives a sinusoidal curve that represents all lines passing through that point.
 We can take multiple points in image space and plot their sinusoids. 
-Then, each intersection in $(\rho, \theta)$ space will represent a line passing through the corresponding points, as illustrated in \cref{fig:hough_points}.
+Then, each intersection in $(\rho, \theta)$ space represents a line passing through the corresponding points, as illustrated in \cref{fig:hough_points}.
 
 For a given threshold $t$, the Hough transform essentially plots the sinusoids for all edge points in the input image (which we obtained using the Canny edge detection algorithm) and outputs intersection points in $(\rho,\theta)$ space that are on at least $t$ different sinusoids.
 Consequently, the lines identified by the Hough transform are supported by at least $t$ edge points in the image.
 
-\subsubsection{Clustering}
+\subsubsection{Filtering and clustering the lines}
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
-We will first split them into horizontal and vertical lines and then eliminate similar lines.
+We first split them into horizontal and vertical lines and then eliminate similar lines.
 Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
 This is because the camera is often tilted quite severely in the synthetic dataset as a result of the procedure outlined in \cref{sec:data_chess_positions} (and might be the case in real chessboard photos taken by humans, too).
 Instead, we employ agglomerative clustering which is a bottom-up hierarchical clustering algorithm.
 In this algorithm, each line starts off in its own cluster, and as the algorithm progresses, pairs of clusters are merged in a manner that aims to minimise the variance within the clusters.
-We cluster the lines based only on their direction, i.e. their angle $\theta$, and use the smallest angle between two given lines as the distance metric.
+We cluster the lines based only on their direction, i.e.\ their angle $\theta$, and use the smallest angle between two given lines as the distance metric.
 Finally, we use the mean angle of both top-level clusters to determine which cluster represents the vertical lines and which the horizontal lines.
 The clustered lines are depicted in \cref{fig:board_localisation_line_detection_horizontal_vertical}.
 
@@ -643,7 +644,7 @@ We thus distinguish between three cases based on the $x$-values which we shall o
                 +1 & 0 & -1
             \end{bmatrix}
         \end{equation}
-        Given an intensity image (i.e. a grayscale image) of dimensions $h \times w$ that is represented by the matrix $\mA \in \R^{h\times w}$, 
+        Given an intensity image (i.e.\ a grayscale image) of dimensions $h \times w$ that is represented by the matrix $\mA \in \R^{h\times w}$, 
         we compute the horizontal gradient intensity at each pixel by
         \begin{equation}
             \label{eq:sobel_operation_horizontal}
@@ -882,7 +883,7 @@ As such, we conclude that the corner detection algorithm is very robust to unsee
 
 \section{Occupancy classification}
 \label{sec:occupancy_classification}
-Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e. empty squares being classified as containing a chess piece.
+Empirical experiments showed that performing piece classification directly after detecting the four corner points with no intermediate step yields a large number of false positives, i.e.\ empty squares being classified as containing a chess piece.
 \begin{figure}
     \centering
     \begin{subfigure}[b]{0.65\textwidth}
@@ -1103,7 +1104,7 @@ Key performance metrics for each model are summarised in \cref{tbl:occupancy_cla
                 string type
             },
             columns/parameters/.style={
-                column name={\makecell{trainable\\parameters}}
+                column name={\makecell{\# trainable\\parameters}}
             },
             columns/context/.style={
                 string type,
@@ -1196,13 +1197,13 @@ This is due to the vanishing point of the normal vectors on the chessboard surfa
 Hence, we must extend the \gls{roi} horizontally in the appropriate direction.
 
 To obtain the \glspl{roi}, we first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
-At first, each piece's bounding box will correspond to the square it is located on, i.e. its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
+At first, each piece's bounding box will correspond to the square it is located on, i.e.\ its width and height will be that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
 Depending on the rank $r$, the height is increased by
 \begin{equation*}
     h_\text{inc}(r) = \frac{2r + 5}{7}
 \end{equation*}
 where the unit of measurement corresponds to the warped coordinate system described in \cref{sec:homography_matrix} (each chess square is one square unit).
-This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e. $r=1$) will be increased by one square, and pieces in the top row ($r=8$) will have their height increased by three units.
+This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e.\ $r=1$) will be increased by one square, and pieces in the top row ($r=8$) will have their height increased by three units.
 
 The increase in width is dependent on the file $f$ and given by the piecewise-defined arithmetic progression
 \begin{equation*}
@@ -1257,7 +1258,7 @@ The results in \cref{tbl:piece_classifier_performance} indicate a more significa
                 string type
             },
             columns/parameters/.style={
-                column name={\makecell{trainable\\parameters}}
+                column name={\makecell{\# trainable\\parameters}}
             },
             columns/val_accuracy/.style={
                 dec sep align,
@@ -1291,7 +1292,7 @@ The results in \cref{tbl:piece_classifier_performance} indicate a more significa
     }
     \label{tbl:piece_classifier_performance}
 \end{table}
-The InceptionV3 model achieves the best performance with a validation accuracy of 100\%, i.e. there were no misclassifications in the validation set.
+The InceptionV3 model achieves the best performance with a validation accuracy of 100\%, i.e.\ there were no misclassifications in the validation set.
 Therefore, we will use that model for the chess recognition pipeline.
 \Cref{fig:pieces_inception_loss_accuracy} shows the development of loss and accuracy during training. 
 \begin{figure}

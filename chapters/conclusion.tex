@@ -49,7 +49,7 @@ For example, it could be investigated whether an object detection model could ou
 The problem of object detection (predicting bounding boxes around objects) using \glspl{cnn} has already been extensively studied and even made very accessible via reference implementations in Facebook's \emph{Detectron2} software system for PyTorch \cite{wu2019detectron2}  and the \emph{Object Detection \acs{api}} for TensorFlow \cite{tfodapi2020}, but not yet applied to the problem of chess recognition.
 As detailed in \cref{sec:automated_labelling}, we provide bounding box information for the chess pieces in our dataset, so our dataset could be used to train such models.
 
-A new cutting-edge approach could be to use a single neural network in a fully end-to-end fashion for predicting the chess position based solely on the input image (i.e. without an explicit algorithm for localising the chessboard).
+A new cutting-edge approach could be to use a single neural network in a fully end-to-end fashion for predicting the chess position based solely on the input image (i.e.\ without an explicit algorithm for localising the chessboard).
 Recent advances in applying the \emph{Transformer} architecture \cite{vaswani2017} to computer vision \cite{wu2020,anonymous2020} pave the way for a possible approach where the neural network could use a self-attention mechanism to `attend' to different parts of the input image for predicting the output.
 More specifically, the neural network would learn to locate each of the 64 squares in the input image in order to perform the inference.
 

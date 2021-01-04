@@ -23,7 +23,7 @@ As such, it can be defined a mathematical function of the form $f:\mathbb{R}^n\r
 \end{equation}
 that models the relationship between an $n$-dimensional feature vector $\vx \in \mathbb{R}^n$ of independent (\emph{input}) variables and the dependent (\emph{output}) variable $y \in \mathbb{R}$. 
 Given a particular $\vx$, the model will produce a \emph{prediction} for $y$ which we shall denote $\hat{y}$.
-Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e. the difference between the predicted and observed output.
+Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e.\ the difference between the predicted and observed output.
 
 A labelled dataset for a regression task consists of $m$ tuples of the form
 $\langle \vx_i, y_i\rangle$
@@ -50,7 +50,7 @@ for representing the corresponding feature vectors.
 Classification is a task that finds greater applicability within this project.
 As the name implies, a classification model tries to determine to which category each input sample belongs from a predefined set of classes $\sC$.
 To ease notation, we shall let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
-In practical terms, the elements in $\sC$ could represent any type of mathematical or non-mathematical object, and in that case we only require a one-to-one mapping (bijection) from those objects to $\sC$.
+In practical terms, the elements in $\sC$ could represent any type of object, and in that case we only require a one-to-one mapping (bijection) from those objects to $\sC$.
 Furthermore, in the context of this report, each input sample can only belong to one class, and we will interpret the output of the model to represent the probabilities of the input sample belonging to each of the classes $\sC$.
 Therefore, a classification model is represented by a vector-valued function
 $\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
@@ -236,7 +236,7 @@ which are depicted in \cref{fig:activation_functions}.
 Unlike $g_\text{step}$, the range of these these activation functions is the real numbers, and the functions themselves are differentiable which is an advantage for being able to use gradient descent to optimise the weights \cite[729]{russell2010}.
 
 Rectified units do not suffer from the so-called \emph{vanishing gradient effect} \cite{glorot2011}.
-This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e. when the input is significantly far from zero such that the gradient is almost horizontal (see \cref{fig:activation_functions_sigmoid}), and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
+This phenomenon occurs with sigmoid activation functions when they reach high saturation, i.e.\ when the input is significantly far from zero such that the gradient is almost horizontal (see \cref{fig:activation_functions_sigmoid}), and is especially prevelant in deep neural networks\footnote{Deep neural networks are \glspl{ann} with many layers.}.
 As a result, the \gls{relu} activation function (or variants thereof) is the most popular choice nowadays.
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
@@ -289,28 +289,30 @@ From \cref{eq:ann_activation}, we can compute the values of the three output uni
     \yhat_j = g\left(\sum_{i=1}^n{w_{i,j} x_i} + b_j\right)
 \end{equation}
 for $j=1,2,3$.
-Mathematically, a \gls{slp} is represented by a function $\vf:\R^{n_0}\to \R^{n_1}$ that maps an input vector $\vx \in \R^{n_0}$ to an output vector $\vyhat \in \R^{n_1}$.
+Mathematically, a \gls{slp} is represented by a function $\vf:\R^{n_0}\to \R^{n_1}$ that maps an input vector $\vx \in \R^{n_0}$ to an output vector $\vyhat \in \R^{n_1}$ (staying consistent with the notation earlier in this chapter, both are row vectors).
 Let us use the $n_0 \times n_1$ matrix $\mW$ to contain all weights such that
-\begin{equation*}
+\begin{equation}
+    \label{eq:slp_weights}
     \mW = \begin{bmatrix}
         w_{1,1} & w_{1,2} & \cdots & w_{1,n_1} \\ 
         w_{2,1} & w_{2,2} & \cdots & w_{2,n_1} \\ 
         \vdots & \vdots & \ddots & \vdots \\ 
         w_{n_0,1} & w_{n_0,2} & \cdots & w_{n_0,n_1} \\ 
     \end{bmatrix}.
-\end{equation*}
+\end{equation}
 and the vector
-\begin{equation*}
+\begin{equation}
+    \label{eq:slp_biases}
     \vb = \begin{bmatrix}
-        b_1,b_2,\dots,b_{n_1}
+        b_1 & b_2 & \dots & b_{n_1}
     \end{bmatrix}
-\end{equation*}
+\end{equation}
 to represent the biases.
 Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} can be expressed using the dot product. We finally define the function of a \gls{slp} as
 \begin{equation}
     \label{eq:slp}
     \vf_{\mW,\vb}(\vx) = \vyhat = \vg\left(
-        \vw^\top \vx + \vb
+        \vx \mW + \vb
     \right)
 \end{equation}
 where $\vg(\cdot)$ applies the activation function $g$ pointwise.
@@ -327,7 +329,7 @@ A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \gl
 Each \gls{slp} inside the \gls{mlp} constitutes a logical module which we call a \emph{layer}.
 Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, we will use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
 Further, the notation $b_j^{(l)}$ refers to the $j$\textsuperscript{th} unit's bias in layer $l$, and $w_{i,j}^{(l)}$ is the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$.
-This notation follows \textcite{goodfellow2016} and is customary in describing neural networks
+This notation follows \textcite{goodfellow2016} and is customary in describing neural networks.
 We shall use $n_0,n_1,\dots,n_L$ to denote the number of units in each layer.
 Layer zero is considered the \emph{input layer}, meaning that $n_0$ must be equal to the dimensionality of $\vx$. 
 The layers $1, 2, \dots, L-1$ are the \emph{hidden layers} because they are not directly connected to the input or output units.
@@ -404,7 +406,7 @@ It can clearly be seen that since \glspl{mlp} are simply nested \glspl{slp}, the
 In fact, such networks are usually \emph{fully-connected feedforward networks} because all units from a particular layer connect to all units from the previous layer.
 
 \subsection{Backpropagation}
-\emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e. how far they are `off'. 
+\emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e.\ how far they are `off'. 
 This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that we introduced at the very beginning of this chapter in the context of supervised learning.
 
 Backpropagation with gradient descent is an iterative algorithm for training neural networks that, provided a suitable learning rate $\alpha$, is guaranteed to converge to a \emph{local minimum}.
@@ -412,7 +414,7 @@ The main idea is as follows:
 \begin{enumerate}
     \item Calculate the derivative of the loss function with respect to the current trainable parameters $\vp$ (weights and biases) as
         $\vec{\Delta p} = \frac{\partial L}{\partial \vp}\left(\vp\right)$.
-    \item Take a step in the negative direction of this gradient, i.e. update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ for some learning rate $\alpha \in \R$.
+    \item Take a step in the negative direction of this gradient, i.e.\ update the trainable parameters $\vp \leftarrow \vp - \alpha \vec{\Delta p}$ for some learning rate $\alpha \in \R$.
     \item Repeat steps 1 and 2 until a predefined convergence criterion is met.
 \end{enumerate}
 \Cref{fig:gradient_descent_local_minimum} shows the steps that this algorithm would make on a simple error-weight surface with only one parameter.
@@ -472,26 +474,28 @@ We can formulate a loss function
 that behaves similarly to \cref{eq:mean_squared_error} in that reducing the loss function will also reduce the \gls{mse}, but it will be easier to work with.
 
 \subsubsection{\Glsentrylong{slp}}
-In a \gls{slp}, we can easily express the loss in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
+Let us consider a \gls{slp} with one output unit for simplicity. 
+We can easily express the loss in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
 \begin{equation}
-    L = \frac{1}{2} \sum_{i=1}^m{\left(g\left(
-        \vw \vx_i + b
-    \right) - y_i\right)^2}.
+    L = \frac{1}{2} \sum_{i=1}^m{\left[g\left(
+        \vx_i \vw + b
+    \right) - y_i\right]^2}.
 \end{equation}
+Here, the weight matrix $\mW$ from \cref{eq:slp_weights} has just one column (because there is just one output unit), so we denote it using the column vector $\vw$, and similarly the bias vector from \cref{eq:slp_biases} is just a scalar $b$.
+
 Calculating the derivative of the loss function with respect to each of the trainable parameters is a core part of the gradient descent algorithm.
-% Let us take a look at calculating this gradient.
 The trainable parameters in our network are $\vw$ and $b$, so we will differentiate $L$ with respect to each of these.
 We obtain the partial derivative of the loss with respect to the bias as
 \begin{align}
     \label{eq:backprop_dL_db}
     \frac{\partial L}{\partial b}
     &= \sum_{i=1}^m{
-        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        \frac{\partial}{\partial b} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \left[g \left(\vx_i\vw+b\right) - y_i \right]
+        \frac{\partial}{\partial b} \left[g \left(\vx_i\vw+b\right) - y_i \right]
     } \nonumber \\
     &= \sum_{i=1}^m{
-        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        g' \left(\vw^\top\vx_i+b\right)
+        \left[g \left(\vx_i\vw+b\right) - y_i \right]
+        g' \left(\vx_i\vw+b\right)
     },
 \end{align}
 and similarly we can differentiate with respect to the weights
@@ -499,12 +503,12 @@ and similarly we can differentiate with respect to the weights
     \label{eq:backprop_dL_dw}
     \frac{\partial L}{\partial \vw}
     &= \sum_{i=1}^m{
-        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        \frac{\partial}{\partial \vw} \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
+        \left[g \left(\vx_i\vw+b\right) - y_i \right]
+        \frac{\partial}{\partial \vw} \left[g \left(\vx_i\vw+b\right) - y_i \right]
     } \nonumber \\
     &= \sum_{i=1}^m{
-        \left(g \left(\vw^\top\vx_i+b\right) - y_i \right)
-        g' \left(\vw^\top\vx_i+b\right)
+        \left[g \left(\vx_i\vw+b\right) - y_i \right]
+        g' \left(\vx_i\vw+b\right)
         \vx_i
     }.
 \end{align}
@@ -522,7 +526,7 @@ Mathematically, this is expressed as
 
 \subsubsection{\Glsentrylong{mlp}}
 \label{sec:mlp_training}
-To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e. each layer's weights and biases).
+To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e.\ each layer's weights and biases).
 We must compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$; the exact derivation is left as an exercise to the reader.
 The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
 

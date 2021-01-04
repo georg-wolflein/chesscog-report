@@ -3,7 +3,7 @@
 \begin{document}
 
 \chapquote{The beauty of a move lies not in its appearance but in the thought behind it.}{Aron Nimzowitsch}
-\chapter{Adapting to new chess sets}
+\chapter{Adapting to unseen chess sets}
 \label{chap:adapting}
 
 Chess sets may vary significantly in appearance. 
@@ -26,7 +26,7 @@ if the user wants to employ our system to infer a position on their own chess bo
     \caption[The starting position on the board.]{The starting position on the board. It is the same at the beginning of each game, thus a photo captured in this position is well-suited for transfer learning as the user does not need to manually label the position.}
     \label{fig:chess_start_position}
 \end{figure}
-The angle of the camera to the chessboard should be in the same interval as used in the data synthesis process depicted in \cref{fig:camera_angle}, i.e. between 45° and 60°.
+The angle of the camera to the chessboard should be in the same interval as used in the data synthesis process depicted in \cref{fig:camera_angle}, i.e.\ between 45° and 60°.
 This chapter will demonstrate how to effectively fine-tune the occupancy and piece classification \glspl{cnn} based on only two input images.
 
 \section{Dataset}

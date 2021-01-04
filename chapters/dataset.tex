@@ -3,7 +3,7 @@
 \begin{document}
 
 \chapquote{I don't look at computers as opponents. For me, it is much more interesting to beat humans.}{Magnus Carlsen}
-\chapter{Data synthesis}
+\chapter{Generating synthetic training data}
 \label{chap:data_synthesis}
 
 Studies in human cognition by \textcite{bilalic2010} and \textcite{zhou2018} compared skilled chess players with novices in terms of their ability to remember a chess position for a short amount of time and confirmed that highly skilled players outperform novices at this task.
@@ -16,7 +16,7 @@ In doing so, we automatically ensure that the chess positions are legal and sens
 \section{Chess positions}
 \label{sec:data_chess_positions}
 The positions are generated from a publicly available dataset of 2,851 games played by current World Chess Champion Magnus Carlsen \cite{64squares2020}.
-We randomly select 2\% of all positions (i.e. configurations of chess pieces) from all games to be included in our dataset, although duplicate positions are discarded.
+We randomly select 2\% of all positions (i.e.\ configurations of chess pieces) from all games to be included in our dataset, although duplicate positions are discarded.
 A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
 
 \section{Three-dimensional renders}
@@ -48,7 +48,7 @@ Different camera angles and lighting setups are chosen in a random process in or
             \draw[->] (6, -1) -- (6, 1) node[above,align=center] {direction of play \\ (white)};
         \end{axis}
     \end{tikzpicture}
-    \caption[The chessboard coordinate system.]{Overhead view of the coordinate system on the chessboard. The $z$-axis (not shown) points upward, normal to the chessboard surface, and the board is oriented like a chess game would be set up, i.e. the bottom right square is white. White's direction of play (the direction in which pawns are advanced) coincides with the $y$-axis.}
+    \caption[The chessboard coordinate system.]{Overhead view of the coordinate system on the chessboard. The $z$-axis (not shown) points upward, normal to the chessboard surface, and the board is oriented like a chess game would be set up, i.e.\ the bottom right square is white. White's direction of play (the direction in which pawns are advanced) coincides with the $y$-axis.}
     \label{fig:cartesian_chessboard}
 \end{figure}
 Let us consider a three-dimensional Cartesian coordinate system whose origin lies at the centre point of the chessboard's surface, as depicted in \cref{fig:cartesian_chessboard}. 
@@ -66,14 +66,14 @@ More specifically, the $x$ and $y$ position of a piece in file $i$ and rank $j$ 
         \frac{\mI_2}{10}
     \right).
 \end{equation*}
-Here, we assume that $i$ and $j$ are zero-indexed, i.e. the square \emph{a1} corresponds to $i=j=0$.
+Here, we assume that $i$ and $j$ are zero-indexed, i.e.\ the square \emph{a1} corresponds to $i=j=0$.
 The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, we must add one half.
 Due to the fact that the $x$ and $y$ axes are perpendicular, the two components of $\rvp$ will be independent and thus can be modelled with a covariance matrix that is a multiple of the identity matrix $\mI_2$.
 Experiments showed that a variance of $\frac{1}{10}$ achieved realistic results.
 Finally, the piece's rotation about its $z$-axis is sampled from a uniform distribution over the half-open interval $[0, 2\pi)$.
 
 \paragraph{Camera}
-The camera is aligned such that it points directly at the origin (i.e. the centre of the board).
+The camera is aligned to point directly at the origin (i.e.\ the centre of the board).
 It is positioned with only a small offset from the $yz$-plane to ensure that the view over the chessboard is similar to the current player's perspective. 
 A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player will not usually be positioned exactly in the middle in front of the board.
 An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
@@ -168,7 +168,7 @@ For each chess position, a random choice is made between two different lighting 
             \label{fig:chessboard_lighting_circle}
         \end{figure}
         Furthermore, each spotlight's $z$-component is sampled uniformly in the range $[5, 10)$.
-        Finally, for each spotlight, a focus point on the chessboard surface (i.e. the $xy$ plane) is sampled from
+        Finally, for each spotlight, a focus point on the chessboard surface (i.e.\ the $xy$ plane) is sampled from
         \(
             \normal\left(
                 \begin{bmatrix}
@@ -201,10 +201,9 @@ It is just a matter of performing some linear algebra to compute the correspondi
 For computing the bounding boxes of the pieces, we simply project all vertices of the corresponding meshes onto the view plane and find the minimum and maximum points in the $x$ and $y$ directions.
 \Cref{fig:data_synthesis_visualisation} provides a visualisation of the automatically generated labels for one sample.
 \begin{figure}
-    \makebox[\textwidth][c]{
-        \includegraphics[width=\paperwidth]{3828_data_synthesis}
-    }
-    \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
+    \centering
+    \includegraphics[width=\textwidth]{3828_data_synthesis}
+    \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. The image is rotated 90° to fit on the page. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
     \label{fig:data_synthesis_visualisation}
 \end{figure}
 Note that although we will not use the bounding boxes in this project, they are useful if someone should use the dataset to train an object recognition model for inferring chess positions instead of our classification-based approach.

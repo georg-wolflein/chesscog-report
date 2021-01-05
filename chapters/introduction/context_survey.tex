@@ -3,7 +3,7 @@ This context survey examines not only past approaches to chess recognition, but 
 
 \subsection{Chess recognition}
 \label{sec:context_survey_chess_recognition}
-Determining the game state of a chess board -- commonly described by the term \emph{chess recognition} in many papers -- is a problem in computer vision whereby an algorithm is tasked with recovering the configuration of pieces from an image of a chessboard.
+Determining the game state of a chess board -- described by the term \emph{chess recognition} in many papers -- is a problem in computer vision whereby an algorithm is tasked with recovering the configuration of pieces from an image of a chessboard.
 Early work on chess recognition in the 1990s focused on extracting typeset games from printed material \cite{baird1990}. 
 In recent years, the problem of parsing two-dimensional chess images has effectively been solved using conventional machine learning techniques \cite{khater2012} and deep learning \cite{sameer2020,roy2020}.
 However, recognising chess positions from physical chessboards as opposed to artificial two-dimensional images poses a much more interesting and challenging problem that finds practial application in chess-playing robots, augmented reality, and aiding amateur chess players\footnote{Electronic chess sets are impractical and very costly \cite{wang2013}, thus solutions for chess recognition using just a photo of an unmodified chess board are more compelling for amateur chess players.}.
@@ -32,7 +32,7 @@ Conversely, \textcite{danner2015} as well as \textcite{xie2018} claim that \gls{
 As such, \textcite{danner2015} use Fourier descriptors calculated based on the pieces' contours, but this requires a manually-created database of piece silhouettes.
 Furthermore, they modify the board colours to red and green instead of black and white, in order distinguish the pieces from the board more easily\footnote{Similar board modifications have also been proposed as part of chess robots \cite{banerjee2012} and chess move trackers \cite{wang2013}, but any such modification imposes an unreasonable constraint on normal chess games.}.
 On the other hand, \textcite{xie2018} perform contour-based template matching with an interesting caveat: the camera angle is calculated based on the perspective transformation of the chessboard, and then depending on the angle, different templates are utilised for matching the chess pieces.
-As part of the same work, \citeauthor{xie2018} develop another approach that instead utilises \glspl{cnn}, but find that their original template-matching technique achieves superior results in terms of speed and accuracy in low-resolution images.
+As part of the same work, \citeauthor{xie2018} develop another approach that instead utilises \glspl{cnn}, but find that their original template-matching technique achieves superior results in terms of speed and accuracy in the specific setting of low-resolution images.
 However, the reader should note that their \glspl{cnn} are trained on only 40 images per class, but deep learning methods tend to excel when trained on larger datasets \cite{halevy2009}.
 
 \paragraph{Board localisation}

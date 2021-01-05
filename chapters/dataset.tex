@@ -75,7 +75,7 @@ Finally, the piece's rotation about its $z$-axis is sampled from a uniform distr
 \paragraph{Camera}
 The camera is aligned to point directly at the origin (i.e.\ the centre of the board).
 It is positioned with only a small offset from the $yz$-plane to ensure that the view over the chessboard is similar to the current player's perspective. 
-A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player usually is not positioned exactly in the middle in front of the board.
+A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player is usually not positioned exactly in the middle in front of the board.
 An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
 \footnote{On the other hand, if it is black to play, the perspective must be from the other side of the board, so $\theta$ is chosen in the range $\left[\frac{2\pi}{3},\frac{3\pi}{4}\right]$ which is equivalent to reflecting the camera position about the $xz$-plane.}.
 \begin{figure}
@@ -206,20 +206,19 @@ For computing the bounding boxes of the pieces, we simply project all vertices o
     \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. The image is rotated 90° to fit on the page. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
     \label{fig:data_synthesis_visualisation}
 \end{figure}
-Note that although we do not use the bounding boxes in this project, they are useful if someone should use the dataset to train an object recognition model for inferring chess positions instead of the classification-based approach.
+Note that although we do not use the bounding boxes in this project, they are useful for future research if someone should use the dataset to train an object recognition model for inferring chess positions instead of the classification-based approach.
 In this project, we mainly rely on the board's corner coordinates as well as the \gls{fen} description for training.
 Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
 
 \section{Splitting the dataset}
 \label{sec:split_dataset}
 In order to facilitate a fair evaluation of the chess recognition algorithm once it is completed, we immediately set aside 7\% of the dataset as the so-called \emph{test} set.
-We do not use this data until the very end when it is time to assess the performance of the chess recognition pipeline, so we can prevent \emph{data leakage}: since we want to evaluate how the system performs on unseen data, we should not be allowed to use it during training.
-A much smaller portion of the data (3\%) is be used for \emph{validation} purposes.
+This data remains untouched until the very end when it is time to assess the performance of the chess recognition pipeline, in order to prevent \emph{data leakage}: 
+to facilitate a fair evaluation of how the system performs on unseen data, any use of the the test set should be prohibited during training.
+A much smaller portion of the data (3\%) is used for \emph{validation} purposes.
 This subset is not directly used for training, but for hyperparameter tuning or assessing whether a model overfits to the training data.
 Finally, the remaining 90\% constitutes the training set.
 \Cref{fig:dataset_split} shows the proportions of the splits, including the actual number of samples in each subset.
-Note that the aforementioned splits are performed only once on the shuffled dataset and the associated \gls{json} and image files are moved into three different folders to ensure that the same split is used each time.
-
 \begin{figure}
     \begin{tikzpicture}
         \draw (0,0) rectangle (\textwidth,1);
@@ -240,5 +239,6 @@ Note that the aforementioned splits are performed only once on the shuffled data
     \caption{Visual representation of the dataset split.}
     \label{fig:dataset_split}
 \end{figure}
+Note that the aforementioned splits are performed only once on the shuffled dataset and the associated \gls{json} and image files are moved into three different folders to ensure that the same split is used each time.
 
 \end{document}

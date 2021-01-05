@@ -45,14 +45,14 @@
     \caption{Overview of the chess recognition pipeline.}
     \label{fig:chess_recognition_pipeline_overview}
 \end{wrapfigure}
-The chess recognition system is responsible for taking an \gls{rgb} image of a chessboard with pieces on it and  ultimately produce a \gls{fen} string representing the predicted chess position.
+The chess recognition system is responsible for taking an \gls{rgb} image of a chessboard with pieces on it and  ultimately producing a \gls{fen} string representing the predicted chess position.
 The pipeline, depicted in \cref{fig:chess_recognition_pipeline_overview}, consists of four main stages which shall be described in detail in the subsequent sections.
 
 The first step is locating the chessboard in the image.
 More specifically, we are interested in finding the pixel coordinates of the four chessboard corners. 
 Using these corner points, we warp the image such that the chessboard forms a regular square grid, to eliminate perspective distortion in the sizes of the chess squares.
 Next, we train a binary \gls{cnn} classifier to determine individual squares' occupancies.
-Each of the occupied squares are then be input to another \gls{cnn} that is responsible for determining the type of piece. 
+Each of the occupied squares are then input to another \gls{cnn} that is responsible for determining the type of piece. 
 Finally, we use the output probabilities of the piece classifier to produce a \gls{fen} string representing the position. 
 
 
@@ -362,11 +362,10 @@ Therefore, we can map the four points from the original image to a rectangle who
 We have
 \begin{equation*}
     \mP' = \begin{bmatrix}
-        0 & 0 & 1 \\
-        s_x & 0 & 1 \\
-        s_x & s_y & 1 \\
-        0 & s_y & 1
-    \end{bmatrix}^\top.
+        0 & s_x & s_x & 0 \\
+        0 & 0 & s_y & s_y \\
+        1 & 1 & 1 & 1
+    \end{bmatrix}.
 \end{equation*}
 Since the homography matrix maps points from the original image to the output image, we obtain from \cref{eq:homography_matrix_relation} the relation 
 \begin{equation}
@@ -398,7 +397,7 @@ The \gls{ransac} algorithm consists of two main steps:
         We require four points to compute a homography, so this is the number of intersection points we must sample in this step.
     \item \label{enum:ransac_2}
         Fit the model to these samples, and then determine which observations are explained by the model within some threshold (the threshold should be just large enough to account for the expected noise in the dataset). 
-        This is the set of inliers, and if the size of this set is greater than the inliers discovered in the previous iteration, we will retain this model instead of the previous.
+        This is the set of inliers, and if the size of this set is greater than the inliers discovered in the previous iteration, we retain this model instead of the previous.
         Repeat from step 1 until reaching a specified number of iterations.
 \end{enumerate}
 
@@ -965,6 +964,7 @@ When referring to these models, we shall use a 4-tuple consisting of the input s
         Starting with 16 filters in the first convolutional layer, the number of channels is doubled in each subsequent layer, as is common practice in \glspl{cnn} \cite{simonyan2015}.
         Each convolutional layer uses the \gls{relu} activation function and is followed by a max pooling layer with a $2\times 2$ kernel that is moved with a stride of $2$ such that the width and height are halved.
         Finally, the output of the last pooling layer is reshaped to a 640,000-dimensional vector that passes through two fully connected \gls{relu}-activated layers before reaching the final fully connected layer with softmax activation.
+        The decrease in spatial size in each convolutional and pooling layer is calculated according to \cref{eq:cnn_output_size}.
     }
     \label{fig:occupancy_convnet}
 \end{figure}

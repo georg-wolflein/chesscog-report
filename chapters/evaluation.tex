@@ -236,9 +236,9 @@ The datasets and trained models are made available for download, and all necessa
 \section{Critical appraisal}
 \Cref{sec:context_survey_chess_recognition} surveys the state of the art in computer vision based approaches to chess recognition. 
 Vision systems for chess robots or those designed for recording chess moves are inadequate for performing game state inference on a single image because these systems commonly rely on the difference between two images in order to determine the last move.
-In the realm of single-image chess recognition systems (the type of system we aim to develop in this project), the context survey shows that systems exclusively employing traditional computer vision techniques are simply no match for approaches that effectively take advantage of deep learning.
+In the realm of single-image chess recognition systems (the type of system this project aims to develop), the context survey shows that systems exclusively employing traditional computer vision techniques are simply no match for approaches that effectively take advantage of deep learning.
 However, systems with a poor piece classification performance might excel in their algorithm for board localisation.
-Therefore, this section will evaluate and compare our system to existing approaches across several different dimensions.
+Therefore, this section will evaluate and compare my system to existing approaches across several different dimensions.
 The context survey identifies the work of \textcite{mehta2020} as the current state of the art because it achieves the highest overall accuracy score and is one of the few works employing \glspl{cnn}, so in evaluating this project, a particular focus is put in the comparison to their system.
 
 \paragraph{Datasets}
@@ -272,10 +272,10 @@ My system outperforms this by more than four percentage points, achieving 99.71\
 \paragraph{Piece classification}
 The approach to piece classification described in this project is a two-step process:
 first, an AlexNet \cite{krizhevsky2017} \gls{cnn} predicts the occupancy of each square, and then an InceptionV3 \cite{szegedy2016} model classifies the pieces on the occupied squares. 
-Both \glspl{cnn} were initialised with pre-trained weights used for training on the ImageNet dataset \cite{deng2009}, and then fine-tuned to our dataset using transfer learning.
+Both \glspl{cnn} were initialised with pre-trained weights used for training on the ImageNet dataset \cite{deng2009}, and then fine-tuned to the chess dataset using transfer learning.
 \Textcite{mehta2020} employ transfer learning from ImageNet weights with the AlexNet architecture as well, but follow a single-stage process where the \gls{cnn} is tasked with predicting all 13 classes (a dozen piece types and the empy square).
 Their piece classifier achieves an accuracy of 93.45\%, whereas my two-stage approach has an accuracy of 99.91\% on the test set\footnote{
-    To obtain the overall accuracy of the piece classifier, we multiply the occupancy classification accuracy with the piece classification accuracy from \cref{tbl:chess_recognition_trainvaltest_results}.
+    To obtain the overall accuracy of the piece classifier, the occupancy classification accuracy is multiplied with the piece classification accuracy from \cref{tbl:chess_recognition_trainvaltest_results}.
 }, an improvement of more than six percentage points.
 The only other \gls{cnn}-based chess inference system, that of \textcite{xie2018}, also uses transfer learning with various \gls{cnn} architectures and achieves the best performance with GoogLeNet \cite{szegedy2015}, the predecessor to InceptionV3 \cite{szegedy2016}.
 As such, \citeauthor{xie2018} achieve a classification accuracy of 98.14\%, but they use only six classes (pawn, knight, bishop, rook, queen, king), meaning that their system is unable to distinguish between the colours of the pieces and cannot identify empty squares.

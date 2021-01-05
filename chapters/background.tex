@@ -10,8 +10,8 @@ Readers familiar with this subject matter may skip this chapter and resume at \c
 
 \section{Supervised learning}
 At its core, the purpose of an \gls{ann} is to infer a function that maps some input to some output, based on sample input-output pairs.
-In machine learning, we call this a \emph{supervised learning} task, and there are a great number of machine learning models (not only \glspl{ann}) that have been developed for this task.
-We shall briefly examine the two main disciplines within supervised learning: \emph{regression} and \emph{classification}.
+In machine learning, this is known as a \emph{supervised learning} task, and there are a great number of machine learning models (not only \glspl{ann}) that have been developed for this task.
+I shall briefly examine the two main disciplines within supervised learning: \emph{regression} and \emph{classification}.
 
 \subsection{Regression}
 \label{sec:regression}
@@ -22,36 +22,36 @@ As such, it can be defined by a mathematical function of the form $f:\mathbb{R}^
     f(\vx) = \hat{y} = y + \epsilon
 \end{equation}
 that models the relationship between an $n$-dimensional feature vector $\vx \in \mathbb{R}^n$ of independent (\emph{input}) variables and the dependent (\emph{output}) variable $y \in \mathbb{R}$. 
-Given a particular $\vx$, the model produces a \emph{prediction} for $y$ which we shall denote $\hat{y}$.
+Given a particular $\vx$, the model produces a \emph{prediction} for $y$ which shall be denoted $\hat{y}$.
 Here, the additive error term $\epsilon$ represents the discrepancy between $y$ and $\hat{y}$, i.e.\ the difference between the predicted and observed output.
 
 A labelled dataset for a regression task consists of $m$ tuples of the form
 $\langle \vx_i, y_i\rangle$
 for $i=1,\dots,m$.
 For each feature vector $\vx_i$ (a row vector), the corresponding $y_i$ represents the observed output, or \emph{label} \cite{burkov2019}.
-We use the vector
+The vector
 \begin{equation}
     \label{eq:sup_learn_target}
     \vy = \begin{bmatrix}
         y_1 & y_2 & \cdots & y_m
     \end{bmatrix}^\top
 \end{equation}
-to denote all the labelled outputs in the dataset, and the $m \times n$ matrix
+is used to denote all the labelled outputs in the dataset, and the $m \times n$ matrix
 \begin{equation}
     \label{eq:sup_learn_input_matrix}
     \mX = \begin{bmatrix}
         \vx_1 & \vx_2 & \cdots & \vx_m
     \end{bmatrix}^\top
 \end{equation}
-for representing the corresponding feature vectors.
+represents the corresponding feature vectors.
 
 \subsection{Classification}
 \label{sec:background_classification}
 Classification is a task that finds greater applicability within this project.
 As the name implies, a classification model tries to determine to which category each input sample belongs from a predefined set of classes $\sC$.
-To ease notation, we shall let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
-In practical terms, the elements in $\sC$ could represent any type of object, and in that case we only require a one-to-one mapping (bijection) from those objects to $\sC$.
-Furthermore, in the context of this report, each input sample can only belong to one class, and we interpret the output of the model to represent the probabilities of the input sample belonging to each of the classes $\sC$.
+To ease notation, let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
+In practical terms, the elements in $\sC$ could represent any type of object, and in that case all that is required is a one-to-one mapping (bijection) from those objects to $\sC$.
+Furthermore, in the context of this report, each input sample can only belong to one class, and the output of the model is interpreted to represent the probabilities of the input sample belonging to each of the classes $\sC$.
 Therefore, a classification model is represented by a vector-valued function
 $\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
 instead of a scalar function as in \cref{eq:reg_model}, namely
@@ -76,8 +76,8 @@ This means that for a given class $c \in \sC$, the components of $\vy$ are given
 \end{equation*}
 which retains the property described in \cref{eq:pmf}.
 Since $\vf$ represents a \gls{pmf}, the one-hot encoded vector essentially states that the probability of class $c$ is 100\% and all other classes have a probability of 0\%.
-Notice that our outputs are now the vectors $\vy_i$ instead of the scalars $y_i$ in the regression task.
-Hence a labelled classification dataset consists of $m$ tuples of the form $\langle \vx_i,\vy_i \rangle$, meaning that instead of the vector $\vy$ from \cref{sec:background_classification}, we must use a matrix
+Notice that the outputs are now the vectors $\vy_i$ instead of the scalars $y_i$ in the regression task.
+Hence a labelled classification dataset consists of $m$ tuples of the form $\langle \vx_i,\vy_i \rangle$, meaning that instead of the vector $\vy$ from \cref{sec:background_classification}, it is necessary to use a matrix
 \begin{equation}
     \mY = \begin{bmatrix}
         \vy_1 & \vy_2 & \cdots & \vy_m
@@ -147,7 +147,7 @@ In this model, if there exists no link between unit $i$ and a particular $j$ the
     \label{fig:ann}
 \end{figure}
 
-The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function}, $g: \mathbb{R} \rightarrow \mathbb{R}$. We have
+The unit $i$'s activation is its excitation applied to a non-linear \emph{activation function} $g: \mathbb{R} \rightarrow \mathbb{R}$, giving
 \begin{equation}
     \label{eq:ann_activation}
     a_i = g\left(z_i\right) = g\left(\sum_{j=1}^n{w_{j,i} a_j} + b_i\right).
@@ -155,8 +155,8 @@ The unit $i$'s activation is its excitation applied to a non-linear \emph{activa
 
 \paragraph{Activation functions}
 In its original form in \citeyear{mcculloch1943}, \citeauthor{mcculloch1943} defined the neuron as having only binary activation \cite*{mcculloch1943}. 
-This means that in our model from \cref{eq:ann_activation}, we would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{step}: \mathbb{R} \rightarrow \{0, 1\}$ like the Heaviside step function%
-\footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in our model the bias term $b_i$ acts as the threshold.}
+This means that the model from \cref{eq:ann_activation} would require $a_i \in \{0, 1\}$ and hence an activation function of the form $g_\text{step}: \mathbb{R} \rightarrow \{0, 1\}$ like the Heaviside step function%
+\footnote{In fact, \citeauthor{mcculloch1943} defined the activation to be zero when $x<\theta$ for a threshold parameter $\theta \in \mathbb{R}$ and one otherwise, but in the model described here the bias term $b_i$ acts as the threshold.}
 \begin{equation*}
     \label{eq:step_activation}
     g_\text{step}(x) = \begin{cases} 
@@ -241,9 +241,9 @@ As a result, the \gls{relu} activation function (or variants thereof) is the mos
 Furthermore, the computational cost of the function itself as well as its gradient is cheap.
 
 \subsection{Feedforward neural networks}
-Our definition of \glspl{ann} so far still is very general and makes virtually no restrictions on the graph of the network.
+The definition of \glspl{ann} so far still is very general and makes virtually no restrictions on the graph of the network.
 It turns out that it is difficult to propagate activations between neurons when they exhibit cycles, as is the case with the last three units in \cref{fig:ann}.
-Thus we impose a constraint that the nodes of the network are not allowed to form cycles, and as a result the network becomes a \gls{dag}.
+Let us thus impose a constraint that the nodes of the network are not allowed to form cycles, and as a result the network becomes a \gls{dag}.
 This class of \glspl{ann} is referred to as \emph{feedforward neural networks}.
 
 \subsubsection{\Glsentrylong{slp}}
@@ -281,9 +281,9 @@ Likewise, there are no connections from output units to input units.
 The only connections in the network originate from input units and feed to output units. 
 In fact, that is where the term \emph{feedforward} arises: the network exhibits neither backwards nor intra-layer connections.
 The connections themselves are of course weighted as in any \gls{ann}.
-Due to the unidirectional nature of the links, we can continue to use the notation $w_{i,j}$ to denote weights, but now $i$ refers to the input unit and $j$ refers to the output unit.
+Due to the unidirectional nature of the links, I continue to use the notation $w_{i,j}$ to denote weights, but now $i$ refers to the input unit and $j$ refers to the output unit.
 
-From \cref{eq:ann_activation}, we can compute the values of the three output units in \cref{fig:slp} as
+From \cref{eq:ann_activation}, one can compute the values of the three output units in \cref{fig:slp} as
 \begin{equation}
     \label{eq:slp_simple}
     \yhat_j = g\left(\sum_{i=1}^{n_1}{w_{i,j} x_i} + b_j\right)
@@ -308,7 +308,7 @@ and the row vector
     \end{bmatrix}
 \end{equation}
 to represent the biases.
-Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} can be expressed using the dot product. We finally define the function of a \gls{slp} as
+Since the output vector $\vyhat$ is simply the concatenation of the output units, the summation in \cref{eq:slp_simple} can be expressed using the dot product. Finally, the function of a \gls{slp} can be defined as
 \begin{equation}
     \label{eq:slp}
     \vf_{\mW,\vb}(\vx) = \vyhat = \vg\left(
@@ -326,14 +326,14 @@ A \gls{mlp} with $L$ layers can be expressed mathematically by composing $L$ \gl
     \vf(\vx) = (\vf_1 \circ \vf_2 \circ \dots \circ \vf_L)(\vx).
 \end{equation}
 
-Each \gls{slp} inside the \gls{mlp} constitutes a logical module which we call a \emph{layer}.
-Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, we shall henceforth use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
+Each \gls{slp} inside the \gls{mlp} constitutes a logical module which is called a \emph{layer}.
+Due to the fact that each layer has its own weights $\mW$ and biases $\vb$, I shall henceforth use the parenthesised superscript notation $\mW^{(l)}$ and $\vb^{(l)}$ to denote the weights and biases in the $l$\textsuperscript{th} layer.
 Further, the notation $b_j^{(l)}$ refers to the $j$\textsuperscript{th} unit's bias in layer $l$, and $w_{i,j}^{(l)}$ is the weight of the connection from unit $i$ in layer $l-1$ to unit $j$ in layer $l$.
 This notation follows \textcite{goodfellow2016} and is customary in describing neural networks.
-We shall use $n_0,n_1,\dots,n_L$ to denote the number of units in each layer.
+I shall use $n_0,n_1,\dots,n_L$ to denote the number of units in each layer.
 Layer zero is considered the \emph{input layer}, meaning that $n_0$ must be equal to the dimensionality of $\vx$. 
 The layers $1, 2, \dots, L-1$ are the \emph{hidden layers} because they are not directly connected to the input or output units.
-Finally, we refer to layer $L$ as the \emph{output layer}, since its units represent the prediction $\vyhat$, and so $n_L$ must be equal to the dimensionality of $\vyhat$. 
+Finally, layer $L$ is the \emph{output layer}, since its units represent the prediction $\vyhat$, and so $n_L$ must be equal to the dimensionality of $\vyhat$. 
 \Cref{fig:mlp} gives an example of a \gls{mlp} architecture.
 \begin{figure}
     \centering
@@ -407,7 +407,7 @@ In fact, such networks are usually \emph{fully-connected feedforward networks} b
 
 \subsection{Backpropagation}
 \emph{Training} with regard to neural networks refers to the process of altering a network's weights and biases with the goal of achieving an optimal configuration that reduces the error of the predictions, i.e.\ how far they are `off'. 
-This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that we introduced at the very beginning of this chapter in the context of supervised learning.
+This is how the network facilitates \emph{learning} the input-output function from \cref{eq:reg_model} that I introduced at the very beginning of this chapter in the context of supervised learning.
 
 Backpropagation with gradient descent is an iterative algorithm for training neural networks that, provided a suitable learning rate $\alpha$, is guaranteed to converge to a \emph{local minimum}.
 The main idea is as follows:
@@ -453,20 +453,20 @@ The main idea is as follows:
     \label{fig:gradient_descent_local_minimum}
 \end{figure}
 
-To explain the backpropagation algorithm, we shall examine the case of a regression task, meaning that the network has only one output unit.
+To explain the backpropagation algorithm, I shall examine the case of a regression task, meaning that the network has only one output unit.
 The algorithm can, of course, be generalised to classification problems with multiple output units.
 
 Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^m$ be a labelled regression dataset as defined in \cref{sec:regression}.
-We must first introduce a measure indicating how good our predictions are.
-For simplicity, we shall use the \gls{mse}, although the reader should note that the cross-entropy loss is preferred for classification problems.
+First of all, it is necessary to introduce a measure indicating how good the predictions are.
+For simplicity, I shall use the \gls{mse}, although the reader should note that the cross-entropy loss is preferred for classification problems.
 The \gls{mse} of a set of predictions $\vyhat$ is the average squared difference between the predictions and targets,
 \begin{equation}
     \label{eq:mean_squared_error}
     E\left( \vyhat, \vy \right) = \frac{1}{m} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2} = \frac{1}{m} \norm{\vyhat-\vy}_2^2.
 \end{equation}
-The reader should not confuse this notation with that of a classification problem; here, we use $\vy$ to denote the targets for each sample in the dataset and $\vyhat$ to denote the corresponding predictions.
+The reader should not confuse this notation with that of a classification problem; here, I use $\vy$ to denote the targets for each sample in the dataset and $\vyhat$ to denote the corresponding predictions.
 
-We can formulate a loss function
+One can formulate a loss function
 \begin{equation}
     \label{eq:mse}
     L\left( \vyhat, \vy \right) = \frac{1}{2} \sum_{i=1}^m{\left(\yhat_i - y_i\right)^2}
@@ -475,17 +475,17 @@ that behaves similarly to \cref{eq:mean_squared_error} in that reducing the loss
 
 \subsubsection{\Glsentrylong{slp}}
 Let us consider a \gls{slp} with one output unit for simplicity. 
-We can easily express the loss in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
+The loss can easily be expressed in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
 \begin{equation}
     L = \frac{1}{2} \sum_{i=1}^m{\left[g\left(
         \vx_i \vw + b
     \right) - y_i\right]^2}.
 \end{equation}
-Here, the weight matrix $\mW$ from \cref{eq:slp_weights} has just one column (because there is just one output unit), so we denote it using the column vector $\vw$, and similarly the bias vector from \cref{eq:slp_biases} is just a scalar $b$.
+Here, the weight matrix $\mW$ from \cref{eq:slp_weights} has just one column (because there is just one output unit), so I denote it using the column vector $\vw$, and similarly the bias vector from \cref{eq:slp_biases} is just a scalar $b$.
 
 Calculating the derivative of the loss function with respect to each of the trainable parameters is a core part of the gradient descent algorithm.
-The trainable parameters in our network are $\vw$ and $b$, so we differentiate $L$ with respect to each of these.
-We obtain the partial derivative of the loss with respect to the bias as
+In this network, the trainable parameters are $\vw$ and $b$, so $L$ is differentiated with respect to each of these.
+The partial derivative of the loss with respect to the bias is
 \begin{align}
     \label{eq:backprop_dL_db}
     \frac{\partial L}{\partial b}
@@ -498,7 +498,7 @@ We obtain the partial derivative of the loss with respect to the bias as
         g' \left(\vx_i\vw+b\right)
     },
 \end{align}
-and similarly we can differentiate with respect to the weights
+and similarly one can differentiate with respect to the weights:
 \begin{align}
     \label{eq:backprop_dL_dw}
     \frac{\partial L}{\partial \vw}
@@ -526,11 +526,11 @@ Mathematically, this is expressed as
 
 \subsubsection{\Glsentrylong{mlp}}
 \label{sec:mlp_training}
-To apply backpropagation in \glspl{mlp}, we must first compute the gradient of the loss with resepect to each trainable parameter (i.e.\ each layer's weights and biases).
-In other words, we must compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$, but the exact derivation is left as an exercise to the reader.
-The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, we can apply the chain rule when calculating the derivative of \cref{eq:mlp}.
+To apply backpropagation in \glspl{mlp}, one must first compute the gradient of the loss with resepect to each trainable parameter (i.e.\ each layer's weights and biases).
+In other words, one must compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$, but the exact derivation is left as an exercise to the reader.
+The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, the chain rule can be applied when calculating the derivative of \cref{eq:mlp}.
 
-Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once we have the gradients, we update the weights and biases by applying the rule
+Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once the gradients are computed, the next step is to update the weights and biases by applying the rule
 \begin{align}
     \label{eq:backprop_mlp_update_weights}
     \mW_l &\gets \mW_l - \alpha \frac{\partial L}{\partial \mW_l}(\mW_l),\\
@@ -538,9 +538,9 @@ Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once we ha
     \vb_l &\gets \vb_l - \alpha \frac{\partial L}{\partial \vb_l}(\vb_l).
 \end{align}
 
-A major limitation of gradient descent, as we describe it here, is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
-This becomes impractical for large datasets due to memory consumption and computational complexity, so we commonly split the dataset into batches and estimate the gradients for each batch in a process known as \emph{stochastic gradient descent}.
-Furthermore, we typically apply more sophisticated optimisation algorithms than the update rules outlined in \cref{eq:backprop_mlp_update_weights,eq:backprop_mlp_update_biases} to improve the speed and quality of convergence.
+A major limitation of gradient descent, as it is described here, is the summation in \cref{eq:backprop_dL_db,eq:backprop_dL_dw} that is applied over the whole dataset of $m$ samples. 
+This becomes impractical for large datasets due to memory consumption and computational complexity, so the dataset is commonly split into batches and the gradients are estimated for each batch in a process known as \emph{stochastic gradient descent}.
+Moreover, one would typically apply more sophisticated optimisation algorithms than the update rules outlined in \cref{eq:backprop_mlp_update_weights,eq:backprop_mlp_update_biases} to improve the speed and quality of convergence.
 A very popular choice that empirically demonstrates good results in many settings is the Adam optimiser \cite{kingma2017}.
 However, such details are unfortunately outwith the scope of this report.
 
@@ -548,15 +548,15 @@ However, such details are unfortunately outwith the scope of this report.
 \label{sec:cnns}
 Let us examine how \glspl{ann} can be applied to a simple image classification problem.
 Consider an input image of $256 \times 256$ pixels with three colour channels (\gls{rgb}).
-If we flatten this image to a single vector, that vector contains $3 \cdot 2^{16}$ values.
-We could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined classes.
+If this image is flattened to a single vector, that vector contains $3 \cdot 2^{16}$ values.
+One could construct a \gls{mlp} that takes this vector as input and tries to classify the image as belonging to one of the predefined classes.
 If the first layer has half as many units as the input, the weight matrix $\mW_1$ would be be of size $(3 \cdot 2^{16}) \times (3 \cdot 2^{15})$, meaning that it would hold $9 \cdot 2^{31}$ values.
 This means that the first layer alone would already have over two billion parameters.
 Networks with this many parameters are infeasible to train because the number of parameters exceeds the memory capacity and computational ability of modern hardware.
 Furthermore, networks with too many parameters are much more likely to overfit to training data.
 
 \Glspl{cnn} are a special class of \glspl{ann} that require significantly fewer parameters in each layer.
-They are well-suited for image tasks and can be trained on modern hardware even when they have many layers (which we refer to as \emph{deep neural networks}).
+They are well-suited for image tasks and can be trained on modern hardware even when they have many layers (which are known as \emph{deep neural networks}).
 Originally, the concept of \glspl{cnn} evolved from the so-called \emph{neocognitron} that was introduced in 1980 and inspired studies of the visual cortex in humans and animals \cite{fukushima1980}.
 In \citeyear{lecun1998}, \citeauthor{lecun1998} proposed the famous \emph{LeNet-5} architecture that is considered to be the first \gls{cnn} \cite{lecun1998}. 
 The main concepts developed in the seminal work of \citeauthor{lecun1998} carry through to today.
@@ -567,24 +567,24 @@ Hubel and Wiesel demonstrated this by showing that some neurons activate only fo
 They also showed that some neurons with larger receptive fields respond to more complex patterns that are combinations of such lower-level patterns.
 
 \Glspl{cnn} follow the same intuition: neurons at the beginning of the network learn to recognise very simple, low-level patterns, while neurons deeper in the network compose these patterns to perceive more complex features.
-They are comprised of \emph{convolutional} and \emph{pooling} layers, which we shall describe below.
+They are comprised of \emph{convolutional} and \emph{pooling} layers, which I shall describe below.
 
 \subsection{Convolutional layers}
 \label{sec:convolutional_layers}
 Convolutional layers are the most important component in a \gls{cnn}.
 However, the term \emph{convolution} is actually used as a misnomer to mean \emph{cross-correlation} in the context of \glspl{cnn}.
-Both terms refer to a mathematical operation where we slide a matrix (known as \emph{filter} or \emph{kernel}) over the input image and compute the sum of products at each location.
-A convolution operation is equivalent to cross-correlation if we pre-rotate the filter matrix by 180 degrees.
-For the remainder of this report we shall follow the convention in machine learning and use the term convolution to refer to cross-correlation.
+Both terms refer to a mathematical operation where a matrix (known as \emph{filter} or \emph{kernel}) is slid over the input image and compute the sum of products at each location.
+A convolution operation is equivalent to cross-correlation if the filter matrix is pre-rotated by 180 degrees.
+For the remainder of this report I shall follow the convention in machine learning and use the term convolution to refer to cross-correlation.
 
 Each neuron in the first convolutional layer is connected to a square region of pixels (the receptive field) from the input image, as opposed to being connected to the entire input image which is the case in fully-connected \glspl{mlp}.
 Similarly, subsequent layers' neurons connect only to a square region of neurons in the previous layer, so that the network begins to form a hierarchy of filters.
 
 Let us consider a neuron in the first convolutional layer.
-It is connected to a square patch of pixels from the input image (for now, we consider only one colour channel), so let us represent this patch using the $k\times k$ matrix $\mP$ where $k$ indicates the side length of the square.
+It is connected to a square patch of pixels from the input image (for now, let us consider only one colour channel), so let us represent this patch using the $k\times k$ matrix $\mP$ where $k$ indicates the side length of the square.
 The convolutional layer is associated with a filter matrix $\mF$ of the same size as $\mP$.
 The convolution of the matrices $\mP$ and $\mF$, denoted $\mP * \mF$, is obtained by performing a pointwise multiplication of the corresponding elements in $\mP$ and $\mF$, and then computing the sum of these results.
-More formally, using the notation $p_{ij}$ and $f_{ij}$ to index into those two matrices, we can define the convolution operation as
+More formally, using the notation $p_{ij}$ and $f_{ij}$ to index into those two matrices, the convolution operation can be defined as
 \begin{equation}
     \mP * \mF = \sum_{i=1}^k \sum_{j=1}^k p_{ij} f_{ij}.
 \end{equation}
@@ -608,7 +608,7 @@ For a patch
     \end{bmatrix}
 \end{equation*}
 that clearly has high values in the middle column and thus describes a vertical line, 
-we have $\mP * \mF = 47$. However, if we consider a different patch
+one obtains $\mP * \mF = 47$. However, when considering a different patch
 \begin{equation*}
     \mP_2 = \begin{bmatrix}
         10 & 11 & 10 \\
@@ -618,8 +618,8 @@ we have $\mP * \mF = 47$. However, if we consider a different patch
 \end{equation*}
 where the intensities are quite uniform (and thus not describing a vertical line), the convolution with $\mF$ achieves a much lower result of $6$.
 
-Coming back to our examination of the first layer of a \gls{cnn}, we know that it is associated with a filter $\mF$. 
-The output of the layer is computed by sliding a $k \times k$ window over the input image, and at each location of the window, we compute the convolution $\mP * \mF$ where $\mP$ are the pixels in the current window.
+Coming back to examining the first layer of a \gls{cnn}, notice that it is associated with a filter $\mF$. 
+The output of the layer is obtained by sliding a $k \times k$ window over the input image, and at each location of the window, the convolution $\mP * \mF$ is computed where $\mP$ are the pixels in the current window.
 This process is illustrated using an example in \cref{fig:conv_simple}.
 \begin{figure}
     \centering
@@ -777,25 +777,25 @@ The output is still only one matrix where the elements are summed across the cha
     \caption[Illustration of a convolution operation acting on two input channels.]{Illustration of a convolution operation with $2\times 2$ kernels acting on two input channels.}
     \label{fig:conv_multiple_channels}
 \end{figure}
-In practice, a convolutional layer stacks multiple such operations on top of each other (with different filters) so that we obtain more than one output matrix.
+In practice, a convolutional layer stacks multiple such operations on top of each other (with different filters) so that the result is more than one output matrix.
 These matrices, after adding the bias and applying the activation function $g$, constitute the input channels for the subsequent layer.
-Each output channel has its own bias $b$, so we require a bias vector $\vb$ to denote all of the biases.
+Each output channel has its own bias $b$, so a bias vector $\vb$ is required to denote all of the biases.
 
-The astute reader might wonder how we obtain the values for each of the filters so that they correspond to useful features in the image that ultimately allow a series of fully-connected feedforward layers following the convolutional layers to perform a classification prediction at the end of the network.
+The astute reader might wonder how the values for each of the filters are obtained so that they correspond to useful features in the image that ultimately allow a series of fully-connected feedforward layers following the convolutional layers to perform a classification prediction at the end of the network.
 As in \glspl{mlp}, the answer is to use backpropagation and gradient descent.
 Each of the values in the filter matrices is a trainable parameter and the biases are of course trainable, too.
-It is possible to calculate the gradients of these trainable parameters with respect to the loss function, so we can use an optimisation algorithm such as the popular \emph{Adam} optimizer \cite{kingma2017} to update the parameters as discussed at the end of \cref{sec:mlp_training}.
+It is possible to calculate the gradients of these trainable parameters with respect to the loss function, so an optimisation algorithm such as the popular \emph{Adam} optimizer \cite{kingma2017} can be employed to update the parameters as discussed at the end of \cref{sec:mlp_training}.
 
 There are a number of hyperparameters associated with convolutional layers that impact the output dimensions as well as number of trainable parameters in the layer:
 \begin{itemize}
     \item the filter size $k$;
-    \item the padding $p$ which indicates by how many rows/columns we extend the input matrix in each direction, setting these new values to zero (\cref{fig:conv_simple,fig:conv_multiple_channels} use $p=0$);
-    \item the stride $s$, indicating how many pixels we move the sliding window each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
+    \item the padding $p$ which indicates by how many rows/columns the input matrix is extended in each direction, setting these new values to zero (\cref{fig:conv_simple,fig:conv_multiple_channels} use $p=0$);
+    \item the stride $s$, indicating how many pixels the sliding window is moved each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
     \item the desired number of output channels $c_\text{out}$.
 \end{itemize}
 Of course, the activation function $g$ may also be regarded as a hyperparameter, but it has no effect on the size of the layer's output.
 Let us consider a convolutional layer with an input of spatial size $h_\text{in} \times w_\text{in}$ and $c_\text{in}$ channels.
-By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, we can derive the equations
+By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, one can derive the equations
 \begin{equation}
     \label{eq:cnn_output_size}
     h_\text{out} = \left\lfloor \frac{h_\text{in} + 2p - k }{s} \right\rfloor + 1 \qquad \text{and} \qquad
@@ -804,21 +804,21 @@ By examining how the spatial output dimensions correspond to the input size and 
 relating the input spatial dimensions to the output spatial dimensions of a convolutional layer.
 It is important to know this when designing a \gls{cnn} architecture in order to monitor how the spatial size shrinks with each convolutional layer.
 
-Having said that, we can finally provide evidence for the claim at the beginning of \cref{sec:cnns} that \glspl{cnn} require significantly fewer trainable parameters than \glspl{mlp}.
+Having said that, I can now provide evidence for the claim at the beginning of \cref{sec:cnns} that \glspl{cnn} require significantly fewer trainable parameters than \glspl{mlp}.
 Notice that the number of trainable parameters is simply the number of elements in each filter $\mF$ multiplied by the number of filters, plus the number of biases.
-For one output channel, we need $c_\text{in}$ filters as shown in \cref{fig:conv_multiple_channels}.
-So, for $c_\text{out}$ output channels, we require $c_\text{in} \cdot c_\text{out}$ filters, and since each filter is a $k \times k$ matrix, the number of kernel parameters is
+One output channel requires $c_\text{in}$ filters as shown in \cref{fig:conv_multiple_channels}.
+So, $c_\text{out}$ output channels require $c_\text{in} \cdot c_\text{out}$ filters, and since each filter is a $k \times k$ matrix, the number of kernel parameters is
 $c_\text{in} \cdot c_\text{out} \cdot k^2$.
 Each filter is associated with a bias that is trainable, so the total number of trainable parameters is 
 $c_\text{in} \cdot c_\text{out} \cdot (k^2+1)$.
 In contrast to \glspl{mlp}, this is independent of the spatial size of the input ($h_\text{in} \times w_\text{in}$), and since the value of $k$ is typically quite small, the number of trainable parameters is orders of magnitude smaller than that of a layer in a \gls{mlp}.
-As such, the weights in a \gls{cnn} are considered to be \emph{shared} because we slide the filters over the entire input and can therefore identify similar features in different spatial locations.
+As such, the weights in a \gls{cnn} are considered to be \emph{shared} because the filters are slid over the entire input and can therefore identify similar features in different spatial locations.
 
 \subsection{Pooling layers}
-To understand the motivation of pooling layers, we shall first examine the general architecture of a \gls{cnn}.
+To understand the motivation of pooling layers, I shall first examine the general architecture of a \gls{cnn}.
 Typically, a \gls{cnn} consists of a number of convolutional and pooling layers followed by a small \gls{mlp} consisting of one or two fully-connected layers.
-Since the output of the convolutional/pooling layers is a tensor of rank three (more specifically, we have $c_\text{out}$ feature maps, each of size $h_\text{out} \times w_\text{out}$), it must first be flattened so that all elements are concatenated into a vector.
-However, to ensure that this vector contains useful information for classification, we would like to have a relatively small spatial size $h_\text{out} \times w_\text{out}$, but a large number of channels. 
+Since the output of the convolutional/pooling layers is a tensor of rank three (more specifically, there are $c_\text{out}$ feature maps, each of size $h_\text{out} \times w_\text{out}$), it must first be flattened so that all elements are concatenated into a vector.
+However, to ensure that this vector contains useful information for classification, it is preferrable to have a relatively small spatial size $h_\text{out} \times w_\text{out}$, but a large number of channels. 
 The reasoning for this is twofold:
 \begin{enumerate*}[label=(\roman*)]
     \item a low spatial size reduces the size of the vector and thus the number of trainable parameters in the \gls{mlp}; and
@@ -829,9 +829,9 @@ They are used immediately after convolutional layers and typically occur less of
 This is because pooling layers remove some information.
 
 Pooling is applied on a per-channel basis, so the number of input channels is equal to the number of output channels.
-Furthermore, we do not apply an activation function because that is the job of the convolutional layers.
+Furthermore, it does not apply an activation function because that is the job of the convolutional layers.
 The most common type of pooling is maximum pooling.
-In a max-pooling layer, we slide a window over the input and retain only the highest activation, as illustrated in \cref{fig:maxpool}.
+Such max-pooling layers slide a window over the input and retain only the highest activation, as illustrated in \cref{fig:maxpool}.
 \begin{figure}
     \centering
     \begin{tikzpicture}
@@ -873,19 +873,19 @@ In a max-pooling layer, we slide a window over the input and retain only the hig
 \end{figure}
 It is easy to see that unlike convolutions, pooling layers have no trainable parameters.
 Nonetheless, they have three hyperparameters: the padding $p$, stride $s$ and window size $k$.
-We often set $s=k=2$ and use no padding in order to halve the spatial dimensions (the calculation from \cref{eq:cnn_output_size} holds for pooling layers as well).
+In practice, it is common to set $s=k=2$ and use no padding in order to halve the spatial dimensions (the calculation from \cref{eq:cnn_output_size} holds for pooling layers as well).
 
 \section{Transfer learning}
 \label{sec:background_transfer_learning}
 The underlying motivation behind transfer learning is to reuse knowledge gained in one task as a basis for learning a different task.
-It is an important tool that we employ in two different settings throught this project:
+It is an important tool that I employ in two different settings throught this project:
 \begin{enumerate*}[label=(\roman*)]
     \item training \glspl{cnn} for classifying chess squares pieces in \cref{sec:occupancy_classification,sec:piece_classification}; and
     \item fine-tuning these models in order to adapt to previously unseen chess sets in \cref{chap:adapting}.
 \end{enumerate*}
 
 Training a deep \gls{cnn} from scratch (starting from randomly initialised weights) can take several days even on modern \glspl{gpu}. 
-Furthermore, to achieve good performance, we require very large labelled datasets.
+Furthermore, to achieve good performance, such netowrks require very large labelled datasets.
 Obtaining the required compute capability and quantity of data is often infeasible, and so it is very common to initialise the weights based on an already trained network.
 This makes sense because as discussed in \cref{sec:cnns}, \glspl{cnn} learn patterns at the beginning of the network that are of a similar level of abstraction for different datasets.
 Understanding these feature representations is still a very active area of research; in fact, a recent paper shows that when training the same deep neural network architecture on different datasets, the learned features are very similar at the beginning of the network until a depth of around two thirds \cite{kornblith2019}.
@@ -893,10 +893,10 @@ In practice, this means that it is only in the last third of the network that it
 
 For many popular deep \gls{cnn} architectures, weight states are available online that were trained for a long period of time on large datasets such as \emph{ImageNet} \cite{deng2009}, a classification dataset with millions of samples that are annotated for thousands of categories.
 Naturally, the \emph{classification head} (the \gls{mlp} after the convolutional and pooling layers that is responsible for classification) must be quite different for the target domain, especially if the target domain has a different number of classes.
-Thus, we simply replace the classification head by a \gls{mlp} that contains the desired number of output units, but use the pretrained weights and architecture for the preceding layers.
-Then, we can train the classification head in isolation by \emph{freezing}\footnote{Freezing a layer means that the weights and biases in that layer are not updated during backpropagation.} the weights in all the other layers.
+Thus, the classification head is simply replaced by a \gls{mlp} that contains the desired number of output units, but the pretrained weights and architecture are used for the preceding layers.
+Then, the classification head can be trained in isolation by \emph{freezing}\footnote{Freezing a layer means that the weights and biases in that layer are not updated during backpropagation.} the weights in all the other layers.
 In essence, this means that the final \gls{mlp} is trained based on the features learnt in the pretrained model.
-Finally, we can train the whole network by unfreezing all layers in a process called \emph{fine-tuning}.
+Finally, the whole network is trained by unfreezing all layers in a process called \emph{fine-tuning}.
 Typically, this is performed with a smaller learning rate because the feature extraction part of the network is significantly more sensitive.
 \Cref{fig:transfer_learning} shows which layers are copied and trained using a simple example.
 \begin{figure}
@@ -976,7 +976,7 @@ Typically, this is performed with a smaller learning rate because the feature ex
             ($(tran_f1)+(2,.375)$) -- ($(tran_f2)+(2,-.375)$)
             node [black,midway,right,xshift=10pt] {\footnotesize train};
     \end{tikzpicture}
-    \caption[Illustration of the transfer learning process for domain adaption in deep neural networks.]{Illustration of the transfer learning process for domain adaption in deep neural networks. The boxes represent different types of layers: convolutional (conv), pooling (pool), and fully connected (fc). In the first instance, we train only the classification head, while the other layers are frozen. Then, we train the whole network.}
+    \caption[Illustration of the transfer learning process for domain adaption in deep neural networks.]{Illustration of the transfer learning process for domain adaption in deep neural networks. The boxes represent different types of layers: convolutional (conv), pooling (pool), and fully connected (fc). In the first instance, training proceeds only in the classification head, while the other layers are frozen. Then, the whole network is trained.}
     \label{fig:transfer_learning}
 \end{figure}
 

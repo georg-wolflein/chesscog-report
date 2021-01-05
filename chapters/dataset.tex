@@ -11,17 +11,17 @@ Perhaps more interestingly, both studies find that skilled players remember \emp
 Thus it stands to reason that in general, highly skilled chess players exhibit a more developed pattern recognition ability for chess positions than novices, but this ability is specific to positions that conform to the rules of chess and are likely to occur in actual games.
 
 This project aims to develop a similar pattern recognition ability using machine learning, and therefore the dataset consists of positions from real chess games. 
-In doing so, we automatically ensure that the chess positions are legal and sensible.
+In doing so, I automatically ensure that the chess positions are legal and sensible.
 
 \section{Chess positions}
 \label{sec:data_chess_positions}
 The positions are generated from a publicly available dataset of 2,851 games played by current World Chess Champion Magnus Carlsen \cite{64squares2020}.
-We randomly select 2\% of all positions (i.e.\ configurations of chess pieces) from all games to be included in the dataset, although duplicate positions are discarded.
+I randomly select 2\% of all positions (i.e.\ configurations of chess pieces) from all games to be included in the dataset, although duplicate positions are discarded.
 A total of 4,888 chess positions are obtained in this manner and saved in \gls{fen} format.
 
 \section{Three-dimensional renders}
 \label{sec:3d_renders}
-In order to obtain realistic images of these chess positions, we employ a three-dimensional model of a chess set on a wooden table. 
+In order to obtain realistic images of these chess positions, I employ a three-dimensional model of a chess set on a wooden table. 
 Chess pieces are placed on the board squares according the given \gls{fen} description. 
 Different camera angles and lighting setups are chosen in a random process in order to maximise diversity in the dataset.
 
@@ -66,8 +66,8 @@ More specifically, the $x$ and $y$ position of a piece in file $i$ and rank $j$ 
         \frac{\mI_2}{10}
     \right).
 \end{equation*}
-Here, we assume that $i$ and $j$ are zero-indexed, i.e.\ the square \emph{a1} corresponds to $i=j=0$.
-The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, we must add one half.
+Here, it is assumed that $i$ and $j$ are zero-indexed, i.e.\ the square \emph{a1} corresponds to $i=j=0$.
+The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, one must add a half.
 Due to the fact that the $x$ and $y$ axes are perpendicular, the two components of $\rvp$ are independent and thus can be modelled with a covariance matrix that is a multiple of the identity matrix $\mI_2$.
 Experiments showed that a variance of $\frac{1}{10}$ achieved realistic results.
 Finally, the piece's rotation about its $z$-axis is sampled from a uniform distribution over the half-open interval $[0, 2\pi)$.
@@ -184,10 +184,11 @@ For each chess position, a random choice is made between two different lighting 
 
 \section{Automated labelling}
 \label{sec:automated_labelling}
-Apart from eliminating the need to manually set up a large number of positions on the chessboard and photographing them, the use of a 3D model for synthetic data generation exhibits another major advantage: we can compute the required labels for the data without human intervention.
+Apart from eliminating the need to manually set up a large number of positions on the chessboard and photographing them, the use of a 3D model for synthetic data generation exhibits another major advantage:
+the required labels can be computed for the data without human intervention.
 In fact, manually labelling the data is usually the most time-consuming part of the entire process.
 
-With each render, we export a file in \gls{json} format alongside the image file containing the following information:
+With each render, a file in \gls{json} format is exported alongside the image file containing the following information:
 \begin{itemize}
     \item the pixel coordinates of the chessboard's four corner points on the rendered image;
     \item the \gls{fen} description of the pieces on the board;
@@ -196,23 +197,23 @@ With each render, we export a file in \gls{json} format alongside the image file
     \item the position and angle of the camera (in the 3D world coordinate system); and
     \item the lighting mode as well as position, angle, and focus point of each light.
 \end{itemize}
-The coordinates of the chessboard's corners can be computed because we know the coordinates of the relevant meshes in the 3D world coordinate system, and we know the world-to-camera-view matrix used to render the image.
+The coordinates of the chessboard's corners can be computed because the coordinates of the relevant meshes are known in the 3D world coordinate system, as is the world-to-camera-view matrix used to render the image.
 It is just a matter of performing some linear algebra to compute the corresponding 2D image coordinates.
-For computing the bounding boxes of the pieces, we simply project all vertices of the corresponding meshes onto the view plane and find the minimum and maximum points in the $x$ and $y$ directions.
+For computing the bounding boxes of the pieces, I simply project all vertices of the corresponding meshes onto the view plane and find the minimum and maximum points in the $x$ and $y$ directions.
 \Cref{fig:data_synthesis_visualisation} provides a visualisation of the automatically generated labels for one sample.
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{3828_data_synthesis}
-    \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. The image is rotated 90° to fit on the page. For each piece, we compute the bounding box and annotate it with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
+    \caption[Visualisation of the automatically generated labels.]{Visualisation of the automatically generated labels. The image is rotated 90° to fit on the page. The bounding box is computed for each piece and annotated with the piece type. The four corners of the chessboard are joined with red lines in the visualisation.}
     \label{fig:data_synthesis_visualisation}
 \end{figure}
-Note that although we do not use the bounding boxes in this project, they are useful for future research if someone should use the dataset to train an object recognition model for inferring chess positions instead of the classification-based approach.
-In this project, we mainly rely on the board's corner coordinates as well as the \gls{fen} description for training.
+Note that although the bounding boxes are not used in this project, they are useful for future research if someone should use the dataset to train an object recognition model for inferring chess positions instead of the classification-based approach.
+This project mainly relies on the board's corner coordinates as well as the \gls{fen} description for training.
 Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
 
 \section{Splitting the dataset}
 \label{sec:split_dataset}
-In order to facilitate a fair evaluation of the chess recognition algorithm once it is completed, we immediately set aside 7\% of the dataset as the so-called \emph{test} set.
+In order to facilitate a fair evaluation of the chess recognition algorithm once it is completed, 7\% of the dataset is immediately set aside as the so-called \emph{test} set.
 This data remains untouched until the very end when it is time to assess the performance of the chess recognition pipeline, in order to prevent \emph{data leakage}: 
 to facilitate a fair evaluation of how the system performs on unseen data, any use of the the test set should be prohibited during training.
 A much smaller portion of the data (3\%) is used for \emph{validation} purposes.

@@ -9,8 +9,8 @@ This chapter highlights and justifies the main implementation decisions in a bri
 For more implementation-specific details, the interested reader may consult the code directly; many important methods are described using docstrings, and online documentation is available, too.
 
 The context survey of implementation tools in \cref{sec:implementation_tools} justifies the use of Python as the main language of implementation.
-We adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-accelerated neural network training and inference due to its prevalence in the research community, and execute such tasks on a Ubuntu 20.04.1 lab machine with a 6GB NVIDIA GeForce GTX 1060 \gls{gpu}.
-For many traditional computer vision methods employed in \cref{sec:board_localisation} such as Canny edge detection and Hough transform, we draw on the popular OpenCV library \cite{opencv2000} which provides efficient implementations of standard computer vision algorithms.
+I adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-accelerated neural network training and inference due to its prevalence in the research community, and execute such tasks on a Ubuntu 20.04.1 lab machine with a 6GB NVIDIA GeForce GTX 1060 \gls{gpu}.
+For many traditional computer vision methods employed in \cref{sec:board_localisation} such as Canny edge detection and Hough transform, I draw on the popular OpenCV library \cite{opencv2000} which provides efficient implementations of standard computer vision algorithms.
 
 \paragraph{Repositories}
 The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \texttt{https://github.com/georgw777/\{repo\}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
@@ -152,9 +152,9 @@ The functionality of inheriting from parent configurations was useful in \cref{s
 Finally, the weights of the exported \gls{cnn} models are supplied alongside the state of the configuration at training time to ensure the same settings (apart from data augmentations) are used for inference.
 
 Another core feature of the configuration system is a custom way of specifying paths.
-Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but we shall still refer to them as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
+Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but shall still be refer to as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
 First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
-Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if we create a path handler for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} would be equivalent to \texttt{/path/to/dataset/images/train}.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if a path handler is created for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} would be equivalent to \texttt{/path/to/dataset/images/train}.
 These \glspl{uri} can be used in the configuration files as well as the code itself; 
 \texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
 
@@ -176,7 +176,7 @@ Apart from rendering the scenes, that same Python script was responsible for gen
 \Cref{sec:user_man_chesscog_data_synthesis} provides instructions for running this script.
 The synthesised dataset itself is provided online for download\footnote{The dataset ($\approx$7GB) is available for download at \url{https://tinyurl.com/chesscog-dataset} or by executing the Python script for downloading it as instructed in \cref{sec:user_man_chesscog_data_synthesis}.}.
 
-In the spirit of reproducibility, we provide the trained models' weights and relevant configuration files (created using \texttt{recap}) for download as well\footnote{The files are quite large, so they are available for download rather than supplying them in the project submission or Git repository.}.
+In the spirit of reproducibility, I provide the trained models' weights and relevant configuration files (created using \texttt{recap}) for download as well\footnote{The files are quite large, so they are available for download rather than supplying them in the project submission or Git repository.}.
 For instructions, refer to \cref{chap:user_man_chesscog}.
 
 \section{Web app (\texttt{chesscog-app})}
@@ -186,7 +186,7 @@ The web app consists of two parts:
     \item the frontend \gls{gui}, written in TypeScript using the popular React framework; and
     \item a simple \gls{rest} \gls{api} for performing the chess position inference via the \texttt{chesscog} package.
 \end{enumerate*}
-React apps are typically run using Node, but since all the code is client-side, we bundle the app to a set of static \gls{html} files that are served using \texttt{nginx}.
+React apps are typically run using Node, but since all the code is client-side, the app is bundled as a set of static \gls{html} files that are served using \texttt{nginx}.
 The backend \gls{api} was developed using the \texttt{fastapi} Python library which implements the \gls{asgi}.
 It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \texttt{/api/predict}, which upon receiving a \gls{http} POST request with an input image, runs the chess recognition pipeline and returns the predicted \gls{fen} position alongside some other information in \gls{json} format.
 \Cref{fig:webapp_overview} provides an overview of the web app's main components and their communication.

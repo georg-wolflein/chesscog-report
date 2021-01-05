@@ -8,17 +8,17 @@
 
 Chess sets may vary significantly in appearance. 
 As a result, \glspl{cnn} trained on one type of chess set might perform poorly in the inference stage when supplied with images of another chess set. 
-This is because we violate the assumption that the training and testing data are drawn from the same distribution.
+This is due to the violation of the assumption that the training and testing data are drawn from the same distribution.
 In light of the theory introduced in \cref{sec:background_transfer_learning}, the natural response is to employ transfer learning in order to fine-tune the \glspl{cnn} to this new data distribution.
-Due to the inherent similarities in the data distribution (the fact that they are chess sets and that the source and target tasks are the same), it stands to reason that we could employ a form of \emph{one-shot} transfer learning; 
+Due to the inherent similarities in the data distribution (the fact that they are chess sets and that the source and target tasks are the same), it stands to reason that I could employ a form of \emph{one-shot} transfer learning; 
 that is, using only a small amount of data in order to adapt the \glspl{cnn} to the new distribution.
 Using the least amount of data necessary makes the system considerably more convenient for the user.
 
-A significant advantage of the chess recognition system as it is developed in \cref{chap:chess_recognition} is the fact that we employ conventional computer vision techniques such as edge and line detection in order to localise the board.
-This means that we are able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
-On the other hand, had we employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
-The fact that we can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a system where we could employ transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
-if the user wants to employ the system to infer a position on their own chess board, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
+A significant advantage of the chess recognition system as it is developed in \cref{chap:chess_recognition} is the fact that it employs conventional computer vision techniques such as edge and line detection in order to localise the board.
+This means that it is able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
+On the other hand, had I employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
+The fact that the system can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a the idea of employing transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
+if the user wants to apply this new system to infer a position on their own chess board, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
 \begin{figure}[h]
     \centering
     \newgame
@@ -30,7 +30,7 @@ The angle of the camera to the chessboard should be in the same interval as used
 This chapter will demonstrate how to effectively fine-tune the occupancy and piece classification \glspl{cnn} based on only two input images.
 
 \section{Dataset}
-First, we require a dataset in order to evaluate the effectiveness of the approach.
+First, a dataset is required in order to evaluate the effectiveness of the approach.
 The training set, consisting of the two images obtained in the aforementioned manner is depicted in \cref{fig:transfer_learning_train_data}.
 \begin{figure}
     \centering
@@ -48,7 +48,7 @@ The training set, consisting of the two images obtained in the aforementioned ma
     \caption{The training dataset used for the transfer learning approach, consisting of only two samples.}
     \label{fig:transfer_learning_train_data}
 \end{figure}
-For this task, we do not employ a validation dataset because the availability of labelled data is limited (it would be unreasonable to ask the user for more photos and then even requiring them to manually annotate the positions).
+For this task, I do not employ a validation dataset because the availability of labelled data is limited (it would be unreasonable to ask the user for more photos and then even requiring them to manually annotate the positions).
 The test dataset consists of 27 images which were obtained by playing a game of chess and taking a photo of the board after each move.
 Each photo is taken from the current player's perspective, so the images alternate between White's and Black's perspectives.
 All samples are associated with a manually labelled \gls{fen} string describing the position.
@@ -78,11 +78,11 @@ While the occupancy classification \gls{cnn} is able to adapt quite well to this
 
 \section{Training}
 The ability to fine-tune the models to this new dataset is mainly constrained by the limited availability of data.
-Since we only have two input images, the occupancy classifier must be fine-tuned using only 128 samples (each board has 64 squares).
+Since I only have two input images, the occupancy classifier must be fine-tuned using only 128 samples (each board has 64 squares).
 Moreover, the piece classifier has only 64 training samples because there are 32 pieces on the board at the starting position.
 While the \gls{cnn} for occupancy detection is a binary classifier, the piece classifier must undertake the more challenging task of distinguishing between a dozen different piece types.
 Furthermore, the data is not balanced between the classes: for example, there are 16 training samples for black pawns, but only two for the black king, and some pieces are more difficult to detect than others (pawns usually look the same from all directions whereas knights do not).
-Given this premise, it is clear that we should employ data augmentations at training time in order to increase the variability of the data and reduce the risk of overfitting.
+Given this premise, it is clear that I should employ data augmentations at training time in order to increase the variability of the data and reduce the risk of overfitting.
 
 \subsection{Data augmentation}
 The use of various types of data augmentation resulted in a net increase in the accuracy of the position inference by 45 percentage points (from 44\% without data augmentation to 89\% with augmentation).
@@ -90,17 +90,17 @@ Furthermore, the mean number errors per position was decreased from 2.3 squares 
 Of course, these augmentations are only applied while training the networks and not at test time.
 The following sections lay out various data augmentations employed to increase the performance of the piece classifier.
 While the occupancy classifier was fine-tuned as well, augmentations were not used as aggresively in that \gls{cnn}'s training process because its accuracy was already quite high.
-These augmentations had little to no effect on the performance, so in the interest of brevity we shall instead focus on the augmentations of the piece classifier.
+These augmentations had little to no effect on the performance, so in the interest of brevity I shall instead focus on the augmentations of the piece classifier.
 
 \subsubsection{Shearing}
-Of all augmentations, we observe the most significant performance gains in the shear transformation, likely due to its similarity to actual perspective distortion.
-In \cref{sec:piece_classification}, we explain that the piece images are transformed (by performing a horizontal flip where appropriate) in a manner such that the bottom left part of the sample always depicts the square on which the piece stands, as can be seen in \cref{fig:white_queens}.
-Consequently, we must carefully design the use of the shear transform to retain this property in broad terms.
+Of all augmentations, the shear transformation exhibits the most significant performance gains, likely due to its similarity to actual perspective distortion.
+In \cref{sec:piece_classification}, I explain that the piece images are transformed (by performing a horizontal flip where appropriate) in a manner such that the bottom left part of the sample always depicts the square on which the piece stands, as can be seen in \cref{fig:white_queens}.
+Consequently, the use of the shear transform must be carefully designed to retain this property in broad terms.
 
 A shear transform is a linear map that displaces pixels from the original image. 
 For the purposes of this project, the magnitude of displacement is proportional to the $y$-axis, and each pixel remains on its row.
 Mathematically, a shear is a function $\vs : \R^2 \to \R^2$ that maps a 2D coordinate to another.
-We define it as
+It is defined as
 \begin{equation}
     \vs(x,y) = \begin{bmatrix}
         x + \lambda y \\ y
@@ -187,10 +187,10 @@ For $\lambda=0$, there is no distortion.
     \label{fig:shear}
 \end{figure}
 \Cref{fig:shear} demonstrates the shear transform on a conceptual level and shows that the bottom left corner of the image is affected the least.
-At each iteration during training, we sample $\lambda$ from a uniform distribution in the interval $[-0.1, 0.25]$.
+At each iteration during training, I sample $\lambda$ from a uniform distribution in the interval $[-0.1, 0.25]$.
 
 \subsubsection{Affine transform}
-Apart from shearing, we employ two more affine transformations: translation and scaling.
+Apart from shearing, I employ two more affine transformations: translation and scaling.
 The random $x$ and $y$ displacements are sampled uniformly in the interval $[-0.03, 0.1]$, meaning that the piece may shift up to 3\% left or down (relative to the total width/height), but up to 10\% up or right.
 Again, this is because the most important information is in the bottom left of the image.
 
@@ -199,8 +199,8 @@ The scale factor for each axis is chosen uniformly in the interval $[0.8, 1.2]$.
 
 \subsubsection{Colour jitter}
 A popular means of image augmentation is inducing colour perturbations.
-We achieve this by jointly varying brightness, contrast, hue, and saturation.
-For each of these factors, we choose the degree of alteration from four separate uniform distributions over intervals that are sensibly selected such that the alteration does not appear too drastic upon visual inspection.
+I achieve this by jointly varying brightness, contrast, hue, and saturation.
+For each of these factors, the degree of alteration is chosen from four separate uniform distributions over intervals that are sensibly selected such that the alteration does not appear too drastic upon visual inspection.
 
 \Cref{fig:augmentations} shows five augmentations of the same input image, drawing attention to the random parameter selection which creates the intended variability in the training images.
 \begin{figure}
@@ -218,11 +218,11 @@ The augmentation pipeline is applied to each image for each batch during trainin
 
 \subsection{Fine-tuning}
 \label{sec:transfer_learning_finetuning}
-To train the networks, we follow a two-stage approach as motivated in \cref{sec:background_transfer_learning} and already employed in \cref{sec:occupancy_classification,sec:piece_classification}.
-First, we train only the classification head with a learning rate of 0.001, and then we decrease the learning rate by a factor of ten and train all layers.
-In the case of the occupancy classifier, we perform 100 iterations over the entire training set at both stages, essentially following the same regime as \cref{sec:occupancy_classification}.
-However, for the piece classifier, we execute an additional 50 iterations in the second stage to ensure reliable convergence.
-As expected, we are unable to achieve gains in the occupancy classifier's accuracy because it already achieved such a strong performance from the outset.
+To train the networks, I follow a two-stage approach as motivated in \cref{sec:background_transfer_learning} and already employed in \cref{sec:occupancy_classification,sec:piece_classification}.
+First, I train only the classification head with a learning rate of 0.001, and then I decrease the learning rate by a factor of ten and train all layers.
+In the case of the occupancy classifier, I perform 100 iterations over the entire training set at both stages, essentially following the same regime as \cref{sec:occupancy_classification}.
+However, for the piece classifier, I execute an additional 50 iterations in the second stage to ensure reliable convergence.
+As expected, the system is unable to achieve gains in the occupancy classifier's accuracy because it already achieved such a strong performance from the outset.
 In fact, the loss is already below 0.001 at the beginning of training which can be seen in \cref{fig:transfer_learning_loss_accuracy_occupancy}.
 \begin{figure}
     \centering
@@ -328,7 +328,7 @@ Key indicators for evaluating the performance of the chess recognition pipeline 
     \caption{Performance of the fine-tuned chess recognition pipeline on the transfer learning dataset.}
     \label{tbl:transfer_learning_results}
 \end{table}
-Comparing that to \cref{tbl:transfer_learning_results_without_finetuning}, we experience drastic improvements in all aspects.
+Comparing that to \cref{tbl:transfer_learning_results_without_finetuning}, the system experiences drastic improvements in all aspects.
 Even in absolute terms, the results are very strong and a testament to the effectiveness of using transfer learning and careful data augmentation in order to adapt to a slightly different data distribution.
 The mean number of incorrect squares per board decreased by almost two orders of magnitude to $0.11$.
 This allowed an increase in the percentage of correctly identified positions from 0\% to 89\%. 

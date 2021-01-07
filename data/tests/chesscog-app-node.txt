@@ -1,0 +1,15 @@
+$ npm test --watchAll=false
+
+> chesscog-app@0.1.0 test ~/chesscog-app/app
+> react-scripts test
+
+PASS src/components/FileUpload.test.tsx
+PASS src/components/Version.test.tsx
+PASS src/components/Recognition.test.tsx
+PASS src/components/App.test.tsx
+
+Test Suites: 4 passed, 4 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        2.561 s
+Ran all test suites

@@ -1,7 +1,40 @@
+% !TeX root = ./testing.tex
 \documentclass[../../report.tex]{subfiles}
 
 \begin{document}
 
 \chapter{Testing summary}
+
+\section{Automated testing}
+All three repositories contain automated tests.
+Instructions for executing these tests are provided in \cref{sec:recap_tests,sec:chesscog_tests,sec:chesscogapp_tests}.
+As explained in \cref{chap:implementation}, they are run on every commit by a \gls{ci} pipeline.
+\Cref{fig:tests_recap,fig:tests_chesscog,fig:tests_chesscogapp} show the command line output obtained when running each repository's test suite manually.
+\begin{figure}
+    \verbatiminput{data/tests/recap.txt}
+    \caption{Automated tests for the \texttt{recap} package.}
+    \label{fig:tests_recap}
+\end{figure}%
+\begin{figure}
+    \verbatiminput{data/tests/chesscog.txt}
+    \caption{Automated tests for the \texttt{chesscog} package.}
+    \label{fig:tests_chesscog}
+\end{figure}%
+\begin{figure}
+    \begin{subfigure}[b]{\textwidth}
+        \verbatiminput{data/tests/chesscog-app.txt}
+        \caption{tests for the backend \acs{api} (Python)}
+    \end{subfigure}
+    \bigskip\par
+    \begin{subfigure}[b]{\textwidth}
+        \verbatiminput{data/tests/chesscog-app-node.txt}
+        \caption{tests for the frontend \acs{gui} (Node)}
+    \end{subfigure}
+    \caption{Automated tests for the web app.}
+    \label{fig:tests_chesscogapp}
+\end{figure}%
+These outputs show that the submitted versions of each of the packages pass all the tests.
+The Python tests were written using the \texttt{pytest} framework and the frontend tests for the web app use \texttt{jest} for Node.
+To test the frontend \gls{gui}, the \texttt{jest} tests mock up the backend \gls{api} with fake responses in order to test that the desired output is rendered to the \gls{dom}.
 
 \end{document}

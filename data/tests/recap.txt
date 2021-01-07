@@ -1,0 +1,11 @@
+$ python -m pytest
+====================== test session starts =======================
+platform darwin -- Python 3.8.6, pytest-6.2.1, py-1.10.0, pluggy-0.13.1
+rootdir: ~/recap
+collected 14 items                                               
+
+tests/test_config.py ...                                   [ 21%]
+tests/test_path_manager.py ..........                      [ 92%]
+tests/test_version.py .                                    [100%]
+
+======================= 14 passed in 0.07s =======================

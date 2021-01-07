@@ -1,0 +1,17 @@
+$ python -m pytest
+====================== test session starts =======================
+platform darwin -- Python 3.8.6, pytest-6.2.1, py-1.10.0, pluggy-0.13.1
+rootdir: ~/chesscog
+collected 57 items                                               
+
+tests/test_version.py .                                    [  1%]
+tests/classifiers/test_download_models.py ..               [  5%]
+tests/core/test_coordinates.py ..                          [  8%]
+tests/core/test_io.py .                                    [ 10%]
+tests/core/test_registry.py .....                          [ 19%]
+tests/core/test_statistics.py ......                       [ 29%]
+tests/core/dataset/test_transforms.py ...                  [ 35%]
+tests/corner_detection/test_detect_corners.py ............ [ 56%]
+.........................                                  [100%]
+
+======================= 57 passed in 2.01s =======================

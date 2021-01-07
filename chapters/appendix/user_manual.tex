@@ -1,3 +1,4 @@
+% !TeX root = ./user_manual.tex
 \documentclass[../../report.tex]{subfiles}
 
 \begin{document}
@@ -5,29 +6,38 @@
 \chapter{User manual: \texttt{recap} package}
 \label{chap:user_man_recap}
 
+\section{Run automated tests}
+\label{sec:recap_tests}
+
 \section{Documentation}
 \label{sec:recap_documentation}
 
 \chapter{User manual: \texttt{chesscog}}
 \label{chap:user_man_chesscog}
 
+\section{Run automated tests}
+\label{sec:chesscog_tests}
+
 \section{Documentation}
 \label{sec:chesscog_documentation}
 
 \section{Data synthesis}
 \label{sec:user_man_chesscog_data_synthesis}
-\begin{verbatim}
+\begin{minted}{bash}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m ensurepip
 ./python3.7m -m pip install --upgrade pip
 ./python3.7m -m pip install python-chess
 blender chess_model.blend --background --python scripts/synthesize_data.py
-\end{verbatim}
+\end{minted}
 %TODO: download dataset
 %TODO: explain JSON
 
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}
+
+\section{Run automated tests}
+\label{sec:chesscogapp_tests}
 
 
 \end{document}

@@ -1,14 +1,16 @@
+% !TeX root = ./report.tex
 \documentclass[a4paper,oneside]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[british]{babel}
 \usepackage[table]{xcolor}
 \usepackage{quotchap}
 \usepackage{breakcites} % don't let citations break out of the text frame
-%\usepackage{microtype} % get rid of some frame busts automatically
 \usepackage[font=small]{caption}
 \usepackage{csquotes}
 \usepackage{footnote}
 \usepackage{fancyhdr}
+\usepackage{minted}
+\usepackage{verbatim}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{xfrac}
@@ -152,6 +154,7 @@
 
 \setcounter{tocdepth}{1}
 \setcounter{secnumdepth}{3}
+\counterwithout{footnote}{chapter} % don't reset footnotes at every chapter
 
 \allowdisplaybreaks
 

@@ -13,7 +13,7 @@ I adopt the PyTorch framework \cite{pytorch2019} to facilitate \acs{gpu}-acceler
 For many traditional computer vision methods employed in \cref{sec:board_localisation} such as Canny edge detection and Hough transform, I draw on the popular OpenCV library \cite{opencv2000} which provides efficient implementations of standard computer vision algorithms.
 
 \paragraph{Repositories}
-The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \texttt{https://github.com/georgw777/\{repo\}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
+The implementation of this project took place in three main repositories, all of which were made public on GitHub\footnote{The code of each of these repositories is supplied alongside the submission, but can also be accessed at \path{https://github.com/georgw777/{repo}} where \texttt{\{repo\}} is to be substituted with the repository's name. The author of this report was the sole contributor to these repositories.}:
 \begin{itemize}
     \item \texttt{recap}\footnote{\emph{Recap} is an acronym for REproducible Configurations for Any Project, and is published as a Python package on \acs{pypi} at \url{http://pypi.org/project/recap}.}: a Python package for managing configurations and files associated with machine learning experiments;
     \item \texttt{chesscog}\footnote{The name \texttt{chesscog} is derived from its purpose: `chess recognition'.}: Python implementation of all core components of the chess recognition system: data synthesis (\cref{chap:data_synthesis}), the recognition pipeline including training and evaluation (\cref{chap:chess_recognition}), and the transfer learning approach to adapt to new chess sets (\cref{chap:adapting}); and
@@ -119,7 +119,7 @@ This is especially useful due to the fact that the chess recognition system was 
             \draw[thickarrow] (1,-8.5) -- +(0,2);
         \end{tikzpicture}
     }
-    \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency. The current status of each pipeline is available at \texttt{https://github.com/georgw777/\{repo\}/actions} where \texttt{\{repo\}} is to be substituted with the repository’s name.}
+    \caption[Overview of \acs{ci}/\acs{cd} pipelines.]{Overview of \acs{ci}/\acs{cd} pipelines. Trapeziums represent actions initiated by the developer, rectangles correspond to automated processes executed by the pipeline, and the thick arrows represent logical dependency. The current status of each pipeline is available at \path{https://github.com/georgw777/{repo}/actions} where \texttt{\{repo\}} is to be substituted with the repository’s name.}
     \label{fig:cicd}
 \end{figure}
 Whenever a release is published in the \texttt{chesscog} repository, it notifies the \texttt{chesscog-app} repository which opens a \gls{pr} where the version of the \texttt{chesscog} dependency is updated.
@@ -154,7 +154,7 @@ Finally, the weights of the exported \gls{cnn} models are supplied alongside the
 Another core feature of the configuration system is a custom way of specifying paths.
 Instead of using relative or absolute paths\footnote{Both variants are associated with issues: absolute paths may differ between machines, and relative paths break when certain dependencies (such as the dataset) are located somewhere else.} in the configuration files, \texttt{recap} utilises a format similar\footnote{The format of \texttt{recap} paths does not completely follow the requirements of a \gls{uri}, but shall still be refer to as `\texttt{recap} \glspl{uri}'.} to \glspl{uri} (although the use of conventional paths is still possible).
 First, the user registers so-called \emph{path handlers} that translate specific \texttt{recap} \glspl{uri} to absolute or relative paths.
-Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if a path handler is created for the \texttt{data://} scheme pointing to \texttt{/path/to/dataset}, the \texttt{recap} \gls{uri} \texttt{data://images/train} would be equivalent to \texttt{/path/to/dataset/images/train}.
+Path handlers are registered for a specific \gls{uri} scheme\footnote{The scheme of a \gls{uri} is the part before the colon and double forward slash (\texttt{://}).}, so if a path handler is created for the \path{data://} scheme pointing to \path{/path/to/dataset}, the \texttt{recap} \gls{uri} \path{data://images/train} would be equivalent to \path{/path/to/dataset/images/train}.
 These \glspl{uri} can be used in the configuration files as well as the code itself; 
 \texttt{recap} provides the \texttt{URI} class which is fully compatible with Python's native \texttt{pathlib.Path} interface and lazily translates the \glspl{uri} to paths on the host system.
 
@@ -188,7 +188,7 @@ The web app consists of two parts:
 \end{enumerate*}
 React apps are typically run using Node, but since all the code is client-side, the app is bundled as a set of static \gls{html} files that are served using \texttt{nginx}.
 The backend \gls{api} was developed using the \texttt{fastapi} Python library which implements the \gls{asgi}.
-It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \texttt{/api/predict}, which upon receiving a \gls{http} POST request with an input image, runs the chess recognition pipeline and returns the predicted \gls{fen} position alongside some other information in \gls{json} format.
+It provides one main route\footnote{There is an interactive \gls{api} documentation available at \url{https://www.chesscog.com/api/docs}.}, \path{/api/predict}, which upon receiving a \gls{http} POST request with an input image, runs the chess recognition pipeline and returns the predicted \gls{fen} position alongside some other information in \gls{json} format.
 \Cref{fig:webapp_overview} provides an overview of the web app's main components and their communication.
 \begin{figure}
     \makebox[\textwidth][c]{

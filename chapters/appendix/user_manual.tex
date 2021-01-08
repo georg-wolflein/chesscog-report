@@ -6,22 +6,169 @@
 \chapter{User manual: \texttt{recap} package}
 \label{chap:user_man_recap}
 
-\section{Run automated tests}
+\emph{Recap} is a tool for providing \emph{REproducible Configurations for Any Project}.
+Research should be reproducible.
+Especially in deep learning, it is important to keep track of hyperparameters and configurations used in experiments.
+This package aims at making that easier.
+
+\section{Installing}
+\label{sec:recap_installation}
+Before installing this package, ensure that Python version 3.6 or greater is installed on your system.
+Furthermore, ensure that the Python package installer \texttt{pip} is installed.
+
+The preferred way of installing this package is to install it directly from \gls{pypi} by running the command:
+\begin{minted}{bash}
+pip install recap
+\end{minted}
+
+However, if you wish to install it from source, you may do so using the \emph{Poetry} tool for managing Python dependencies:
+\begin{minted}{bash}
+pip install poetry
+cd recap
+poetry install
+poetry shell
+\end{minted}
+Using Poetry will automatically create a virtual Python environment for this project.
+Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
+Ensure that you use this shell when running any of the other commands below.
+
+Finally, if you just want to install \texttt{recap} globally without using Poetry, you may instead run:
+\begin{minted}{bash}
+cd recap
+pip install .
+\end{minted}
+
+\section{Usage}
+Recap provides two top-level concepts that can be imported as follows:
+\begin{minted}{python3}
+from recap import URI, CfgNode as CN
+\end{minted}
+
+The \py{CfgNode} is a subclass of \py{CfgNode} from the \emph{yacs} package.
+It provides some additional features for parsing configurations that are inherited between files which is not possible with yacs.
+
+Recap's \py{URI} class provides a mechanism for handling logical paths within your project more conveniently with an interface that is fully compatible with \py{pathlib.Path}.
+
+\subsection{\Acs{yaml} configurations}
+Configurations are defined just like in yacs, except that you need to import the \py{CfgNode} class from the recap package instead of yacs.
+Consider the following \gls{yaml} configuration that sets default values for all configuration options we will use in our project.
+We shall name it \texttt{\_base.yaml} because our experiments will build on these values.
+\begin{minted}{yaml}
+SYSTEM:
+  NUM_GPUS: 4
+  NUM_WORKERS: 2
+TRAIN:
+  LEARNING_RATE: 0.001
+  BATCH_SIZE: 32
+  SOME_OTHER_HYPERPARAMETER: 10
+\end{minted}
+
+The equivalent configuration can be obtained programatically like so:
+
+\begin{minted}{python3}
+from recap import CfgNode as CN
+
+cfg = CN()
+cfg.SYSTEM = CN()
+cfg.SYSTEM.NUM_GPUS = 4
+cfg.SYSTEM.NUM_WORKERS = 2
+cfg.TRAIN = CN()
+cfg.TRAIN.LEARNING_RATE = 1e-3
+cfg.TRAIN.BATCH_SIZE = 32
+cfg.TRAIN.SOME_OTHER_HYPERPARAMETER = 10
+print(cfg)
+\end{minted}
+
+\subsubsection{Inheriting configurations}
+Recap provides functionality for inheriting configuration options from other configuration files by setting the top-level \mintinline{yaml}{_BASE_} key.
+So, we could create a configuration file \path{experiment_1.yaml} for an experiment where we try a different learning rate and batch size:
+
+\begin{minted}{yaml}
+_BASE_: _base.yaml
+
+TRAIN:
+  LEARNING_RATE: 1e-2
+  BATCH_SIZE: 64
+\end{minted}
+
+In our code, when we want to load the experiment configuration, we would use the \py{recap.CfgNode.load_yaml_with_base()} function:
+
+\begin{minted}{python3}
+from recap import CfgNode as CN
+
+cfg = CN.load_yaml_with_base("experiment_1.yaml")
+
+print(cfg)
+
+# Will output:
+"""
+SYSTEM:
+  NUM_GPUS: 4
+  NUM_WORKERS: 2
+TRAIN:
+  LEARNING_RATE: 0.01
+  BATCH_SIZE: 64
+  SOME_OTHER_HYPERPARAMETER: 10
+"""
+\end{minted}
+Note that the \mintinline{yaml}{_BASE_} keys can be arbitrarily nested;
+however, circular references are prohibited.
+
+\subsection{Logical \acsp{uri} and the path manager}
+Recap includes a path manager for conveniently specifying paths to logical entities.
+The path strings are set up like a \gls{uri} where the scheme (i.e.\ \texttt{http} in the path string \texttt{http://google.com}) refers to a logical entity.
+Each such entity needs to be set up as a \py{PathTranslator} that can translate the logical \gls{uri} path to a physical path on the file system.
+
+For example, we could set up a path translator for the data scheme to refer to the the path of a dataset on our file system located at \path{/path/to/dataset}. Then the recap URI \path{data://train/abc.txt} would be translated to the local path \path{/path/to/dataset/train/abc.txt}.
+The simplest way of setting that up is using the \py{register_translator} function (although more complex setups are possible with the \py{PathTranslator} class, allowing you to download files from the internet, for example):
+
+\begin{minted}{python3}
+from recap.path_manager import register_translator
+from pathlib import Path
+
+register_translator("data", Path("/path/to/dataset"))
+\end{minted}
+Then, we can use the \py{recap.URI} class just like any \py{pathlib.Path} object:
+\begin{minted}{python3}
+from recap import URI
+
+my_uri = URI("data://train/abc.txt")
+# Here, str(my_uri) == "/path/to/dataset/train/abc.txt"
+
+with my_uri.open("r") as f:
+    print(f.read())
+\end{minted}
+
+
+\subsubsection{Logical \acsp{uri} in inherited configurations}
+The \py{recap.URI} interface is fully compatible with nested configurations.
+This means that you can use recap \glspl{uri} within the \mintinline{yaml}{_BASE_} field for inheriting configurations.
+For example, you could register a path translator for the config scheme and then include \mintinline{yaml}{_BASE_: config://_base.yaml} in your configuration files.
+
+\section{Automated tests}
 \label{sec:recap_tests}
+To run the automated tests, navigate to the \texttt{recap} folder and then run
+\begin{minted}{bash}
+python -m pytest
+\end{minted}
+Note that this will not work if the \texttt{recap} package was installed directly via \texttt{pip} because that will not copy over the \texttt{tests} folder.
+Instead, use one of the other two installation options given in \cref{sec:recap_installation}
+Ensure that \texttt{poetry shell} is run before executing this command if the package was installed via Poetry.
+A screenshot of the output is provided in \cref{fig:tests_recap}.
 
 \section{Documentation}
 \label{sec:recap_documentation}
+More detailed documentation than this user manual is available at \url{https://recap.readthedocs.io}.
+The package documentation includes detailed explanations of each of the submodules, methods, and classes.
+The same documentation is provided in \gls{html} format alongside this submission at \path{docs/recap/index.html}.
 
 \chapter{User manual: \texttt{chesscog}}
 \label{chap:user_man_chesscog}
 
-\section{Run automated tests}
-\label{sec:chesscog_tests}
+\section{Installing}
 
-\section{Documentation}
-\label{sec:chesscog_documentation}
-
-\section{Data synthesis}
+\section{Usage}
+\subsection{Data synthesis}
 \label{sec:user_man_chesscog_data_synthesis}
 \begin{minted}{bash}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
@@ -33,10 +180,16 @@ blender chess_model.blend --background --python scripts/synthesize_data.py
 %TODO: download dataset
 %TODO: explain JSON
 
+\section{Automated tests}
+\label{sec:chesscog_tests}
+
+\section{Documentation}
+\label{sec:chesscog_documentation}
+
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}
 
-\section{Run automated tests}
+\section{Automated tests}
 \label{sec:chesscogapp_tests}
 
 

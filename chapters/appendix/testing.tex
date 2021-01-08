@@ -4,9 +4,26 @@
 \begin{document}
 
 \chapter{Testing summary}
+The chess recognition pipeline has been extensively tested. 
+Three main methods of testing were employed to ensure the quality of the system: 
+\begin{enumerate}
+    \item manual end-to-end testing by means of the web app demonstration;
+    \item performing an empirical evaluation of the different components in the pipeline and the system as a whole; and
+    \item running automated unit tests in all three repositories.
+\end{enumerate}
+For the first point, \cref{fig:chesscogapp_inference} shows the result of a chess position inference using the web app.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{screenshot_chesscogapp_inference}
+    \caption{Screenshot of the chess position inference using the web app.}
+    \label{fig:chesscogapp_inference}
+\end{figure}
+The performance of the system was manually tested on a number of different chess positions from the test set in this fashion.
+As per the second point, \cref{chap:chess_recognition,chap:adapting,chap:evaluation} carry out empirical performance evaluations and analyse the results.
+Finally, the next section provides some more details about the automated testing procedure as per the last point.
 
 \section{Automated testing}
-All three repositories contain automated tests.
+All three repositories contain automated unit tests.
 Instructions for executing these tests are provided in \cref{sec:recap_tests,sec:chesscog_tests,sec:chesscogapp_tests}.
 As explained in \cref{chap:implementation}, they are run on every commit by a \gls{ci} pipeline.
 \Cref{fig:tests_recap,fig:tests_chesscog,fig:tests_chesscogapp} show the command line output obtained when running each repository's test suite manually.

@@ -165,11 +165,39 @@ The same documentation is provided in \gls{html} format alongside this submissio
 \chapter{User manual: \texttt{chesscog}}
 \label{chap:user_man_chesscog}
 
+\emph{Chesscog} combines traditional computer vision techniques with deep learning to identify chess positions from photos.
+This repository contains all the code required to execute the chess recognition pipeline end-to-end as well as to train and fine-tune the \glspl{cnn} for unseen chess sets.
+Furthermore, the evaluation scripts for the experiments conducted for this report are available in this package.
+
 \section{Installing}
+Before installing this package, ensure that Python version 3.7 or greater is installed on your system.
+Furthermore, ensure that the Python package installer \texttt{pip} is installed.
+Then, navigate to the \texttt{chesscog} folder in the submission, or run \mintinline{bash}{git clone https://github.com/georgw777/chesscog.git}.
+
+The easiest way to install the \texttt{chesscog} package and its dependencies is to run:
+\begin{minted}{bash}
+pip install .
+\end{minted}
+
+However, if you wish to install it using the \emph{Poetry} tool for managing Python dependencies, first ensure that Poetry is installed by running \mintinline{bash}{pip install poetry} and then run:
+\begin{minted}{bash}
+cd chesscog
+poetry install
+poetry shell
+\end{minted}
+Using Poetry will automatically create a virtual Python environment for this project.
+Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
+Ensure that you use this shell when running any of the other commands below.
 
 \section{Usage}
-\subsection{Data synthesis}
-\label{sec:user_man_chesscog_data_synthesis}
+
+As explained in \cref{sec:chesscog_implementation}, many Python files simultaneously act as scripts.
+The following subsections provide instructions for running these scripts in order to carry out the main tasks of the chess recognition system.
+The scripts themselves are explained in more detail in the documentation (see \cref{sec:chesscog_documentation}), but are also self-documenting when supplied with the \texttt{--help} command line option.
+
+\subsection{Dataset}
+\label{sec:user_man_chesscog_dataset}
+\subsubsection{Data synthesis}
 \begin{minted}{bash}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m ensurepip
@@ -177,8 +205,22 @@ cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m pip install python-chess
 blender chess_model.blend --background --python scripts/synthesize_data.py
 \end{minted}
+
+\subsubsection{Downloading and splitting the dataset}
 %TODO: download dataset
+
+\subsubsection{Format of the dataset}
 %TODO: explain JSON
+
+\subsection{Models}
+\subsubsection{Downloading the trained models}
+\subsubsection{Train the models yourself}
+
+\subsection{Performing an inference}
+
+\subsection{Performance evaluation}
+
+\subsection{Adapting to an unseen chess set}
 
 \section{Automated tests}
 \label{sec:chesscog_tests}

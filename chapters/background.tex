@@ -50,7 +50,7 @@ represents the corresponding feature vectors.
 Classification is a task that finds greater applicability within this project.
 As the name implies, a classification model tries to determine to which category each input sample belongs from a predefined set of classes $\sC$.
 To ease notation, let $\sC=\{1, 2, \dots, C\}$ where $C$ is the total number of classes.
-In practical terms, the elements in $\sC$ could represent any type of object, and in that case all that is required is a one-to-one mapping (bijection) from those objects to $\sC$.
+In practical terms, the elements in $\sC$ could represent any type of object, and in that case, all that is required is a one-to-one mapping (bijection) from those objects to $\sC$.
 Furthermore, in the context of this report, each input sample can only belong to one class, and the output of the model is interpreted to represent the probabilities of the input sample belonging to each of the classes $\sC$.
 Therefore, a classification model is represented by a vector-valued function
 $\vf : \mathbb{R}^n \rightarrow [0,1]^{\abs{\sC}}$
@@ -59,7 +59,7 @@ instead of a scalar function as in \cref{eq:reg_model}, namely
     \label{eq:cla_model}
     \vf(\vx) = \vyhat = \vy + \vec{\epsilon}.
 \end{equation}
-Here, $\vf(\vx)$ actually represents a \gls{pmf} where the $i$\textsuperscript{th} component $\hat{y}_i$ of the output vector $\vyhat$ represents the probability that the input sample $\vx$ belongs to the class $i\in \sC$.
+Here, $\vf$ actually represents a \gls{pmf} where the $i$\textsuperscript{th} component $\hat{y}_i$ of the output vector $\vyhat$ represents the probability that the input sample $\vx$ belongs to the class $i\in \sC$.
 It follows that
 \begin{equation}
     \label{eq:pmf}
@@ -449,7 +449,7 @@ The main idea is as follows:
             \node[below,align=center] at (1.6,{g(1.6)}) {global minimum};
         \end{axis}
     \end{tikzpicture}
-    \caption[An illustration gradient descent training on an error-weight surface.]{An illustration gradient descent training on an error-weight surface with only one parameter (not drawn to scale). Gradient descent minimises the objective loss function and converges to a local minimum. In practice, deep neural networks have millions of parameters, resulting in a high-dimensional error surface, and local minima often turn out to be `good enough' in that their error is only slightly higher than the global minimum \cite{lecun2015}.}
+    \caption[Illustration of gradient descent training on an error-weight surface.]{Illustration of gradient descent training on an error-weight surface with only one parameter (not drawn to scale). Gradient descent minimises the objective loss function and converges to a local minimum. In practice, deep neural networks have millions of parameters, resulting in a high-dimensional error surface, and local minima often turn out to be `good enough' in that their error is only slightly higher than the global minimum \cite{lecun2015}.}
     \label{fig:gradient_descent_local_minimum}
 \end{figure}
 
@@ -458,7 +458,7 @@ The algorithm can, of course, be generalised to classification problems with mul
 
 Let $\left\{\langle \vx_i, y_i \rangle \right\}_{i=1}^m$ be a labelled regression dataset as defined in \cref{sec:regression}.
 First of all, it is necessary to introduce a measure indicating how good the predictions are.
-For simplicity, I shall use the \gls{mse}, although the reader should note that the cross-entropy loss is preferred for classification problems.
+For simplicity, I use the \gls{mse}, although the reader should note that the cross-entropy loss is preferred for classification problems.
 The \gls{mse} of a set of predictions $\vyhat$ is the average squared difference between the predictions and targets,
 \begin{equation}
     \label{eq:mean_squared_error}
@@ -475,7 +475,7 @@ that behaves similarly to \cref{eq:mean_squared_error} in that reducing the loss
 
 \subsubsection{\Glsentrylong{slp}}
 Let us consider a \gls{slp} with one output unit for simplicity. 
-The loss can easily be expressed in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
+The loss can be expressed in terms of the weights and biases by combining \cref{eq:slp,eq:mse} as
 \begin{equation}
     L = \frac{1}{2} \sum_{i=1}^m{\left[g\left(
         \vx_i \vw + b
@@ -498,7 +498,7 @@ The partial derivative of the loss with respect to the bias is
         g' \left(\vx_i\vw+b\right)
     },
 \end{align}
-and similarly one can differentiate with respect to the weights:
+and similarly, differentiating with respect to the weights gives
 \begin{align}
     \label{eq:backprop_dL_dw}
     \frac{\partial L}{\partial \vw}
@@ -526,11 +526,11 @@ Mathematically, this is expressed as
 
 \subsubsection{\Glsentrylong{mlp}}
 \label{sec:mlp_training}
-To apply backpropagation in \glspl{mlp}, one must first compute the gradient of the loss with resepect to each trainable parameter (i.e.\ each layer's weights and biases).
-In other words, one must compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$, but the exact derivation is left as an exercise to the reader.
+To apply backpropagation in \glspl{mlp}, the first step is to compute the gradient of the loss with resepect to each trainable parameter (i.e.\ each layer's weights and biases).
+In other words, it is necessary to compute $\frac{\partial L}{\partial \mW_l}$ and $\frac{\partial L}{\partial \vb_l}$ for each layer $l=1,2,\dots,L$, but the exact derivation is left as an exercise to the reader.
 The main idea is realising that because \glspl{mlp} are simply nested \glspl{slp}, the chain rule can be applied when calculating the derivative of \cref{eq:mlp}.
 
-Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once the gradients are computed, the next step is to update the weights and biases by applying the rule
+Similar to \cref{eq:backprop_update_weights,eq:backprop_update_bias}, once the gradients are computed, the weights and biases are updated by applying the rule
 \begin{align}
     \label{eq:backprop_mlp_update_weights}
     \mW_l &\gets \mW_l - \alpha \frac{\partial L}{\partial \mW_l}(\mW_l),\\
@@ -573,12 +573,12 @@ They are comprised of \emph{convolutional} and \emph{pooling} layers, which I sh
 \label{sec:convolutional_layers}
 Convolutional layers are the most important component in a \gls{cnn}.
 However, the term \emph{convolution} is actually used as a misnomer to mean \emph{cross-correlation} in the context of \glspl{cnn}.
-Both terms refer to a mathematical operation where a matrix (known as \emph{filter} or \emph{kernel}) is slid over the input image and compute the sum of products at each location.
+Both terms refer to a mathematical operation where a matrix (known as \emph{filter} or \emph{kernel}) is slid over the input image and the sum of products is computed at each location.
 A convolution operation is equivalent to cross-correlation if the filter matrix is pre-rotated by 180 degrees.
-For the remainder of this report I shall follow the convention in machine learning and use the term convolution to refer to cross-correlation.
+For the remainder of this report, I shall follow the convention in machine learning and use the term convolution to refer to cross-correlation.
 
 Each neuron in the first convolutional layer is connected to a square region of pixels (the receptive field) from the input image, as opposed to being connected to the entire input image which is the case in fully-connected \glspl{mlp}.
-Similarly, subsequent layers' neurons connect only to a square region of neurons in the previous layer, so that the network begins to form a hierarchy of filters.
+Similarly, subsequent layers' neurons connect only to a square region of neurons in the respective previous layer, so that the network begins to form a hierarchy of filters.
 
 Let us consider a neuron in the first convolutional layer.
 It is connected to a square patch of pixels from the input image (for now, let us consider only one colour channel), so let us represent this patch using the $k\times k$ matrix $\mP$ where $k$ indicates the side length of the square.
@@ -790,10 +790,10 @@ There are a number of hyperparameters associated with convolutional layers that 
 \begin{itemize}
     \item the filter size $k$;
     \item the padding $p$ which indicates by how many rows/columns the input matrix is extended in each direction, setting these new values to zero (\cref{fig:conv_simple,fig:conv_multiple_channels} use $p=0$);
-    \item the stride $s$, indicating how many pixels the sliding window is moved each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
+    \item the strideby how many pixels the sliding window is moved each time (\cref{fig:conv_simple,fig:conv_multiple_channels} use $s=1$); and
     \item the desired number of output channels $c_\text{out}$.
 \end{itemize}
-Of course, the activation function $g$ may also be regarded as a hyperparameter, but it has no effect on the size of the layer's output.
+Of course, the activation function $g$ may also be regarded as a hyperparameter, but it has no effect on the dimensions of the layer's output.
 Let us consider a convolutional layer with an input of spatial size $h_\text{in} \times w_\text{in}$ and $c_\text{in}$ channels.
 By examining how the spatial output dimensions correspond to the input size and hyperparameters in \cref{fig:conv_simple}, one can derive the equations
 \begin{equation}
@@ -809,14 +809,14 @@ Notice that the number of trainable parameters is simply the number of elements 
 One output channel requires $c_\text{in}$ filters as shown in \cref{fig:conv_multiple_channels}.
 So, $c_\text{out}$ output channels require $c_\text{in} \cdot c_\text{out}$ filters, and since each filter is a $k \times k$ matrix, the number of kernel parameters is
 $c_\text{in} \cdot c_\text{out} \cdot k^2$.
-Each filter is associated with a bias that is trainable, so the total number of trainable parameters is 
+Furthermore, each filter is associated with a bias that is trainable, so the total number of trainable parameters is 
 $c_\text{in} \cdot c_\text{out} \cdot (k^2+1)$.
-In contrast to \glspl{mlp}, this is independent of the spatial size of the input ($h_\text{in} \times w_\text{in}$), and since the value of $k$ is typically quite small, the number of trainable parameters is orders of magnitude smaller than that of a layer in a \gls{mlp}.
+In contrast to \glspl{mlp}, this is independent of the input's spatial size ($h_\text{in} \times w_\text{in}$), and since the value of $k$ is typically quite small, the number of trainable parameters is orders of magnitude smaller than that of a layer in a \gls{mlp}.
 As such, the weights in a \gls{cnn} are considered to be \emph{shared} because the filters are slid over the entire input and can therefore identify similar features in different spatial locations.
 
 \subsection{Pooling layers}
 To understand the motivation of pooling layers, I shall first examine the general architecture of a \gls{cnn}.
-Typically, a \gls{cnn} consists of a number of convolutional and pooling layers followed by a small \gls{mlp} consisting of one or two fully-connected layers.
+Typically, a \gls{cnn} consists of a number of convolutional and pooling layers followed by a small \gls{mlp} that has one or two fully-connected layers.
 Since the output of the convolutional/pooling layers is a tensor of rank three (more specifically, there are $c_\text{out}$ feature maps, each of size $h_\text{out} \times w_\text{out}$), it must first be flattened so that all elements are concatenated into a vector.
 However, to ensure that this vector contains useful information for classification, it is preferrable to have a relatively small spatial size $h_\text{out} \times w_\text{out}$, but a large number of channels. 
 The reasoning for this is twofold:
@@ -825,7 +825,7 @@ The reasoning for this is twofold:
     \item a high number of channels allows the \gls{cnn} to detect many different useful features. 
 \end{enumerate*}
 Pooling layers provide a means of reducing the spatial size while keeping the number of channels constant.
-They are used immediately after convolutional layers and typically occur less often than convolutional layers in \gls{cnn} architectures because their excessive use prevents the network from learning any useful features.
+They are used immediately after convolutional layers and typically occur less often than convolutional layers in a \gls{cnn} architecture because their excessive use prevents the network from learning any useful features.
 This is because pooling layers remove some information.
 
 Pooling is applied on a per-channel basis, so the number of input channels is equal to the number of output channels.
@@ -880,16 +880,16 @@ In practice, it is common to set $s=k=2$ and use no padding in order to halve th
 The underlying motivation behind transfer learning is to reuse knowledge gained in one task as a basis for learning a different task.
 It is an important tool that I employ in two different settings throught this project:
 \begin{enumerate*}[label=(\roman*)]
-    \item training \glspl{cnn} for classifying chess squares pieces in \cref{sec:occupancy_classification,sec:piece_classification}; and
+    \item training \glspl{cnn} for classifying chess squares and pieces in \cref{sec:occupancy_classification,sec:piece_classification}; and
     \item fine-tuning these models in order to adapt to previously unseen chess sets in \cref{chap:adapting}.
 \end{enumerate*}
 
-Training a deep \gls{cnn} from scratch (starting from randomly initialised weights) can take several days even on modern \glspl{gpu}. 
+Training a deep \gls{cnn} from scratch (starting from a randomly initialised weight state) can take several days even on modern \glspl{gpu}. 
 Furthermore, to achieve good performance, such netowrks require very large labelled datasets.
 Obtaining the required compute capability and quantity of data is often infeasible, and so it is very common to initialise the weights based on an already trained network.
 This makes sense because as discussed in \cref{sec:cnns}, \glspl{cnn} learn patterns at the beginning of the network that are of a similar level of abstraction for different datasets.
 Understanding these feature representations is still a very active area of research; in fact, a recent paper shows that when training the same deep neural network architecture on different datasets, the learned features are very similar at the beginning of the network until a depth of around two thirds \cite{kornblith2019}.
-In practice, this means that it is only in the last third of the network that it specialises on the task at hand, and before that it learns only very general features.
+In practice, this means that it is only in the last third of the network that it specialises on the task at hand, and before that, it learns only very general features.
 
 For many popular deep \gls{cnn} architectures, weight states are available online that were trained for a long period of time on large datasets such as \emph{ImageNet} \cite{deng2009}, a classification dataset with millions of samples that are annotated for thousands of categories.
 Naturally, the \emph{classification head} (the \gls{mlp} after the convolutional and pooling layers that is responsible for classification) must be quite different for the target domain, especially if the target domain has a different number of classes.

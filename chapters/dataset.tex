@@ -22,7 +22,7 @@ A total of 4,888 chess positions are obtained in this manner and saved in \gls{f
 \section{Three-dimensional renders}
 \label{sec:3d_renders}
 In order to obtain realistic images of these chess positions, I employ a three-dimensional model of a chess set on a wooden table. 
-Chess pieces are placed on the board squares according the given \gls{fen} description. 
+Chess pieces are placed on the board's squares according the given \gls{fen} description. 
 Different camera angles and lighting setups are chosen in a random process in order to maximise diversity in the dataset.
 
 \begin{figure}
@@ -51,7 +51,7 @@ Different camera angles and lighting setups are chosen in a random process in or
     \caption[The chessboard coordinate system.]{Overhead view of the coordinate system on the chessboard. The $z$-axis (not shown) points upward, normal to the chessboard surface, and the board is oriented like a chess game would be set up, i.e.\ the bottom right square is white. White's direction of play (the direction in which pawns are advanced) coincides with the $y$-axis.}
     \label{fig:cartesian_chessboard}
 \end{figure}
-Let us consider a three-dimensional Cartesian coordinate system whose origin lies at the centre point of the chessboard's surface, as depicted in \cref{fig:cartesian_chessboard}. 
+For the following explanations, consider a three-dimensional Cartesian coordinate system whose origin lies at the centre point of the chessboard's surface, as depicted in \cref{fig:cartesian_chessboard}. 
 The chessboard lies on the plane formed by the $x$ and $y$ axes, and the chess squares are of unit length. 
 
 \paragraph{Pieces}
@@ -67,7 +67,7 @@ More specifically, the $x$ and $y$ position of a piece in file $i$ and rank $j$ 
     \right).
 \end{equation*}
 Here, it is assumed that $i$ and $j$ are zero-indexed, i.e.\ the square \emph{a1} corresponds to $i=j=0$.
-The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, one must add a half.
+The reason for shifting the mean by $\frac{7}{2}$ above is that since the origin lies at the midpoint of the board, the mean must be shifted four units to the left (or downwards for the $y$-axis), but since the normal distribution should be centred on the midpoint of the square, a half must be added.
 Due to the fact that the $x$ and $y$ axes are perpendicular, the two components of $\rvp$ are independent and thus can be modelled with a covariance matrix that is a multiple of the identity matrix $\mI_2$.
 Experiments showed that a variance of $\frac{1}{10}$ achieved realistic results.
 Finally, the piece's rotation about its $z$-axis is sampled from a uniform distribution over the half-open interval $[0, 2\pi)$.
@@ -76,7 +76,7 @@ Finally, the piece's rotation about its $z$-axis is sampled from a uniform distr
 The camera is aligned to point directly at the origin (i.e.\ the centre of the board).
 It is positioned with only a small offset from the $yz$-plane to ensure that the view over the chessboard is similar to the current player's perspective. 
 A slight perturbation to the $x$-component of the camera position is introduced according to a normal distribution with $\mu=0$ and $\sigma=0.8$ since the player is usually not positioned exactly in the middle in front of the board.
-An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if white is to play%
+An angle $\theta$ is chosen uniformly in the range $\left[\frac{\pi}{4},\frac{\pi}{3}\right]$ to represent the angle that the camera makes with the board's surface (see \cref{fig:camera_angle}) if it is white to play%
 \footnote{On the other hand, if it is black to play, the perspective must be from the other side of the board, so $\theta$ is chosen in the range $\left[\frac{2\pi}{3},\frac{3\pi}{4}\right]$ which is equivalent to reflecting the camera position about the $xz$-plane.}.
 \begin{figure}
     \centering
@@ -177,7 +177,7 @@ For each chess position, a random choice is made between two different lighting 
                 \displaystyle \frac{5}{2} \mI_2
             \right)
         \)
-        and the corresponding spotlight is rotated such that it points in that direction.
+        and the corresponding spotlight is rotated such that it points in that point's direction.
         Consequently, there is greater variabililty in the lighting because the spotlights might point at different areas on the board, thus producing different types of shadows.
         \Cref{fig:lighting_spotlights_example} shows an example rendering where the lighting produced by the spotlights is poorer than the camera flash mode.
 \end{enumerate}
@@ -208,7 +208,7 @@ For computing the bounding boxes of the pieces, I simply project all vertices of
     \label{fig:data_synthesis_visualisation}
 \end{figure}
 Note that although the bounding boxes are not used in this project, they are useful for future research if someone should use the dataset to train an object recognition model for inferring chess positions instead of the classification-based approach.
-This project mainly relies on the board's corner coordinates as well as the \gls{fen} description for training.
+On the other hand, this project mainly relies on the board's corner coordinates as well as the \gls{fen} description for training.
 Furthermore, the data about the cameras and lighting is useful in iteratively refining the models by analysing which conditions perform poorly and improving on them.
 
 \section{Splitting the dataset}
@@ -240,6 +240,6 @@ Finally, the remaining 90\% constitutes the training set.
     \caption{Visual representation of the dataset split.}
     \label{fig:dataset_split}
 \end{figure}
-Note that the aforementioned splits are performed only once on the shuffled dataset and the associated \gls{json} and image files are moved into three different folders to ensure that the same split is used each time.
+Note that the aforementioned splits are performed only once on the shuffled dataset and the associated \gls{json} and image files are moved into three separate folders to ensure that the same split is used each time.
 
 \end{document}

@@ -12,11 +12,11 @@ Later, it was discovered that the Mechanical Turk was in fact a hoax that needed
 It was not until 1996 when IBM's Deep Blue famously defeated World Chess Champion Garry Kasparov that a chess algorithm was considered better than human players.
 Nowadays, amateur and professional chess players commonly use chess engines to analyse their positions and improve their game.
 
-Motivated by the problem described in the introduction -- the cumbersome process of transferring a chess position from the board to the computer, this report presents an end-to-end chess recognition system that outperforms all existing approaches.
+Motivated by the problem described in the introduction -- the cumbersome process of transferring a chess position from the board to the computer in order to facilitate engine analysis, this report presents an end-to-end chess recognition system that outperforms all existing approaches.
 It correctly classifies 99.72\% of the chessboard squares in the test set (see \cref{ft:per_piece}), thus reducing the error rate of the current state of the art\footnote{The current state of the art has achieves a per-square accuracy of 93.45\% \cite{mehta2020} which corresponds to an error rate of 6.55\%, as compared 0.28\% in the system described in this report.} by a factor of 23.
 In other words, it correctly predicts 93.86\% of the chess positions without any mistakes, and when permitting a maximum of one mistake per board, its accuracy lies at 99.71\%.
 Furthermore, a means of one-shot transfer learning for adapting the system to new chess sets is developed.
-Based on only two photos of a new chess set, it is able to correctly classify 88.89\% of the positions, and the remaining predictions only had one mistake each.
+Based on only two photos of a new chess set, it is able to correctly classify 88.89\% of the positions, the remaining predictions having only one mistake each.
 On a per-square basis, that fine-tuned algorithm reaches an accuracy of 99.83\%, even surpassing the accuracy of the current state of the art system mentioned above which was trained on a lot more than two images.
 The functionality of the developed system is demonstrated in a web app, and all code used to run experiments is available so that the results can be reproduced independently.
 
@@ -37,7 +37,7 @@ An alternative and interesting direction of further research could be to investi
 Each time the user uploads an image for inference, the system would produce its prediction and then allow the user to correct the position if it was incorrect.
 The uploaded photos along with the corrected labels could then be used as training data to continually improve the \gls{cnn}.
 This would alleviate the need to have different models for each user, and would produce a chess recognition system trained on many different chess sets.
-However, this may lead to other difficulties such as poor training data because some users might assign incorrect, or a worse performance overall because the chess sets are so diverse.
+However, this may lead to other difficulties such as poor training data because some users might assign incorrect labels, or a worse performance overall because the chess sets are so diverse.
 
 On a more technical note, another direction of further research is to improve the one-shot learning approach by employing new data augmentation strategies.
 One possibility could be to generate an approximation of rotating the pieces around their vertical axis by modelling them as cylinders.
@@ -45,12 +45,12 @@ From a cropped input image containing a chess piece, one could find the projecti
 Then, one could rotate the cylinder and project the points back onto the 2D image plane which could be used as an augmented data sample.
 
 Further work could also examine entirely different approaches to chess recognition. 
-For example, it could be investigated whether an object detection model could outperform the occupancy and piece classification \glspl{cnn}.
-The problem of object detection (predicting bounding boxes around objects) using \glspl{cnn} has already been extensively studied and even made very accessible via reference implementations in Facebook's \emph{Detectron2} software system for PyTorch \cite{wu2019detectron2}  and the \emph{Object Detection \acs{api}} for TensorFlow \cite{tfodapi2020}, but not yet applied to the problem of chess recognition.
+For example, it could be investigated whether an object detection model would outperform the occupancy and piece classification \glspl{cnn}.
+The problem of object detection (predicting bounding boxes around objects) using \glspl{cnn} has already been extensively studied and even made very accessible via reference implementations in Facebook's \emph{Detectron2} \cite{wu2019detectron2} software system for PyTorch and the \emph{Object Detection \acs{api}} \cite{tfodapi2020} for TensorFlow, but not yet applied to the problem of chess recognition.
 As detailed in \cref{sec:automated_labelling}, I provide bounding box information for the chess pieces in my dataset, so my dataset could be used to train such models.
 
 A new cutting-edge approach could be to use a single neural network in a fully end-to-end fashion for predicting the chess position based solely on the input image (i.e.\ without an explicit algorithm for localising the chessboard).
-Recent advances in applying the \emph{Transformer} architecture \cite{vaswani2017} to computer vision \cite{wu2020,anonymous2020} pave the way for a possible approach where the neural network could use a self-attention mechanism to `attend' to different parts of the input image for predicting the output.
+Recent advances in applying the \emph{Transformer} architecture \cite{vaswani2017} to computer vision \cite{wu2020,anonymous2020} pave the way for an approach where the neural network could use a self-attention mechanism to `attend' to different parts of the input image for predicting the output.
 More specifically, the neural network would learn to locate each of the 64 squares in the input image in order to perform the inference.
 
 Finally, it should be noted that the applications of the developed chess recognition system span beyond the scenario that motivated its construction in \cref{chap:introduction}.

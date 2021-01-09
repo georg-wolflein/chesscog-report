@@ -60,13 +60,13 @@ Finally, I use the output probabilities of the piece classifier to produce a \gl
 \label{sec:board_localisation}
 To determine the location of the chessboard's corners, I rely on its regular geometric nature. 
 Each square on the physical chessboard has the same width and height, even though their observed dimensions in the input image vary due to 3D perspective distortion.
+Before conducting any futher computation, the image is resized to a width of 1,200 pixels, keeping the aspect ratio.
 
 \subsection{Finding intersection points}
 \label{sec:find_intersection_points}
 A chessboard consists of 64 squares that are arranged in an $8\times 8$ grid.
 Thus, there are nine horizontal and nine vertical lines.
 The first step of the algorithm should detect the majority of these lines and find their intersection points.
-Before conducting any futher computation, the image is resized to a width of 1,200 pixels, keeping the aspect ratio.
 
 \subsubsection{Edge detection}
 \begin{figure}
@@ -114,7 +114,7 @@ Before conducting any futher computation, the image is resized to a width of 1,2
     \label{fig:board_localisation_line_detection}
 \end{figure}
 To detect edges in the input image, I convert the \gls{rgb} image to grayscale and apply the Canny edge detector \cite{canny1986}, the result of which is shown in \cref{fig:board_localisation_line_detection_edges}.
-Canny edge detection is a multi-stage algorithm that first reduces noise in the image (by applying a Gaussian blur), then computes pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm go beyond the scope of this report.
+Canny edge detection is a multi-stage algorithm that first reduces noise in the image (by applying a Gaussian blur), then computes pixel intensity gradients, performs non-maximum supression, and finally refines the results using hysteresis thresholding \cite{canny1986}, although the precise details of this algorithm are beyond the scope of this report.
 
 \subsubsection{Line detection}
 \begin{figure}
@@ -218,9 +218,9 @@ Consequently, the lines identified by the Hough transform are supported by at le
 
 \subsubsection{Filtering and clustering the lines}
 On the chessboard images, the Hough transform typically yields around 200 lines, most of which are very similar. 
-Therefore, I split them into horizontal and vertical lines and then eliminate similar lines.
+Therefore, I split them into horizontal and vertical lines and then eliminate similar ones.
 Experiments showed that simply setting thresholds for the angle $\theta$ is insufficient for robustly classifying lines as horizontal or vertical.
-This is because the camera is often tilted quite severely in the synthetic dataset as a result of the procedure outlined in \cref{sec:data_chess_positions} (and might be the case in real chessboard photos taken by humans, too).
+This is because the camera is often tilted quite severely in the synthetic dataset as a result of the procedure outlined in \cref{sec:data_chess_positions} (and may be the case in real chessboard photos taken by humans, too).
 Instead, I employ agglomerative clustering which is a bottom-up hierarchical clustering algorithm.
 In this algorithm, each line starts off in its own cluster, and as the algorithm progresses, pairs of clusters are merged in a manner that aims to minimise the variance within the clusters.
 I cluster the lines based only on their direction, i.e.\ their angle $\theta$, and use the smallest angle between two given lines as the distance metric.
@@ -235,7 +235,7 @@ The same procedure is applied vice-versa for the vertical lines, the result of w
 
 \subsubsection{Intersection points}
 It remains to find the intersection points of the horizontal and vertical lines.
-Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, their point of intersection can be found by observing that their equations in Hesse normal form (\cref{eq:hesse_normal_form}) constitute a system of two linear equations that can be solved for $x$ and $y$:
+Given two lines parameterised by $(\rho_1,\theta_1)$ and $(\rho_2,\theta_2)$ respectively, their point of intersection can be found by observing that their equations in Hesse normal form (see \cref{eq:hesse_normal_form}) constitute a system of two linear equations that can be solved for $x$ and $y$:
 \begin{align*}
     \rho_1 &= x \cos \theta_1 + y \sin \theta_1 \\
     \rho_2 &= x \cos \theta_2 + y \sin \theta_2.
@@ -251,7 +251,7 @@ Finally, the intersection points can be found as depicted in \cref{fig:board_loc
 
 \subsection{Finding the homography}
 \label{sec:find_homography}
-Once the intersection points are known, the next step is to project them on to a regular grid. 
+Once the intersection points are known, the next step is to project them onto a regular grid. 
 Using this projection, known as a \emph{homography}, it is then possible to warp the original image to eliminate the perspective distortion. 
 
 \subsubsection{Computing the homography matrix}
@@ -270,13 +270,13 @@ in the warped image using the relation
 \end{equation}
 up to a scalar factor $q \in \R$.
 Here, $\vp$ and $\vp'$ are considered to be 2D \emph{homogenous coordinate vectors}, which are three-component vectors that extend the Euclidean plane with points at infinity. 
-More practically, a point $(x,y)$ in Euclidean space corresponds to the set of homogenous coordinates
+More precisely, a point $(x,y)$ in Euclidean space corresponds to the set of homogenous coordinates
 $\begin{bmatrix}
     q x & q y & q
 \end{bmatrix}^\top$ for any $q \in \R,q \neq 0$.
 In practical terms, a homogenous coordinate can thus be converted to the corresponding Euclidean coordinate by taking its first two components and dividing by the third.
 
-Computing a homography requires four source points on the original image and four corresponding destination points in the warped image.
+Computing a homography requires four source points in the original image and four corresponding destination points in the warped image.
 It makes sense to choose the source points as four instersection points lying on two distinct horizontal and two distinct vertical lines (according to the lines found in \cref{fig:board_localisation_line_detection_elimination}) because they represent a rectangle on the chessboard.
 Let the $3 \times 4$ matrix $\mP$ contain these points' homogenous coordinates as column vectors in clockwise order.
 Further, let $\mP'$ be a matrix of the same size as $\mP$ containing this rectangle's coordinates in clockwise order.
@@ -467,7 +467,7 @@ These four points must form a rectangle in the warped image, so they are mapped 
 \end{algorithm}
 The \gls{ransac}-based method of finding the inlier intersection points is described in \Cref{alg:ransac}. 
 To simplify notation in the algorithm, the $h : \R^2 \to \R^3$ is used to convert Euclidean coordinates to homogenous coordinates and $h^{-1} : \R^3 \to \R^2$ denotes the reverse operation.
-Based on the characterisation of homogenous coordinates from \cref{sec:homography_matrix}, these functions can be defined as
+Based on the characterisation of homogenous coordinates from \cref{sec:homography_matrix}, these functions may be defined as
 \begin{equation*}
     h(x,y) = \begin{bmatrix}
         x\\y\\1
@@ -487,7 +487,7 @@ Its output is a bijection $m : \sI \to \sW$ from a set of inlier points $\sI \su
 Notice that the warped points are represented by two-dimensional vectors whose components are whole numbers, meaning that they lie on a grid of whole numbers.
 Each square on the chessboard is represented by a square of unit length on the grid.
 The chessboard itself is represented by a $8 \times 8$ square on that grid.
-However, since the set of inliers likely does not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}) the precise location of that $8 \times 8$ square is yet to be determined.
+However, since the set of inliers likely does not contain all vertices of the chessboard squares (for example because some lines were not recognised as seen in \cref{fig:board_localisation_line_detection_elimination,fig:incorrect_intersection_points}), the precise location of that $8 \times 8$ square is yet to be determined.
 
 After computing the output of \cref{alg:ransac} and obtaining the mapping $m$ of points from the original image to points on the grid of the warped image, I recompute the homography matrix $\mH$ using \cref{eq:homography_matrix_relation_corners} with \emph{all} inliers to obtain a more accurate homography that is based on more than just four points.
 To do so, I take the matrix of original points $\mP$ to be a $3 \times \abs{\sI}$ matrix whose columns are populated with all the intersection points $\sI$ as homogenous coordinate vectors.
@@ -547,7 +547,7 @@ Finally, I use the homography matrix to project the pixels of the original image
 \end{figure}
 
 \subsubsection{Optimisations}
-\Cref{alg:ransac} aims to outline the method of determining the inlier points in a manner that is easy to follow.
+\Cref{alg:ransac} aims to outline the method of determining the inlier points in a manner that is logical and easy to follow.
 In practise, the employed algorithm is different in order to achieve improved performance.
 Implementing these differences in \cref{alg:ransac} would have made it too convoluted to follow, so they shall instead briefly be summarised below:
 \begin{itemize}
@@ -755,7 +755,7 @@ I thus distinguish between three cases based on the $x$-values which I shall out
 \end{caselist}
 
 Although the three cases above examine only the $x$-values to locate the horizontal position of the chessboard, it is trivial to see how this method applies to determine the vertical position of the chessboard using the $y$-values, too.
-However, the main caveat the reader should acknowledge is that the vertical sobel kernel
+The main caveat the reader should acknowledge is that the vertical sobel kernel
 \begin{equation}
     \mS_x = \begin{bmatrix}
         +1 & +2 & +1\\
@@ -779,16 +779,16 @@ As such, the coordinates of the four corners of the chessboard on the warped ima
     \begin{split}
         \vp'_1 &= \begin{bmatrix}
             x_\text{min} & y_\text{min}
-        \end{bmatrix}^\top \\
+        \end{bmatrix}^\top, \\
         \vp'_3 &= \begin{bmatrix}
             x_\text{max} & y_\text{max}
-        \end{bmatrix}^\top
+        \end{bmatrix}^\top,
     \end{split}
     \qquad\qquad
     \begin{split}
         \vp'_2 &= \begin{bmatrix}
             x_\text{max} & y_\text{min}
-        \end{bmatrix}^\top \\
+        \end{bmatrix}^\top, \\
         \vp'_4 &= \begin{bmatrix}
             x_\text{min} & y_\text{max}
         \end{bmatrix}^\top.
@@ -869,7 +869,7 @@ The most important parameters are summarised below:
     \item low and high Canny edge detection thresholds for the horizontal and vertical gradient images, as well as the relative width of the horizontal and vertical lines from \cref{sec:infer_missing_lines}.
 \end{itemize}
 The optimal parameter values are decided by performing a grid search using sensible presets.
-A corner is classified as being detected accurately if the prediction is within ten pixels of the ground truth label, which given the fact that the width of the image is 1,200 pixels ensures that the predictions must be very close to the ground truth.
+A corner is classified as being detected accurately if the prediction is within ten pixels of the ground truth label, which given the fact that the width of the image is 1,200 pixels\footnote{Recall that at the beginning of \cref{sec:board_localisation}, the input image is resized to a width of 1,200 pixels.} ensures that the predictions must be very close to the ground truth.
 If at least one corner is detected inaccurately, that particular sample is determined to be inaccurate.
 I perform the grid search only on a small subset of the training set because the number of different parameter sets to be tested is in the order of a thousand.
 The set of parameters achieving the best performance on this subset of the training set is retained as the final configuration.
@@ -1019,9 +1019,9 @@ Due to the fact that the difference between training and validation accuracy is 
 \subsection{Transfer learning on deeper models}
 \label{sec:occupancy_transfer_learning}
 Apart from training custom \gls{cnn} architectures as described in the previous section, I examine whether fine-tuning pre-trained models on the dataset can achieve even better performances.
-\Cref{sec:background_transfer_learning} explains the motivation for employing transfer learning and the general methodology of initialising the network with the pre-trained weights, then training just the classification head and finally training the whole network.
+\Cref{sec:background_transfer_learning} explains the motivation for employing transfer learning and the general methodology of initialising the network with pre-trained weights, then training just the classification head and finally training the whole network.
 I replace the final layer of the pre-trained model's classification head with a fully-connected layer that has two output units so the network can classify `empty' and `occupied' squares.
-Due to the abundance of data in the training set, it suffices to train the classification head for only one epoch (one pass over the dataset) with a learning rate $\alpha=10^{-3}$, followed by training the whole network for two epochs\footnote{The number of steps is significantly greater than the number of epochs because each epoch is split into multiple batches.} with $\alpha=10^{-4}$.
+Due to the abundance of data in the training set, it suffices to train the classification head for only one epoch\footnote{The number of steps is significantly greater than the number of epochs because each epoch is split into multiple batches.} (one pass over the dataset) with a learning rate $\alpha=10^{-3}$, followed by training the whole network for two epochs with $\alpha=10^{-4}$.
 As underlying models, I compare the popular \gls{cnn} architectures
 VGG \cite{simonyan2015},
 ResNet \cite{he2016}, and
@@ -1083,7 +1083,7 @@ The final model misclassifies only four of the 146 samples in the validation set
 \end{figure}
 
 \subsection{Analysis}
-Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and the same samples except that the squares are cropped tightly.
+Each model is trained separately on the dataset of squares that are cropped to include contextual information (by increasing the bounding box by 50\% in each direction), and again on the same samples except that the squares are cropped tightly.
 Key performance metrics for each model are summarised in \cref{tbl:occupancy_classifier_performance}.
 \begin{table}
     \centering
@@ -1159,7 +1159,7 @@ Key performance metrics for each model are summarised in \cref{tbl:occupancy_cla
     }
     \label{tbl:occupancy_classifier_performance}
 \end{table}
-In each case, the model trained on the samples that contained contexual information outperfomed its counterpart trained on tightly cropped samples, confirming the hypothesis voiced at the beginning of \cref{sec:occupancy_classification} that the information around the square itself is useful.
+In each case, the model trained on the samples that contained contexual information outperforms its counterpart trained on tightly cropped samples, confirming the hypothesis voiced at the beginning of \cref{sec:occupancy_classification} that the information around the square itself is useful.
 
 Furthermore, it can be seen that the pre-trained models from \cref{sec:occupancy_transfer_learning} perform better than the \glspl{cnn} from \cref{sec:occupancy_cnns}, although the differences in accuracy are small and every model achieves accuracies above 99\%.
 Likely reasons for the superiority of the pre-trained models are the increased number of trainable parameters (up to two orders of magnitude higher than the simple \glspl{cnn}), the use of transfer learning, and the more complex architectural designs.
@@ -1169,19 +1169,19 @@ I select the ResNet model for use in the chess recognition pipeline because it a
 
 \section{Piece classification}
 \label{sec:piece_classification}
-Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece in each of the occupied squares.
-I require a 12-way classifier that takes as input a cropped image of an occupied square and outputs the chess piece on that square. 
+Now that the occupancy of each square on the chessboard can be detected to a high degree of accuracy, the next step is to classify the piece type and colour in each of the occupied squares.
+To this end, a 12-way classifier is required that takes as input a cropped image of an occupied square and outputs the chess piece on that square. 
 There are six types of chess pieces (pawn, knight, bishop, rook, queen, and king), and each piece can either be white or black in colour, thus there are a dozen classes.
 
 Some special attention should be directed to how the pieces are cropped. 
 Simply following the approach described in \cref{sec:occupancy_classification} would provide insufficient information to classify pieces.
-Especially tall pieces at the back of the board would be cropped in a manner such that only the bottom part of the piece remains in the \gls{roi}. 
+Especially tall pieces at the back of the board would be cropped in such a manner that only the bottom part of the piece remains in the \gls{roi}. 
 Consider for example the white king in \cref{fig:occupancy_classification_samples}.
-Cropping only the square it is located in would not include its crown which is an important feature needed to distinguish between kings and queens.
+Cropping only the square it is located on would not include its crown which is an important feature needed to distinguish between kings and queens.
 Instead, I choose a rectangular bounding box that is tall enough to account for the perspective distortion.
 
-The camera perspective causes another phenomenon that must be account for: pieces on the left of the board tend to `slant' to the left, and vice-versa on the right.
-This is due to the vanishing point of the normal vectors on the chessboard surface being roughly centred horizontally with regards to the location of the chessboard itself%
+The camera perspective causes another phenomenon that must be accounted for: pieces on the left of the board tend to `slant' to the left, and vice-versa on the right.
+This is due to the vanishing point of the normal vectors on the chessboard surface being roughly centred horizontally respective to the location of the chessboard itself%
 \footnote{%
     Unfortunately, it is not possible to compute the vanishing point of the normals based solely on the information available in the input images because this would require knowledge of the intrinsic and extrinsic camera parameters \cite{hartley2004}.
     The aim of this work is to recognise chess positions from just the input image without any further information; therefore, I devise a heuristic based on the observation that the vanishing point tends to be vertically below the chessboard and roughly horizontally centred.
@@ -1192,7 +1192,7 @@ This is due to the vanishing point of the normal vectors on the chessboard surfa
     \caption[The normals of the chessboard surface converge to a single vanishing point which is below the image.]{The normals of the chessboard surface (corresponding to the direction the pieces are pointing, marked in red) converge to a single vanishing point which is below the image. It is assumed that the vanishing point is roughly horizontally centred with the chessboard, as this corresponds to how chessboards are usually photographed. As a result, pieces on left `lean' left, and vice-versa on the right.}
     \label{fig:occupancy_classification_normals}
 \end{figure}
-Hence, I must extend the \gls{roi} horizontally in the appropriate direction.
+Hence, I must extend the \gls{roi} horizontally in the appropriate direction (left or right).
 
 To obtain the \glspl{roi}, I first warp the input image of the chessboard as described in \cref{sec:occupancy_classification} and exemplified in \cref{fig:occupancy_classification_samples_warped}.
 At first, each piece's bounding box corresponds to the square it is located on, i.e.\ its width and height are that of the square\footnote{Note that due to the warped perspective, all squares have equal width and height.}.
@@ -1201,7 +1201,7 @@ Depending on the rank $r$, the height is increased by
     h_\text{inc}(r) = \frac{2r + 5}{7}
 \end{equation*}
 where the unit of measurement corresponds to the warped coordinate system described in \cref{sec:homography_matrix} (each chess square is one square unit).
-This represents an arithmetic progression such that the bounding box for pieces in the first rank (bottom row of the chessboard, i.e.\ $r=1$) is increased by one square, and pieces in the top row ($r=8$) have their height increased by three units.
+This represents an arithmetic progression where the bounding box for pieces in the first rank (bottom row of the chessboard, i.e.\ $r=1$) is increased by one square, and pieces in the top row ($r=8$) have their height increased by three units.
 
 The increase in width is dependent on the file $f$ and given by the piecewise-defined arithmetic progression
 \begin{equation*}
@@ -1214,7 +1214,7 @@ A negative increase in width means that the bounding box is extended to the left
 Thus, pieces on the left half of the board ($1 \leq f \leq 4$) have their bounding boxes extended to the left, and vice-versa on the right (for $4 < f \leq 8$).
 
 Experiments demonstrate that this heuristic generates bounding boxes that are large enough to contain even the tallest pieces in most cases, whilst not being needlessly large.
-As a further preprocessing step, the cropped \glspl{roi} for all pieces on the left side of the board ($1 \leq f \leq 4$) are flipped vertically, such that the square that the piece stands on is always in the bottom left of the image.
+As a further preprocessing step, the cropped \glspl{roi} for all pieces on the left side of the board ($1 \leq f \leq 4$) are flipped horizontally, such that the square that the piece stands on is always in the bottom left of the image.
 This may help the classifier understand what piece is being referred to in samples where the larger bounding box includes adjacent pieces in the image.
 \Cref{fig:white_queens} shows a random selection of the \glspl{roi} corresponding to white queens in order to demonstrate that the bounding boxes are large enough to contain even tall pieces.
 \begin{figure}
@@ -1373,7 +1373,7 @@ Finally, I create an internal representation of the chessboard based on the resu
     \label{tbl:chess_recognition_trainval_results}
 \end{table}
 On average, the pipeline misclassifies only 0.03 squares per board.
-Overall, 98\% of the chessboards in the validation set are predicted without mistakes, and 2\% of the samples had only one incorrect square.
+Overall, 97.95\% of the chessboards in the validation set are predicted without mistakes, and 1.37\% of the predictions have only one incorrect square.
 The accuracies of the two classifiers as well as the corner dectector is above 99\%.
 
 \end{document}

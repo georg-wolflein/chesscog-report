@@ -115,6 +115,7 @@ Note that the \mintinline{yaml}{_BASE_} keys can be arbitrarily nested;
 however, circular references are prohibited.
 
 \subsection{Logical \acsp{uri} and the path manager}
+\label{sec:recap_uris}
 Recap includes a path manager for conveniently specifying paths to logical entities.
 The path strings are set up like a \gls{uri} where the scheme (i.e.\ \texttt{http} in the path string \texttt{http://google.com}) refers to a logical entity.
 Each such entity needs to be set up as a \py{PathTranslator} that can translate the logical \gls{uri} path to a physical path on the file system.
@@ -154,7 +155,7 @@ python -m pytest
 Note that this will not work if the \texttt{recap} package was installed directly via \texttt{pip} because that will not copy over the \texttt{tests} folder.
 Instead, use one of the other two installation options given in \cref{sec:recap_installation}
 Ensure that \texttt{poetry shell} is run before executing this command if the package was installed via Poetry.
-A screenshot of the output is provided in \cref{fig:tests_recap}.
+A screenshot of the output is provided in \cref{lst:tests_recap}.
 
 \section{Documentation}
 \label{sec:recap_documentation}
@@ -197,24 +198,60 @@ The scripts themselves are explained in more detail in the documentation (see \c
 
 \subsection{Dataset}
 \label{sec:user_man_chesscog_dataset}
+
+The recommended method of obtaining the rendered dataset is by following the instructions in \cref{sec:user_man_chesscog_download_dataset} to download it.
+However, for the sake of completeness, the following subsection details how the script used to generate the dataset was run.
+
 \subsubsection{Data synthesis}
+To synthesise the 3D dataset, first install Blender. 
+Then, the \texttt{chess} library must be installed in Blender's own Python interpreter.
+On a Mac, this can be achieved by running:
 \begin{minted}{bash}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m ensurepip
 ./python3.7m -m pip install --upgrade pip
-./python3.7m -m pip install python-chess
-blender chess_model.blend --background --python scripts/synthesize_data.py
+./python3.7m -m pip install chess
 \end{minted}
 
+Finally, from back in the \texttt{chesscog} directory, the data can be synthesised using the following command:
+\begin{minted}{bash}
+blender chess_model.blend --background --python scripts/synthesize_data.py
+\end{minted}
+Note that this requires the \texttt{chess\_model.blend} file, i.e.\ the 3D chess model as a Blender file.
+However, this model is not supplied with the project submission due to its large file size.
+
 \subsubsection{Downloading and splitting the dataset}
-%TODO: download dataset
+\label{sec:user_man_chesscog_download_dataset}
+To download the dataset and then perform the train/val/test split, run the two following commands:
+\begin{minted}{bash}
+python -m chesscog.data_synthesis.download_dataset
+python -m chesscog.data_synthesis.split_dataset
+\end{minted}
+The dataset will be downloaded to the \path{data://render} folder which by default maps to \path{~/chess_data} (the mapping is achieved using \texttt{recap}'s \acs{uri} interface detailed in \cref{sec:recap_uris}).
+This directory contains three subfolders, \texttt{train}, \texttt{val}, and \texttt{test}.
 
 \subsubsection{Format of the dataset}
-%TODO: explain JSON
+In each of the three subfolders, the images are supplied in PNG format.
+For every image file, there is a \gls{json} file with the same name (but \texttt{*.json} extension) that contains the associated labels.
+The contents of that \gls{json} file is shown in \cref{lst:json_labels} for the running example in \cref{chap:data_synthesis}.
+\begin{listing}
+    \inputminted{json}{\subfix{../../data/3828.json}}
+    \caption{\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis} (see \cref{fig:data_synthesis_visualisation}).}
+    \label{fig:json_labels}
+\end{listing}
+Training of the chess recognition system relies only on the \texttt{fen}, \texttt{white\_turn}, and \texttt{corners} fields which respectively provide the \gls{fen} description of the chess position on the board, the colour of the current player (indicating from which player's perspective the photo was taken), and the pixel coordinates of the chessboard's four corner points.
+The origin of the coordinate system is the top left of the image.
 
-\subsection{Models}
+Nonetheless, the \gls{json} file also contains information about the positions and rotations of the lights and camera in the 3D world coordinate system as explained in \cref{sec:3d_renders}.
+Furthermore, the bounding boxes for each of the pieces on the board are given in the \texttt{pieces} field in the \gls{json} file.
+The coordinates are supplied in the order $x_1,y_1,x_2,y_2$.
+This information is useful for potential further research exploring the use of object detection models for chess recognition.
+
+\subsection{Board localisation}
+
+\subsection{Occupancy and piece classification}
 \subsubsection{Downloading the trained models}
-\subsubsection{Train the models yourself}
+\subsubsection{Training the models}
 
 \subsection{Performing an inference}
 
@@ -231,8 +268,12 @@ blender chess_model.blend --background --python scripts/synthesize_data.py
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}
 
+\section{Installing}
+\section{Usage}
 \section{Automated tests}
 \label{sec:chesscogapp_tests}
+\section{Documentation}
+FaQ page
 
 
 \end{document}

@@ -1,0 +1,37 @@
+{
+  "fen": "1r3rk1/p3ppbp/6p1/q1p2b2/2P5/4BBP1/P2QPP1P/2R2RK1",
+  "white_turn": false,
+  "camera": {
+    "angle": 45,
+    "location": [-0.005, 0.281, 0.281]
+  },
+  "lighting": {
+    "mode": "spotlights",
+    "flash": { "active": false },
+    "spot1": {
+      "active": true,
+      "xy_angle": 70,
+      "focus": [-0.231, -0.225, 0.0],
+      "location": [0.123, 0.338, 0.217]
+    },
+    "spot2": {
+      "active": true,
+      "xy_angle": 320,
+      "focus": [-0.054, 0.364, 0.0],
+      "location": [0.275, -0.231, 0.223]
+    }
+  },
+  "corners": [
+    [834, 228],
+    [978, 665],
+    [212, 650],
+    [377, 223]
+  ],
+  "pieces": [
+    { "piece": "k", "square": "g8", "box": [314, 504, 91, 132] },
+    { "piece": "r", "square": "f8", "box": [420, 532, 68, 103] },
+    { "piece": "r", "square": "b8", "box": [793, 544, 78, 104] },
+    { "piece": "p", "square": "h7", "box": [279, 482, 47, 61] },
+    ...
+  ]
+}

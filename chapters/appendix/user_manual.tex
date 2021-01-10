@@ -3,7 +3,7 @@
 
 \begin{document}
 
-\chapter{User manual: \texttt{recap} package}
+\chapter{User manual: \texttt{recap} library}
 \label{chap:user_man_recap}
 
 \emph{Recap} is a tool for providing \emph{REproducible Configurations for Any Project}.
@@ -148,7 +148,7 @@ For example, you could register a path translator for the config scheme and then
 
 \section{Automated tests}
 \label{sec:recap_tests}
-To run the automated tests, navigate to the \texttt{recap} folder and then run
+To run the automated tests, run the following command from within the \texttt{recap} repository:
 \begin{minted}{bash}
 python -m pytest
 \end{minted}
@@ -163,7 +163,7 @@ More detailed documentation than this user manual is available at \url{https://r
 The package documentation includes detailed explanations of each of the submodules, methods, and classes.
 The same documentation is provided in \gls{html} format alongside this submission at \path{docs/recap/index.html}.
 
-\chapter{User manual: \texttt{chesscog}}
+\chapter{User manual: \texttt{chesscog} package}
 \label{chap:user_man_chesscog}
 
 \emph{Chesscog} combines traditional computer vision techniques with deep learning to identify chess positions from photos.
@@ -280,6 +280,7 @@ import chesscog # must be imported to properly configure recap
 print(recap.URI("models://"))
 \end{minted}
 \subsubsection{Training the models}
+\label{sec:chesscog_user_man_train}
 To train the models yourself instead of using the already trained models (see previous section), the relevant datasets of the cropped squares must first be created by running:
 \begin{minted}{bash}
 python -m chesscog.occupancy_classifier.create_dataset
@@ -301,6 +302,7 @@ It should already be installed if you followed the instructions in \cref{sec:che
 Finally, you should copy the folder of your selected piece and occupancy classifiers from \path{./runs} into \path{models://} so that these models will be used for inference and evaluation.
 
 \subsection{Performing an inference}
+\label{sec:chesscog_user_man_perform_inference}
 The \py{chesscog.recognition} module is responsible for running the chess recognition pipeline end to end.
 Further, the \py{chesscog.recognition.recognition} submodule provides the \py{ChessRecognizer} class that upon initialisation will load the \glspl{cnn} into memory and exposes the \py{predict()} method that when supplied with an input image will return the predicted \gls{fen} description.
 This submodule also acts as a script that can be executed as follows:
@@ -312,12 +314,13 @@ The \texttt{--white} flag specifies the current player's perspective and can be 
 \Cref{lst:chesscog_recognition_output} shows the output of that script.
 \begin{listing}
     \verbatiminput{data/recognition_output.txt}
-    \caption[Output of the chess recognition script.]{Output of the chess recognition script. Additional line breaks that were added to fit on the page are indicated with a backslash.}
+    \caption[Output of the chess recognition script.]{Output of the chess recognition script. Additional line breaks are added to fit on the page and are indicated with a backslash. White pieces are represented by uppercase letters while black pieces are denoted using lowercase letters.}
     \label{lst:chesscog_recognition_output}
 \end{listing}
 It provides the user with a text-based representation of the predicted chess position and a link to the chess engine analysis tool on the popular chess website \emph{Lichess} with that position set up.
 
 \subsection{Performance evaluation}
+\label{sec:chesscog_user_man_evaluate}
 For evaluating the performance of the entire chess recognition pipeline on the test set, run:
 \begin{minted}{text}
 python -m chesscog.recognition.evaluate --save-fens --dataset test
@@ -329,17 +332,81 @@ python -m chesscog.report.prepare_recognition_results \
   --results results://recognition --dataset test
 \end{minted}
 
-The \py{chesscog.corner_detection}, \py{chesscog.occupancy_classifier}, and \py{chesscog.piece_classifier} each contain an \texttt{evaluate} module that acts in a similar manner to that of the whole system described above.
+The \py{chesscog.corner_detection}, \py{chesscog.occupancy_classifier}, and \py{chesscog.piece_classifier} modules each contain an \texttt{evaluate} submodule that acts in a similar manner to that of the whole system described above.
 These modules facilitate the separate performance evaluation of the individual components of the pipeline.
 For more information, run these models with the \texttt{--help} flag.
 
 \subsection{Adapting to an unseen chess set}
+To adapt to an unseen chess set, first take a picture of the starting position from both players' perspectives, as illustrated in \cref{fig:transfer_learning_train_data}.
+These two pictures constitute the \emph{training data} used to fine-tune the networks.
+Name these two pictures \path{white.png} and \path{black.png} and place them in the \path{data://transfer_learning/images/train} folder.
+Ensure that the two associated \gls{json} files are exactly as indicated in \cref{fig:transfer_learning_json}.
+\begin{listing}
+    \begin{sublisting}[b]{\textwidth}
+        \inputminted{json}{\subfix{../../data/transfer_learning/white.json}}
+        \caption{white player's perspective}
+    \end{sublisting}
+    \medskip\par
+    \begin{sublisting}[b]{\textwidth}
+        \inputminted{json}{\subfix{../../data/transfer_learning/black.json}}
+        \caption{black player's perspective}
+    \end{sublisting}
+    \caption{\Gls{json} labels of the two training images for the transfer learning task.}
+    \label{fig:transfer_learning_json}
+\end{listing}
+Notice that these \gls{json} files simply contain the \gls{fen} string of the starting position (thus both are identical), as well as the boolean flag indicating the player's perspective.
+This is all the information necessary to fine-tune the model!
+
+Alternatively, the transfer learning dataset used in \cref{chap:adapting} can be downloaded by executing:
+\begin{minted}{text}
+python -m chesscog.transfer_learning.download_dataset
+\end{minted}
+
+\subsubsection{Fine-tuning the models}
+The next step is to fine-tune the \glspl{cnn}. 
+Ensure that the occupancy and piece classifiers trained on the rendered dataset are located in \path{models://occupancy_classifier} and \path{models://piece_classifier} as explained previously in \cref{sec:chesscog_user_man_train}.
+Then, these models can be fine-tuned to the new dataset by running:
+\begin{minted}{text}
+python -m chesscog.transfer_learning.train
+\end{minted}
+This command will first train the occupancy classifier and then the piece classifier.
+Both resulting models are then located in the \path{runs://transfer_learning} folder.
+As explained in \cref{sec:chesscog_user_man_train}, the TensorBoard tool can be run concurrently in a different shell to inspect progress:
+\begin{minted}{bash}
+tensorboard --logdir ./runs
+\end{minted}
+Finally, if the results are satisfactory, copy over the models from \path{runs://transfer_learning} to \path{models://transfer_learning}.
+
+Alternatively, the fine-tuned models from \cref{chap:adapting} can automatically be downloaded into the \path{models://transfer_learning} using the command:
+\begin{minted}{bash}
+python -m chesscog.transfer_learning.download_models
+\end{minted}
+
+\subsubsection{Performing an inference}
+To perform an inference using the fine-tuned models, the same command line interface as in \cref{sec:chesscog_user_man_perform_inference} is implemented for the adapted pipeline.
+Simply run the following command, substituting as indicated in \cref{sec:chesscog_user_man_perform_inference}:
+\begin{minted}{bash}
+python -m chesscog.transfer_learning.recognition img.png --white
+\end{minted}
+
+\subsubsection{Evaluating the fine-tuned pipeline}
+To evaluate the pipeline, create a labelled test dataset in \path{data://transfer_learning/images/test}.
+Then, use the \py{chesscog.transfer_learning.evaluate} module to evaluate the performance of the pipeline in the same way as explained in \cref{sec:chesscog_user_man_evaluate}.
 
 \section{Automated tests}
 \label{sec:chesscog_tests}
+To run the automated tests, run the following command from within the \texttt{chesscog} repository:
+\begin{minted}{bash}
+python -m pytest
+\end{minted}
+Ensure that \texttt{poetry shell} is run before executing this command if the package was installed via Poetry.
+A screenshot of the output is provided in \cref{lst:tests_chesscog}.
 
 \section{Documentation}
 \label{sec:chesscog_documentation}
+More detailed documentation than this user manual is available at \url{https://georgw777.github.io/chesscog}.
+The package documentation includes detailed explanations of each of the submodules, methods, and classes.
+The same documentation is provided in \gls{html} format alongside this submission at \path{docs/chesscog/index.html}.
 
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}

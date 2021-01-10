@@ -267,6 +267,7 @@ Here, \texttt{img.png} is to be replaced with the path to the input image.
 \subsection{Occupancy and piece classification}
 Code for training and evaluating the occupancy and piece classifiers is located in the \py{chesscog.occupancy_classifier} and \py{chesscog.piece_classifier} modules respectively.
 \subsubsection{Downloading the trained models}
+\label{sec:chesscog_user_man_download_models}
 To download the trained models, simply run:
 \begin{minted}{bash}
 python -m chesscog.occupancy_classifier.download_model
@@ -351,7 +352,7 @@ Ensure that the two associated \gls{json} files are exactly as indicated in \cre
         \inputminted{json}{\subfix{../../data/transfer_learning/black.json}}
         \caption{black player's perspective}
     \end{sublisting}
-    \caption{\Gls{json} labels of the two training images for the transfer learning task.}
+    \caption{\Acs{json} labels of the two training images for the transfer learning task.}
     \label{fig:transfer_learning_json}
 \end{listing}
 Notice that these \gls{json} files simply contain the \gls{fen} string of the starting position (thus both are identical), as well as the boolean flag indicating the player's perspective.
@@ -411,12 +412,76 @@ The same documentation is provided in \gls{html} format alongside this submissio
 \chapter{User manual: web app}
 \label{chap:user_man_chesscogapp}
 
+The web app provides a proof of concept to demonstrate the functionality of the chess recognition pipeline.
+
 \section{Installing}
+The web app can be accessed at \url{https://www.chesscog.com} without any installation.
+However, you may instead wish to run the web app locally using the installation instructions below.
+Sometimes the inference system at the above mentioned URL does not work because the application uses too much memory on the server than allowed by the hosting plan, an issue explained in \cref{chap:implementation}.
+In that case, running the web app locally is the best option.
+
+First, ensure that Docker Compose is installed on the host system.
+Then, from within the \texttt{chesscog-app} directory, simply run
+\begin{minted}{bash}
+docker-compose -f docker-compose.prod.yml up --build
+\end{minted}
+This command starts two Docker containers (the frontend and the backend).
+In building the backend \gls{api}, the trained models will automatically be downloaded to the container as per the instructions from \cref{sec:chesscog_user_man_download_models}.
+To open the web app, navigate to \url{http://localhost:80}.
+
 \section{Usage}
+Upon opening the web app in a browser (using either method described above), the landing will appear (see \cref{fig:chesscogapp_landing_page}).
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{screenshot_chesscogapp_landing_page}
+        \caption{landing page}
+        \label{fig:chesscogapp_landing_page}
+    \end{subfigure}
+    \hfill
+    \medskip\par
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{screenshot_chesscogapp_app}
+        \caption{main app}
+        \label{fig:chesscogapp_main_app}
+    \end{subfigure}
+    \caption{Screenshots of the web app.}
+\end{figure}
+Simply click the ``try it out'' button and the web page will scroll down to the main app depicted in \cref{fig:chesscogapp_main_app}.
+Either drag and drop a photo of a chessboard onto the left-hand panel, or click on the panel to upon a file upload prompt.
+Upon uploading the file, a preview is displayed, and a button labelled ``go'' appears.
+Select either ``white to play'' or ``black to play'' and then click on that button to start the inference (a loading animation is shown on the chessboard while the chess recognition pipeline is processing the image).
+Once the inference completes, the web app will look as depicted in \cref{fig:chesscogapp_inference} and display the predicted position on the right.
+Click the button on the right of the ``go'' button with the Lichess symbol in order to open that position on the popular chess website Lichess.
+Finally, to perform another inference, click the ``reset'' button.
+
 \section{Automated tests}
 \label{sec:chesscogapp_tests}
+There are automated tests for the frontend app written in TypeScript and the backend \gls{api} written in Python.
+To run these tests, the relevant dependencies must first be installed, so ensure that the host system has the Poetry tool for managing python dependencies as well as the Node package manager \texttt{npm}.
+The following script installs the necessary dependencies and runs the tests for the backend and frontend.
+Ensure that the current working directory is the root of the \texttt{chesscog-app} repository before executing the following commands.
+\begin{minted}{bash}
+# Backend tests
+cd api
+poetry install
+poetry run python -m pytest
+# Frontend tests
+cd ../app
+npm install
+npm test
+\end{minted}
+\Cref{lst:tests_chesscogapp} shows the outputs of the automated tests for both components (frontend and backend).
+
 \section{Documentation}
-FaQ page
+The web app is documented by way of a user-centric ``frequently asked questions'' page that addresses common issues and questions.
+This page can be accessed at \url{https://www.chesscog.com/faq} and \cref{fig:chesscogapp_faq} shows a screenshot.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{screenshot_chesscogapp_faq}
+    \caption{Screenshot of the frequently asked questions page.}
+    \label{fig:chesscogapp_faq}
+\end{figure}
 
 
 \end{document}

@@ -159,6 +159,7 @@
 \setcounter{tocdepth}{1}
 \setcounter{secnumdepth}{3}
 \counterwithout{footnote}{chapter} % don't reset footnotes at every chapter
+\counterwithout{table}{chapter}
 
 \allowdisplaybreaks
 
@@ -166,6 +167,10 @@
 %TC:envir algorithm [] ignore
 
 \begin{document}
+
+\renewcommand*{\listfigurename}{List of figures}
+\renewcommand*{\listtablename}{List of tables}
+\renewcommand*{\listoflistingscaption}{List of listings}
 
 %TC:ignore
 \frontmatter
@@ -176,7 +181,10 @@
 \tableofcontents
 \listoffigures
 \listoftables
-% \listoflistings
+\begingroup
+\let\clearpage\relax
+\listoflistings
+\endgroup
 \subfile{chapters/notation}
 %TC:endignore
 

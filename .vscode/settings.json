@@ -21,5 +21,6 @@
         "**/*.lof": true,
         "**/*.fdb_latexmk": true,
         "*/**/*.pdf": false,
+        "**/_minted-*": true
     }
 }

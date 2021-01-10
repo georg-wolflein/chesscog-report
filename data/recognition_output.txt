@@ -1,0 +1,13 @@
+$ python -m chesscog.recognition.recognition \
+  data://render/train/3828.png --white
+. K R . . R . .
+P . P P Q . . P
+. P B B . . . .
+. . . . . P . .
+. . b . . p . q
+. p . . . . . .
+p b p p . . . p
+. k r . . . r .
+
+You can view this position at https://lichess.org/editor/ \
+1KR2R2/P1PPQ2P/1PBB4/5P2/2b2p1q/1p6/pbpp3p/1kr3r1

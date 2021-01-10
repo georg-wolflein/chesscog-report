@@ -171,6 +171,7 @@ This repository contains all the code required to execute the chess recognition 
 Furthermore, the evaluation scripts for the experiments conducted for this report are available in this package.
 
 \section{Installing}
+\label{sec:chesscog_installing}
 Before installing this package, ensure that Python version 3.7 or greater is installed on your system.
 Furthermore, ensure that the Python package installer \texttt{pip} is installed.
 Then, navigate to the \texttt{chesscog} folder in the submission, or run \mintinline{bash}{git clone https://github.com/georgw777/chesscog.git}.
@@ -236,7 +237,7 @@ For every image file, there is a \gls{json} file with the same name (but \texttt
 The contents of that \gls{json} file is shown in \cref{lst:json_labels} for the running example in \cref{chap:data_synthesis}.
 \begin{listing}
     \inputminted{json}{\subfix{../../data/3828.json}}
-    \caption{\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis} (see \cref{fig:data_synthesis_visualisation}).}
+    \caption[\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis}.]{\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis} (see \cref{fig:data_synthesis_visualisation}).}
     \label{fig:json_labels}
 \end{listing}
 Training of the chess recognition system relies only on the \texttt{fen}, \texttt{white\_turn}, and \texttt{corners} fields which respectively provide the \gls{fen} description of the chess position on the board, the colour of the current player (indicating from which player's perspective the photo was taken), and the pixel coordinates of the chessboard's four corner points.
@@ -248,14 +249,89 @@ The coordinates are supplied in the order $x_1,y_1,x_2,y_2$.
 This information is useful for potential further research exploring the use of object detection models for chess recognition.
 
 \subsection{Board localisation}
+Code related to board localisation is in the \py{chesscog.corner_detection} module.
+More specifically, the \py{chesscog.corner_detection.detect_corners} submodule contains the \py{find_corners()} method that takes as input an image (as a \py{numpy} array) and outputs the detected corner points.
+This submodule simultaneously acts as a script that can be run as follows:
+\begin{minted}{bash}
+python -m chesscog.corner_detection.detect_corners img.png
+\end{minted}
+Here, \texttt{img.png} is to be replaced with the path to the input image.
+\Cref{fig:example_detect_corners} shows the output of that script when supplied with the path \path{data://render/train/3828.png} which is the running example from \cref{chap:data_synthesis}.
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\textwidth]{3828_corner_detection_screenshot}
+    \caption{Screenshot of the corner detection script's output.}
+    \label{fig:example_detect_corners}
+\end{figure}
 
 \subsection{Occupancy and piece classification}
+Code for training and evaluating the occupancy and piece classifiers is located in the \py{chesscog.occupancy_classifier} and \py{chesscog.piece_classifier} modules respectively.
 \subsubsection{Downloading the trained models}
+To download the trained models, simply run:
+\begin{minted}{bash}
+python -m chesscog.occupancy_classifier.download_model
+python -m chesscog.piece_classifier.download_model
+\end{minted}
+The models are downloaded to the \path{models://occupancy_classifier} and \path{models://piece_classifier} folders.
+To find out where that is on the local file system, run the following little Python script:
+\begin{minted}{python3}
+import recap
+import chesscog # must be imported to properly configure recap
+print(recap.URI("models://"))
+\end{minted}
 \subsubsection{Training the models}
+To train the models yourself instead of using the already trained models (see previous section), the relevant datasets of the cropped squares must first be created by running:
+\begin{minted}{bash}
+python -m chesscog.occupancy_classifier.create_dataset
+python -m chesscog.piece_classifier.create_dataset
+\end{minted}
+Then, the models can be trained by running:
+\begin{minted}{bash}
+python -m chesscog.occupancy_classifier.train
+python -m chesscog.piece_classifier.train
+\end{minted}
+This will train all models specified using \gls{yaml} configuration files in the \path{config://occupancy_classifier} and \path{config://piece_classifier} folders.
+It is recommended that you use a machine with a CUDA-compatible \gls{gpu} for training.
+To inspect the progress, run in a separate shell:
+\begin{minted}{bash}
+tensorboard --logdir ./runs
+\end{minted}
+The TensorBoard tool plots the key metrics live during training.
+It should already be installed if you followed the instructions in \cref{sec:chesscog_installing}.
+Finally, you should copy the folder of your selected piece and occupancy classifiers from \path{./runs} into \path{models://} so that these models will be used for inference and evaluation.
 
 \subsection{Performing an inference}
+The \py{chesscog.recognition} module is responsible for running the chess recognition pipeline end to end.
+Further, the \py{chesscog.recognition.recognition} submodule provides the \py{ChessRecognizer} class that upon initialisation will load the \glspl{cnn} into memory and exposes the \py{predict()} method that when supplied with an input image will return the predicted \gls{fen} description.
+This submodule also acts as a script that can be executed as follows:
+\begin{minted}{bash}
+python -m chesscog.recognition.recognition img.png --white
+\end{minted}
+Again, \texttt{img.png} should be replaced by the path to the desired input image (which may be a \texttt{recap} \gls{uri}).
+The \texttt{--white} flag specifies the current player's perspective and can be replaced with \texttt{--black} for the other player.
+\Cref{lst:chesscog_recognition_output} shows the output of that script.
+\begin{listing}
+    \verbatiminput{data/recognition_output.txt}
+    \caption[Output of the chess recognition script.]{Output of the chess recognition script. Additional line breaks that were added to fit on the page are indicated with a backslash.}
+    \label{lst:chesscog_recognition_output}
+\end{listing}
+It provides the user with a text-based representation of the predicted chess position and a link to the chess engine analysis tool on the popular chess website \emph{Lichess} with that position set up.
 
 \subsection{Performance evaluation}
+For evaluating the performance of the entire chess recognition pipeline on the test set, run:
+\begin{minted}{text}
+python -m chesscog.recognition.evaluate --save-fens --dataset test
+\end{minted}
+This creates a \gls{csv} file at \path{results://recognition/test.csv} that contains the prediction result (as well as other information like the number of mistakes) for each sample in the test set.
+To obtain an overview of useful metrics (those shown in \cref{tbl:chess_recognition_trainvaltest_results}), run:
+\begin{minted}{text}
+python -m chesscog.report.prepare_recognition_results \
+  --results results://recognition --dataset test
+\end{minted}
+
+The \py{chesscog.corner_detection}, \py{chesscog.occupancy_classifier}, and \py{chesscog.piece_classifier} each contain an \texttt{evaluate} module that acts in a similar manner to that of the whole system described above.
+These modules facilitate the separate performance evaluation of the individual components of the pipeline.
+For more information, run these models with the \texttt{--help} flag.
 
 \subsection{Adapting to an unseen chess set}
 

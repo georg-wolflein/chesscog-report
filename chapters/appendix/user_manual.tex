@@ -13,7 +13,7 @@ This package aims at making that easier.
 
 \section{Installing}
 \label{sec:recap_installation}
-Before installing this package, ensure that Python version 3.6 or greater is installed on your system.
+Before installing this package, ensure that Python version 3.6 or greater is installed on the host system.
 Furthermore, ensure that the Python package installer \texttt{pip} is installed.
 
 The preferred way of installing this package is to install it directly from \gls{pypi} by running the command:
@@ -21,18 +21,18 @@ The preferred way of installing this package is to install it directly from \gls
 pip install recap
 \end{minted}
 
-However, if you wish to install it from source, you may do so using the \emph{Poetry} tool for managing Python dependencies:
+However, it is also possible to install it from source using the \emph{Poetry} tool for managing Python dependencies:
 \begin{minted}{bash}
 pip install poetry
 cd recap
 poetry install
 poetry shell
 \end{minted}
-Using Poetry will automatically create a virtual Python environment for this project.
+Poetry will automatically create a virtual Python environment for this project.
 Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
-Ensure that you use this shell when running any of the other commands below.
+Ensure that this shell is used when running any of the other commands below.
 
-Finally, if you just want to install \texttt{recap} globally without using Poetry, you may instead run:
+Finally, to just install \texttt{recap} globally without using Poetry, one may instead run:
 \begin{minted}{bash}
 cd recap
 pip install .
@@ -50,9 +50,9 @@ It provides some additional features for parsing configurations that are inherit
 Recap's \py{URI} class provides a mechanism for handling logical paths within your project more conveniently with an interface that is fully compatible with \py{pathlib.Path}.
 
 \subsection{\Acs{yaml} configurations}
-Configurations are defined just like in yacs, except that you need to import the \py{CfgNode} class from the recap package instead of yacs.
-Consider the following \gls{yaml} configuration that sets default values for all configuration options we will use in our project.
-We shall name it \texttt{\_base.yaml} because our experiments will build on these values.
+Configurations are defined just like in yacs, except that the \py{CfgNode} class must be imported from the \texttt{recap} package instead of yacs.
+Consider the following \gls{yaml} configuration that sets default values for all configuration options that will be used in the project.
+A good name for this file is \texttt{\_base.yaml} because all experiments will build on these values.
 \begin{minted}{yaml}
 SYSTEM:
   NUM_GPUS: 4
@@ -81,7 +81,7 @@ print(cfg)
 
 \subsubsection{Inheriting configurations}
 Recap provides functionality for inheriting configuration options from other configuration files by setting the top-level \mintinline{yaml}{_BASE_} key.
-So, we could create a configuration file \path{experiment_1.yaml} for an experiment where we try a different learning rate and batch size:
+So, one could create a configuration file \path{experiment_1.yaml} for an experiment with a different learning rate and batch size:
 
 \begin{minted}{yaml}
 _BASE_: _base.yaml
@@ -91,17 +91,16 @@ TRAIN:
   BATCH_SIZE: 64
 \end{minted}
 
-In our code, when we want to load the experiment configuration, we would use the \py{recap.CfgNode.load_yaml_with_base()} function:
+In the code, to load the experiment configuration, one would use the function \py{recap.CfgNode.load_yaml_with_base()} like so:
 
 \begin{minted}{python3}
 from recap import CfgNode as CN
 
 cfg = CN.load_yaml_with_base("experiment_1.yaml")
-
 print(cfg)
-
-# Will output:
-"""
+\end{minted}
+The above code will output:
+\begin{minted}{yaml}
 SYSTEM:
   NUM_GPUS: 4
   NUM_WORKERS: 2
@@ -109,7 +108,6 @@ TRAIN:
   LEARNING_RATE: 0.01
   BATCH_SIZE: 64
   SOME_OTHER_HYPERPARAMETER: 10
-"""
 \end{minted}
 Note that the \mintinline{yaml}{_BASE_} keys can be arbitrarily nested;
 however, circular references are prohibited.
@@ -120,16 +118,16 @@ Recap includes a path manager for conveniently specifying paths to logical entit
 The path strings are set up like a \gls{uri} where the scheme (i.e.\ \texttt{http} in the path string \texttt{http://google.com}) refers to a logical entity.
 Each such entity needs to be set up as a \py{PathTranslator} that can translate the logical \gls{uri} path to a physical path on the file system.
 
-For example, we could set up a path translator for the data scheme to refer to the the path of a dataset on our file system located at \path{/path/to/dataset}. Then the recap URI \path{data://train/abc.txt} would be translated to the local path \path{/path/to/dataset/train/abc.txt}.
-The simplest way of setting that up is using the \py{register_translator} function (although more complex setups are possible with the \py{PathTranslator} class, allowing you to download files from the internet, for example):
-
+For example, one could set up a path translator for the data scheme to refer to the the path of a dataset on our file system located at \path{/path/to/dataset}.
+Then, the recap \gls{uri} \path{data://train/abc.txt} would be translated to the local path \path{/path/to/dataset/train/abc.txt}.
+The simplest way of setting that up is using the \py{register_translator} function (although more complex setups are possible with the \py{PathTranslator} class, allowing for example the download of files from the internet):
 \begin{minted}{python3}
 from recap.path_manager import register_translator
 from pathlib import Path
 
 register_translator("data", Path("/path/to/dataset"))
 \end{minted}
-Then, we can use the \py{recap.URI} class just like any \py{pathlib.Path} object:
+Then, the \py{recap.URI} class can be used just like any \py{pathlib.Path} object:
 \begin{minted}{python3}
 from recap import URI
 
@@ -143,8 +141,8 @@ with my_uri.open("r") as f:
 
 \subsubsection{Logical \acsp{uri} in inherited configurations}
 The \py{recap.URI} interface is fully compatible with nested configurations.
-This means that you can use recap \glspl{uri} within the \mintinline{yaml}{_BASE_} field for inheriting configurations.
-For example, you could register a path translator for the config scheme and then include \mintinline{yaml}{_BASE_: config://_base.yaml} in your configuration files.
+This means that recap \glspl{uri} can be used within the \mintinline{yaml}{_BASE_} field for inheriting configurations.
+For example, one could register a path translator for the config scheme and then include \mintinline{yaml}{_BASE_: config://_base.yaml} in the configuration files.
 
 \section{Automated tests}
 \label{sec:recap_tests}
@@ -172,7 +170,7 @@ Furthermore, the evaluation scripts for the experiments conducted for this repor
 
 \section{Installing}
 \label{sec:chesscog_installing}
-Before installing this package, ensure that Python version 3.7 or greater is installed on your system.
+Before installing this package, ensure that Python version 3.7 or greater is installed on the host machine.
 Furthermore, ensure that the Python package installer \texttt{pip} is installed.
 Then, navigate to the \texttt{chesscog} folder in the submission, or run \mintinline{bash}{git clone https://github.com/georgw777/chesscog.git}.
 
@@ -181,15 +179,16 @@ The easiest way to install the \texttt{chesscog} package and its dependencies is
 pip install .
 \end{minted}
 
-However, if you wish to install it using the \emph{Poetry} tool for managing Python dependencies, first ensure that Poetry is installed by running \mintinline{bash}{pip install poetry} and then run:
+However, if desired, it may alternatively be installed using the \emph{Poetry} tool for managing Python dependencies.
+To do so, first ensure that Poetry is installed by running \mintinline{bash}{pip install poetry} and then run:
 \begin{minted}{bash}
 cd chesscog
 poetry install
 poetry shell
 \end{minted}
-Using Poetry will automatically create a virtual Python environment for this project.
+Poetry will automatically create a virtual Python environment for this project.
 Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
-Ensure that you use this shell when running any of the other commands below.
+Ensure that this shell is used when running any of the other commands below.
 
 \section{Usage}
 
@@ -201,7 +200,7 @@ The scripts themselves are explained in more detail in the documentation (see \c
 \label{sec:user_man_chesscog_dataset}
 
 The recommended method of obtaining the rendered dataset is by following the instructions in \cref{sec:user_man_chesscog_download_dataset} to download it.
-However, for the sake of completeness, the following subsection details how the script used to generate the dataset was run.
+However, for the sake of completeness, the following subsection details how the script used to generate the dataset was executed.
 
 \subsubsection{Data synthesis}
 To synthesise the 3D dataset, first install Blender. 
@@ -237,14 +236,14 @@ For every image file, there is a \gls{json} file with the same name (but \texttt
 The contents of that \gls{json} file is shown in \cref{lst:json_labels} for the running example in \cref{chap:data_synthesis}.
 \begin{listing}
     \inputminted{json}{\subfix{../../data/3828.json}}
-    \caption[\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis}.]{\acs{json} format of the annotations generated for the running example image from \cref{chap:data_synthesis} (see \cref{fig:data_synthesis_visualisation}).}
-    \label{fig:json_labels}
+    \caption[Structure of the \acs{json} annotations generated for the running example image from \cref{chap:data_synthesis}.]{Structure of the \acs{json} annotations generated for the running example image from \cref{chap:data_synthesis} (see \cref{fig:data_synthesis_visualisation}).}
+    \label{lst:json_labels}
 \end{listing}
-Training of the chess recognition system relies only on the \texttt{fen}, \texttt{white\_turn}, and \texttt{corners} fields which respectively provide the \gls{fen} description of the chess position on the board, the colour of the current player (indicating from which player's perspective the photo was taken), and the pixel coordinates of the chessboard's four corner points.
+The training of the chess recognition system relies only on the \texttt{fen}, \texttt{white\_turn}, and \texttt{corners} fields which respectively provide the \gls{fen} description of the chess position on the board, the colour of the current player (indicating from which player's perspective the photo was taken), and the pixel coordinates of the chessboard's four corner points.
 The origin of the coordinate system is the top left of the image.
 
 Nonetheless, the \gls{json} file also contains information about the positions and rotations of the lights and camera in the 3D world coordinate system as explained in \cref{sec:3d_renders}.
-Furthermore, the bounding boxes for each of the pieces on the board are given in the \texttt{pieces} field in the \gls{json} file.
+Furthermore, the bounding boxes for each of the pieces on the board are supplied in the \texttt{pieces} field in the \gls{json} file.
 The coordinates are supplied in the order $x_1,y_1,x_2,y_2$.
 This information is useful for potential further research exploring the use of object detection models for chess recognition.
 
@@ -274,7 +273,7 @@ python -m chesscog.occupancy_classifier.download_model
 python -m chesscog.piece_classifier.download_model
 \end{minted}
 The models are downloaded to the \path{models://occupancy_classifier} and \path{models://piece_classifier} folders.
-To find out where that is on the local file system, run the following little Python script:
+To find out where that is on the local file system, run the following Python snippet:
 \begin{minted}{python3}
 import recap
 import chesscog # must be imported to properly configure recap
@@ -293,14 +292,14 @@ python -m chesscog.occupancy_classifier.train
 python -m chesscog.piece_classifier.train
 \end{minted}
 This will train all models specified using \gls{yaml} configuration files in the \path{config://occupancy_classifier} and \path{config://piece_classifier} folders.
-It is recommended that you use a machine with a CUDA-compatible \gls{gpu} for training.
+It is recommended to use a machine with a CUDA-compatible \gls{gpu} for training.
 To inspect the progress, run in a separate shell:
 \begin{minted}{bash}
 tensorboard --logdir ./runs
 \end{minted}
 The TensorBoard tool plots the key metrics live during training.
-It should already be installed if you followed the instructions in \cref{sec:chesscog_installing}.
-Finally, you should copy the folder of your selected piece and occupancy classifiers from \path{./runs} into \path{models://} so that these models will be used for inference and evaluation.
+It should already be installed as per the instructions in \cref{sec:chesscog_installing}.
+Finally, copy the folder of your selected piece and occupancy classifiers from \path{./runs} into \path{models://} so that these models will be used for inference and evaluation.
 
 \subsection{Performing an inference}
 \label{sec:chesscog_user_man_perform_inference}
@@ -335,13 +334,13 @@ python -m chesscog.report.prepare_recognition_results \
 
 The \py{chesscog.corner_detection}, \py{chesscog.occupancy_classifier}, and \py{chesscog.piece_classifier} modules each contain an \texttt{evaluate} submodule that acts in a similar manner to that of the whole system described above.
 These modules facilitate the separate performance evaluation of the individual components of the pipeline.
-For more information, run these models with the \texttt{--help} flag.
+For more information, run these scripts with the \texttt{--help} flag.
 
 \subsection{Adapting to an unseen chess set}
-To adapt to an unseen chess set, first take a picture of the starting position from both players' perspectives, as illustrated in \cref{fig:transfer_learning_train_data}.
+To adapt the pipeline to an unseen chess set, first take a picture of the starting position from both players' perspectives, as illustrated in \cref{fig:transfer_learning_train_data}.
 These two pictures constitute the \emph{training data} used to fine-tune the networks.
 Name these two pictures \path{white.png} and \path{black.png} and place them in the \path{data://transfer_learning/images/train} folder.
-Ensure that the two associated \gls{json} files are exactly as indicated in \cref{fig:transfer_learning_json}.
+Ensure that the two associated \gls{json} files (\texttt{white.json} and \texttt{black.json}) are exactly as indicated in \cref{fig:transfer_learning_json}.
 \begin{listing}
     \begin{sublisting}[b]{\textwidth}
         \inputminted{json}{\subfix{../../data/transfer_learning/white.json}}
@@ -370,7 +369,7 @@ Then, these models can be fine-tuned to the new dataset by running:
 \begin{minted}{text}
 python -m chesscog.transfer_learning.train
 \end{minted}
-This command will first train the occupancy classifier and then the piece classifier.
+This script first trains the occupancy classifier and then the piece classifier.
 Both resulting models are then located in the \path{runs://transfer_learning} folder.
 As explained in \cref{sec:chesscog_user_man_train}, the TensorBoard tool can be run concurrently in a different shell to inspect progress:
 \begin{minted}{bash}
@@ -416,8 +415,8 @@ The web app provides a proof of concept to demonstrate the functionality of the 
 
 \section{Installing}
 The web app can be accessed at \url{https://www.chesscog.com} without any installation.
-However, you may instead wish to run the web app locally using the installation instructions below.
-Sometimes the inference system at the above mentioned URL does not work because the application uses too much memory on the server than allowed by the hosting plan, an issue explained in \cref{chap:implementation}.
+However, one may instead wish to run the web app locally using the installation instructions below.
+Sometimes the inference system at the above mentioned URL encounters issues due to the memory limitations imposed by the free hosting plan, a problem explained in \cref{chap:implementation}.
 In that case, running the web app locally is the best option.
 
 First, ensure that Docker Compose is installed on the host system.
@@ -430,7 +429,7 @@ In building the backend \gls{api}, the trained models will automatically be down
 To open the web app, navigate to \url{http://localhost:80}.
 
 \section{Usage}
-Upon opening the web app in a browser (using either method described above), the landing will appear (see \cref{fig:chesscogapp_landing_page}).
+Upon opening the web app in a browser (using either method described above), the landing page appears (see \cref{fig:chesscogapp_landing_page}).
 \begin{figure}
     \centering
     \begin{subfigure}[b]{\textwidth}
@@ -451,14 +450,14 @@ Simply click the ``try it out'' button and the web page will scroll down to the 
 Either drag and drop a photo of a chessboard onto the left-hand panel, or click on the panel to upon a file upload prompt.
 Upon uploading the file, a preview is displayed, and a button labelled ``go'' appears.
 Select either ``white to play'' or ``black to play'' and then click on that button to start the inference (a loading animation is shown on the chessboard while the chess recognition pipeline is processing the image).
-Once the inference completes, the web app will look as depicted in \cref{fig:chesscogapp_inference} and display the predicted position on the right.
+Once the inference completes, the web app looks as depicted in \cref{fig:chesscogapp_inference} and displays the predicted position on the right.
 Click the button on the right of the ``go'' button with the Lichess symbol in order to open that position on the popular chess website Lichess.
 Finally, to perform another inference, click the ``reset'' button.
 
 \section{Automated tests}
 \label{sec:chesscogapp_tests}
 There are automated tests for the frontend app written in TypeScript and the backend \gls{api} written in Python.
-To run these tests, the relevant dependencies must first be installed, so ensure that the host system has the Poetry tool for managing python dependencies as well as the Node package manager \texttt{npm}.
+To run these tests, the relevant dependencies must first be installed, so ensure that the host system has the Poetry tool for managing Python dependencies as well as the Node package manager \texttt{npm}.
 The following script installs the necessary dependencies and runs the tests for the backend and frontend.
 Ensure that the current working directory is the root of the \texttt{chesscog-app} repository before executing the following commands.
 \begin{minted}{bash}

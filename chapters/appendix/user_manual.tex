@@ -17,23 +17,23 @@ Before installing this package, ensure that Python version 3.6 or greater is ins
 Furthermore, ensure that the Python package installer \texttt{pip} is installed.
 
 The preferred way of installing this package is to install it directly from \gls{pypi} by running the command:
-\begin{minted}{bash}
+\begin{minted}{text}
 pip install recap
 \end{minted}
 
 However, it is also possible to install it from source using the \emph{Poetry} tool for managing Python dependencies:
-\begin{minted}{bash}
+\begin{minted}{text}
 pip install poetry
 cd recap
 poetry install
 poetry shell
 \end{minted}
 Poetry will automatically create a virtual Python environment for this project.
-Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
+Running \mintinline{text}|poetry shell| at the end opens a shell in the virtual environment. 
 Ensure that this shell is used when running any of the other commands below.
 
 Finally, to just install \texttt{recap} globally without using Poetry, one may instead run:
-\begin{minted}{bash}
+\begin{minted}{text}
 cd recap
 pip install .
 \end{minted}
@@ -147,7 +147,7 @@ For example, one could register a path translator for the config scheme and then
 \section{Automated tests}
 \label{sec:recap_tests}
 To run the automated tests, run the following command from within the \texttt{recap} repository:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m pytest
 \end{minted}
 Note that this will not work if the \texttt{recap} package was installed directly via \texttt{pip} because that will not copy over the \texttt{tests} folder.
@@ -172,22 +172,22 @@ Furthermore, the evaluation scripts for the experiments conducted for this repor
 \label{sec:chesscog_installing}
 Before installing this package, ensure that Python version 3.7 or greater is installed on the host machine.
 Furthermore, ensure that the Python package installer \texttt{pip} is installed.
-Then, navigate to the \texttt{chesscog} folder in the submission, or run \mintinline{bash}{git clone https://github.com/georgw777/chesscog.git}.
+Then, navigate to the \texttt{chesscog} folder in the submission, or run \mintinline{text}{git clone https://github.com/georgw777/chesscog.git}.
 
 The easiest way to install the \texttt{chesscog} package and its dependencies is to run:
-\begin{minted}{bash}
+\begin{minted}{text}
 pip install .
 \end{minted}
 
 However, if desired, it may alternatively be installed using the \emph{Poetry} tool for managing Python dependencies.
-To do so, first ensure that Poetry is installed by running \mintinline{bash}{pip install poetry} and then run:
-\begin{minted}{bash}
+To do so, first ensure that Poetry is installed by running \mintinline{text}{pip install poetry} and then run:
+\begin{minted}{text}
 cd chesscog
 poetry install
 poetry shell
 \end{minted}
 Poetry will automatically create a virtual Python environment for this project.
-Running \mintinline{bash}|poetry shell| at the end opens a shell in the virtual environment. 
+Running \mintinline{text}|poetry shell| at the end opens a shell in the virtual environment. 
 Ensure that this shell is used when running any of the other commands below.
 
 \section{Usage}
@@ -206,7 +206,7 @@ However, for the sake of completeness, the following subsection details how the 
 To synthesise the 3D dataset, first install Blender. 
 Then, the \texttt{chess} library must be installed in Blender's own Python interpreter.
 On a Mac, this can be achieved by running:
-\begin{minted}{bash}
+\begin{minted}{text}
 cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 ./python3.7m -m ensurepip
 ./python3.7m -m pip install --upgrade pip
@@ -214,7 +214,7 @@ cd /Applications/Blender.app/Contents/Resources/2.90/python/bin
 \end{minted}
 
 Finally, from back in the \texttt{chesscog} directory, the data can be synthesised using the following command:
-\begin{minted}{bash}
+\begin{minted}{text}
 blender chess_model.blend --background --python scripts/synthesize_data.py
 \end{minted}
 Note that this requires the \texttt{chess\_model.blend} file, i.e.\ the 3D chess model as a Blender file.
@@ -223,7 +223,7 @@ However, this model is not supplied with the project submission due to its large
 \subsubsection{Downloading and splitting the dataset}
 \label{sec:user_man_chesscog_download_dataset}
 To download the dataset and then perform the train/val/test split, run the two following commands:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.data_synthesis.download_dataset
 python -m chesscog.data_synthesis.split_dataset
 \end{minted}
@@ -251,7 +251,7 @@ This information is useful for potential further research exploring the use of o
 Code related to board localisation is in the \py{chesscog.corner_detection} module.
 More specifically, the \py{chesscog.corner_detection.detect_corners} submodule contains the \py{find_corners()} method that takes as input an image (as a \py{numpy} array) and outputs the detected corner points.
 This submodule simultaneously acts as a script that can be run as follows:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.corner_detection.detect_corners img.png
 \end{minted}
 Here, \texttt{img.png} is to be replaced with the path to the input image.
@@ -268,7 +268,7 @@ Code for training and evaluating the occupancy and piece classifiers is located 
 \subsubsection{Downloading the trained models}
 \label{sec:chesscog_user_man_download_models}
 To download the trained models, simply run:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.occupancy_classifier.download_model
 python -m chesscog.piece_classifier.download_model
 \end{minted}
@@ -282,19 +282,19 @@ print(recap.URI("models://"))
 \subsubsection{Training the models}
 \label{sec:chesscog_user_man_train}
 To train the models yourself instead of using the already trained models (see previous section), the relevant datasets of the cropped squares must first be created by running:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.occupancy_classifier.create_dataset
 python -m chesscog.piece_classifier.create_dataset
 \end{minted}
 Then, the models can be trained by running:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.occupancy_classifier.train
 python -m chesscog.piece_classifier.train
 \end{minted}
 This will train all models specified using \gls{yaml} configuration files in the \path{config://occupancy_classifier} and \path{config://piece_classifier} folders.
 It is recommended to use a machine with a CUDA-compatible \gls{gpu} for training.
 To inspect the progress, run in a separate shell:
-\begin{minted}{bash}
+\begin{minted}{text}
 tensorboard --logdir ./runs
 \end{minted}
 The TensorBoard tool plots the key metrics live during training.
@@ -306,7 +306,7 @@ Finally, copy the folder of your selected piece and occupancy classifiers from \
 The \py{chesscog.recognition} module is responsible for running the chess recognition pipeline end to end.
 Further, the \py{chesscog.recognition.recognition} submodule provides the \py{ChessRecognizer} class that upon initialisation will load the \glspl{cnn} into memory and exposes the \py{predict()} method that when supplied with an input image will return the predicted \gls{fen} description.
 This submodule also acts as a script that can be executed as follows:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.recognition.recognition img.png --white
 \end{minted}
 Again, \texttt{img.png} should be replaced by the path to the desired input image (which may be a \texttt{recap} \gls{uri}).
@@ -372,20 +372,20 @@ python -m chesscog.transfer_learning.train
 This script first trains the occupancy classifier and then the piece classifier.
 Both resulting models are then located in the \path{runs://transfer_learning} folder.
 As explained in \cref{sec:chesscog_user_man_train}, the TensorBoard tool can be run concurrently in a different shell to inspect progress:
-\begin{minted}{bash}
+\begin{minted}{text}
 tensorboard --logdir ./runs
 \end{minted}
 Finally, if the results are satisfactory, copy over the models from \path{runs://transfer_learning} to \path{models://transfer_learning}.
 
 Alternatively, the fine-tuned models from \cref{chap:adapting} can automatically be downloaded into the \path{models://transfer_learning} using the command:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.transfer_learning.download_models
 \end{minted}
 
 \subsubsection{Performing an inference}
 To perform an inference using the fine-tuned models, the same command line interface as in \cref{sec:chesscog_user_man_perform_inference} is implemented for the adapted pipeline.
 Simply run the following command, substituting as indicated in \cref{sec:chesscog_user_man_perform_inference}:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m chesscog.transfer_learning.recognition img.png --white
 \end{minted}
 
@@ -396,7 +396,7 @@ Then, use the \py{chesscog.transfer_learning.evaluate} module to evaluate the pe
 \section{Automated tests}
 \label{sec:chesscog_tests}
 To run the automated tests, run the following command from within the \texttt{chesscog} repository:
-\begin{minted}{bash}
+\begin{minted}{text}
 python -m pytest
 \end{minted}
 Ensure that \texttt{poetry shell} is run before executing this command if the package was installed via Poetry.
@@ -421,7 +421,7 @@ In that case, running the web app locally is the best option.
 
 First, ensure that Docker Compose is installed on the host system.
 Then, from within the \texttt{chesscog-app} directory, simply run
-\begin{minted}{bash}
+\begin{minted}{text}
 docker-compose -f docker-compose.prod.yml up --build
 \end{minted}
 This command starts two Docker containers (the frontend and the backend).
@@ -460,7 +460,7 @@ There are automated tests for the frontend app written in TypeScript and the bac
 To run these tests, the relevant dependencies must first be installed, so ensure that the host system has the Poetry tool for managing Python dependencies as well as the Node package manager \texttt{npm}.
 The following script installs the necessary dependencies and runs the tests for the backend and frontend.
 Ensure that the current working directory is the root of the \texttt{chesscog-app} repository before executing the following commands.
-\begin{minted}{bash}
+\begin{minted}{text}
 # Backend tests
 cd api
 poetry install

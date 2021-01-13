@@ -1,0 +1,89 @@
+\documentclass[a4paper,oneside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[table]{xcolor}
+\usepackage{quotchap}
+\usepackage{breakcites} % don't let citations break out of the text frame
+\usepackage[font=small]{caption}
+\usepackage{csquotes}
+\usepackage{footnote}
+\usepackage{fancyhdr}
+\usepackage{minted}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{xfrac}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{mathtools}
+\usepackage{etoolbox}
+\usepackage{makecell}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{pifont}
+\usepackage{xskak}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{pdfpages}
+\usepackage{wrapfig}
+\usepackage[hidelinks]{hyperref}
+\usepackage[inline]{enumitem}
+\usepackage[style=ieee,mincitenames=1,maxcitenames=2]{biblatex}
+\usepackage[toc,acronym,shortcuts,nopostdot]{glossaries}
+\usepackage{glossary-mcols}
+\usepackage[capitalise,noabbrev]{cleveref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{subfiles}
+
+
+% BEGIN: left-align quotchap
+\makeatletter
+\renewcommand*{\sectfont}{\bfseries}% make it bold
+\renewcommand\chapter{%
+  \if@openright\cleardoublepage\else\clearpage\fi
+  \thispagestyle{plain}%
+  \global\@topnum\z@
+  \null\hfill\@printcites\par%
+  \@afterindentfalse
+  \secdef\@chapter\@schapter
+}
+\renewcommand{\@makechapterhead}[1]{%
+  \chapterheadstartvskip%
+  {\size@chapter{\sectfont\raggedright%
+    {\chapnumfont
+      \ifnum \c@secnumdepth >\m@ne%
+      \if@mainmatter\thechapter%
+      \fi\fi
+      \par\nobreak}%
+    {\raggedright\advance\leftmargin10em\interlinepenalty\@M #1\par}}% NEW
+  \nobreak\chapterheadendvskip}}
+\makeatother
+% END: left-align quotchap
+
+
+\author{Georg Wölflein}
+\title{MSci Dissertation}
+
+
+\begin{document}
+\chapter*{Kurzfassung}
+\thispagestyle{empty}
+Anhand eines Schachbrettfotos die Stellung der Figuren zu erkennen ist ein Problem in der digitalen Bildverarbeitung, das bisher noch nicht sehr zuverlässig gelöst wurde. 
+Mit einem solchen System müssten Amateurschachspieler die Stellung der Figuren für eine Computeranalyse nicht mehr manuell eingeben und können somit ihre Fähigkeiten einfacher verbessern. 
+Gegenwärtige Ansätze zur Schachpositionserkennung leiden u.a.\ durch das Fehlen großer Datenmengen und sind nicht darauf ausgelegt, sich an zuvor ungesehene Schachsets anzupassen. 
+In diesem Projekt wird ein neuer Datensatz vorgestellt, der Bilder mithilfe eines 3D-Modells synthetisiert und hundertfach mehr Beispieldaten erzeugt. 
+Ausgehend von diesem Datensatz wird ein neuartiges Schacherkennungssystem erarbeitet, das traditionelle Computer-Vision-Techniken mit Deep-Learning-Verfahren vereint. 
+Das Schachbrett wird mithilfe eines auf RANSAC basierenden Algorithmus lokalisiert, welcher eine projektive Transformation des Bretts auf ein quadratisches Raster vornimmt. 
+Anschließend wird unter Verwendung von zwei Convolutional Neural Networks (CNNs) eine binäre Belegungsmaske der Schachfelder im verzerrten Bild festgestellt und schließlich werden die Figuren identifiziert. 
+Das beschriebene System erreicht eine Fehlerquote von 0,28\% pro Schachfeld im Testdatensatz, 23 mal besser als der aktuelle Stand der Technik. 
+Darüber hinaus wird ein Ansatz basierend auf Transfer Learning entwickelt, wodurch das Inferenzsystem mit nur zwei Fotos der Ausgangsstellung an ein zuvor nicht gesehenes Schachspiel angepasst werden kann. 
+Damit lässt sich eine Genauigkeit von 99,83\% pro Feld auf Bildern dieses zuvor unbekannten Schachsets erzielen. 
+Die Inferenz dauert mit GPU-Unterstützung weniger als eine halbe Sekunde und ungefähr zwei Sekunden auf der CPU. 
+Die Machbarkeit des Systems wird in einer interaktiven Web-App aufgezeigt, die unter \url{https://www.chesscog.com} aufgerufen werden kann.
+
+\end{document}

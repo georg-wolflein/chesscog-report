@@ -13,7 +13,7 @@ It was not until 1996 when IBM's Deep Blue famously defeated World Chess Champio
 Nowadays, amateur and professional chess players commonly use chess engines to analyse their positions and improve their game.
 
 Motivated by the problem described in the introduction -- the cumbersome process of transferring a chess position from the board to the computer in order to facilitate engine analysis, this report presents an end-to-end chess recognition system that outperforms all existing approaches.
-It correctly classifies 99.72\% of the chessboard squares in the test set (see \cref{ft:per_piece}), thus reducing the error rate of the current state of the art\footnote{The current state of the art has achieves a per-square accuracy of 93.45\% \cite{mehta2020} which corresponds to an error rate of 6.55\%, as compared 0.28\% in the system described in this report.} by a factor of 23.
+It correctly classifies 99.72\% of the chessboard squares in the test set (see \cref{ft:per_piece}), thus reducing the error rate of the current state of the art\footnote{The current state of the art has achieves a per-square accuracy of 93.45\% \cite{mehta2020} which corresponds to an error rate of 6.55\%, as compared 0.23\% in the system described in this report.} by a factor of 28.
 In other words, it correctly predicts 93.86\% of the chess positions without any mistakes, and when permitting a maximum of one mistake per board, its accuracy lies at 99.71\%.
 Furthermore, a means of one-shot transfer learning for adapting the system to new chess sets is developed.
 Based on only two photos of a new chess set, it is able to correctly classify 88.89\% of the positions, the remaining predictions having only one mistake each.

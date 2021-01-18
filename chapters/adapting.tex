@@ -17,7 +17,7 @@ Using the least amount of data necessary makes the system considerably more conv
 A significant advantage of the chess recognition system as it is developed in \cref{chap:chess_recognition} is the fact that it employs conventional computer vision techniques such as edge and line detection in order to localise the board.
 This means that it is able to find the location of practically \emph{any} type of chess board with a high accuracy, not just the board used to generate the training data.
 On the other hand, had I employed a board localisation technique based on deep neural networks (for instance a semantic segmentation model), the system would suffer the same type of issues as the \glspl{cnn} mentioned above when required to adapt to new chess sets.
-The fact that the system can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to a the idea of employing transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
+The fact that the system can reliably find the corner points of any chess board but may not be able to correctly identify the configuration of pieces on the board gives rise to the idea of employing transfer learning to obtain better predictions with only minimal extra effort on the part of the user:
 if the user wants to apply this new system to infer a position on their own chess board with their own chess set, they just need to take a picture of the starting position (\cref{fig:chess_start_position}) from both players' perspectives.
 \begin{figure}[h]
     \centering

@@ -140,7 +140,7 @@ The confusion matrix in \cref{tbl:confusion_matrix_test_set} facilitates a more 
     \label{tbl:confusion_matrix_test_set}
 \end{table}
 The last row and column, representing the class `empty square', contain the greatest number of incorrect samples which is a result of the worse performance of the occupancy classifier compared to the piece classifier.
-However, one must also take into account that the occupancy classifier has a more difficult task in this regard, since it must determine whether a square is empty even when it is occuluded by a piece in front of it.
+However, one must also take into account that the occupancy classifier has a more difficult task in this regard, since it must determine whether a square is empty even when it is occluded by a piece in front of it.
 The piece classifier (which has an accuracy of 99.99\%) makes only three errors: in two cases it confuses a knight with a bishop, and in one case a pawn with a rook.
 
 The empirical results on the test set clearly demonstrate that the chess recognition system is highly accurate.
@@ -287,10 +287,10 @@ The remaining chess recognition systems do not employ deep neural networks for p
 This figure is identical to their reported piece classification accuracy, meaning that their board localisation algorithm achieves an accuracy of 100\% (although they do not evaluate that separately).
 Due to the fact that their images are captured from the top down (at a 90° angle), this is quite possible.
 By contrast, the images in my dataset are captured at an angle between 45° and 60° (as explained in \cref{sec:3d_renders}) which increases the difficulty of the chessboard localisation process due to occluded lines, but makes the piece classification problem easier because the pieces look more similar from the top.
-Still, I outperform their system by six percentage points, achieving an end-to-end accuracy of 99.72\% per square\footnote{
+Still, I outperform their system by six percentage points, achieving an end-to-end accuracy of 99.77\% per square\footnote{
     \label{ft:per_piece}
     \Cref{tbl:chess_recognition_trainvaltest_results} does not explicitly report the per-square accuracy of the whole system.
-    However, the mean number of incorrect squares per board was 0.15, so the per-square accuracy is $1-\sfrac{0.15}{64}=99.72\%$.
+    However, the mean number of incorrect squares per board was 0.15, so the per-square accuracy is $1-\sfrac{0.15}{64}=99.77\%$.
 }.
 The next best system after that of \citeauthor{mehta2020} is the system proposed by \textcite{czyzewski2020} which achieves an accuracy of 95\% for chessboard localisation and 95\% for piece classification, culminating in an overall per-square accuracy of 91\%.
 At any rate, it should be noted that since none of the currently available chess inference systems are published with the datasets used to obtain the reported performances, this analysis is limited to comparing accuracy scores, even though these were obtained on different datasets.

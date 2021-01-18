@@ -1159,7 +1159,7 @@ Key performance metrics for each model are summarised in \cref{tbl:occupancy_cla
     }
     \label{tbl:occupancy_classifier_performance}
 \end{table}
-In each case, the model trained on the samples that contained contexual information outperforms its counterpart trained on tightly cropped samples, confirming the hypothesis voiced at the beginning of \cref{sec:occupancy_classification} that the information around the square itself is useful.
+In each case, the model trained on the samples that contained contextual information outperforms its counterpart trained on tightly cropped samples, confirming the hypothesis voiced at the beginning of \cref{sec:occupancy_classification} that the information around the square itself is useful.
 
 Furthermore, it can be seen that the pre-trained models from \cref{sec:occupancy_transfer_learning} perform better than the \glspl{cnn} from \cref{sec:occupancy_cnns}, although the differences in accuracy are small and every model achieves accuracies above 99\%.
 Likely reasons for the superiority of the pre-trained models are the increased number of trainable parameters (up to two orders of magnitude higher than the simple \glspl{cnn}), the use of transfer learning, and the more complex architectural designs.

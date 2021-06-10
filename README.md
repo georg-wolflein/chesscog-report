@@ -2,7 +2,7 @@
 
 This repository contains my [master thesis](report.pdf).
 
-More information is available in the [main repository](https://github.com/georgw777/chesscog).
+More information is available in the [main repository](https://github.com/georg-wolflein/chesscog).
 
 
 ## Abstract
